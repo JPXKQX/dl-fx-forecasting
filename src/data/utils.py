@@ -55,7 +55,7 @@ def get_files_of_extension(folders: List[str], extension: str) -> List[str]:
 
 
 def read_csv_dask(file: str) -> dd.DataFrame:
-    """ Read the unzipped CSV files to the desired format.
+    """ Read and process the unzipped CSV files to the desired format.
 
     Args:
         file (str): path to the CSV file.
@@ -63,12 +63,11 @@ def read_csv_dask(file: str) -> dd.DataFrame:
     Returns:
         dd.DataFrame: distributed formatted dataframe.
     """
-    return dd.read_csv(
+    df = dd.read_csv(
         file, 
         header=None, 
         usecols=[1, 2, 3], 
-        parse_dates=[1], 
-        infer_datetime_format=True,
-        dtype={'low': np.float32, 'high': np.float32},
         names=col_names
-    ).set_index('time')
+    )
+    df = df.set_index(dd.to_datetime(df.time))
+    return df.astype({'low': np.float32, 'high': np.float32})
