@@ -1,7 +1,7 @@
 from src.data.data_extract import DataExtractor
 from src.data.data_preprocess import DataPreprocessor
 from src.data.constants import Currency
-from typing import NoReturn, Boolean
+from typing import NoReturn
 
 import logging
 
@@ -14,14 +14,14 @@ logging.basicConfig(
 def process_fx_pair(
     currency1: Currency, 
     currency2: Currency, 
-    clobber: Boolean = False
+    clobber: bool = False
 ) -> NoReturn:
     """ Process the data corresponding to currency pair specified.
 
     Args:
         currency1 (Currency): first currency to consider.
         currency2 (Currency): second currency to consider.
-        clobber (Boolean): if true overwrite the data associated.
+        clobber (bool): if true overwrite the data associated.
     """   
     # Unzip data
     dd_2020 = DataExtractor((currency1, currency2), list(range(4, 12)), 2020)
