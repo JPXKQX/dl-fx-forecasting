@@ -1,5 +1,5 @@
-from src.data.download import DataExtractor
-from src.data.preprocess import DataPreprocessor
+from src.data.data_extract import DataExtractor
+from src.data.data_preprocess import DataPreprocessor
 from src.data.constants import Currency
 from typing import NoReturn, Boolean
 
