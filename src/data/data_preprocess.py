@@ -15,16 +15,23 @@ WORKING_DIR = os.environ['PWD']
 class DataPreprocessor:
     files: List[str]
     
-    def save_datasets(self) -> str:
+    def save_datasets(self, clobber) -> str:
         """ Save the passed CSV files into Parquet files for a given currency 
         pair. 
+        
+        Args:
+            clobber (Boolean): Whether overwrite data or not.
         
         Returns:
             str: The output directory-.
         """
-        df = self._load_files()
         fx_pair = self._get_fx_pair()
         output_dir = f"{WORKING_DIR}/data/raw/{fx_pair}/"
+        if (not clobber) & os.path.isdir(output_dir):
+            log.info(f"Data already exists in {output_dir}")
+            return output_dir
+        
+        df = self._load_files()
         df.to_parquet(output_dir)
         log.info(f"Data for {fx_pair} has been saved to \"{output_dir}\"")
         return output_dir

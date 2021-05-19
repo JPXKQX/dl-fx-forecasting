@@ -1,7 +1,7 @@
 from src.data.download import DataExtractor
 from src.data.preprocess import DataPreprocessor
 from src.data.constants import Currency
-from typing import NoReturn
+from typing import NoReturn, Boolean
 
 import logging
 
@@ -11,13 +11,18 @@ logging.basicConfig(
     format='%(asctime)s | %(levelname)s | %(message)s')
 
 
-def process_fx_pair(currency1: Currency, currency2: Currency) -> NoReturn:
+def process_fx_pair(
+    currency1: Currency, 
+    currency2: Currency, 
+    clobber: Boolean
+) -> NoReturn:
     """ Process the data corresponding to currency pair specified.
 
     Args:
         currency1 (Currency): first currency to consider.
         currency2 (Currency): second currency to consider.
-    """
+        clobber (Boolean): if true overwrite the data associated.
+    """   
     # Unzip data
     dd_2020 = DataExtractor((currency1, currency2), list(range(4, 12)), 2020)
     csv_files_2020 = dd_2020.prepare()
@@ -27,7 +32,7 @@ def process_fx_pair(currency1: Currency, currency2: Currency) -> NoReturn:
     
     # Save into Parquet files.
     dp = DataPreprocessor(csv_files)
-    output_path = dp.save_datasets() 
+    dp.save_datasets(clobber) 
 
 
 if __name__ == '__main__':
