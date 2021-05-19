@@ -1,6 +1,6 @@
 from src.data import utils
 from dataclasses import dataclass
-from typing import List
+from typing import List, Boolean
 
 import dask.dataframe as dd 
 import os
@@ -15,7 +15,7 @@ WORKING_DIR = os.environ['PWD']
 class DataPreprocessor:
     files: List[str]
     
-    def save_datasets(self, clobber) -> str:
+    def save_datasets(self, clobber: Boolean = False): -> str:
         """ Save the passed CSV files into Parquet files for a given currency 
         pair. 
         

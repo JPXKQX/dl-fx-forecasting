@@ -14,7 +14,7 @@ logging.basicConfig(
 def process_fx_pair(
     currency1: Currency, 
     currency2: Currency, 
-    clobber: Boolean
+    clobber: Boolean = False
 ) -> NoReturn:
     """ Process the data corresponding to currency pair specified.
 
