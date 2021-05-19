@@ -12,7 +12,7 @@ path_raw_data = os.getenv('RAW_TRUEFX_PATH')
 
 
 @dataclass
-class DataDownloader():
+class DataExtractor():
     currencies: Tuple[Currency, Currency]
     months: List[int]
     year: int
