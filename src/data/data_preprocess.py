@@ -1,20 +1,22 @@
 from src.data import utils, constants
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
+from datetime import datetime
 
 import dask.dataframe as dd 
 import os
 import logging
 
 
-log = logging.getLogger("Dataset Generator")
+log = logging.getLogger("Raw Data Generator")
 
 
 @dataclass
 class DataPreprocessor:
     files: List[str]
+    output_dir = f"{constants.WORKING_DIR}/data/raw/"
     
-    def save_datasets(self, clobber: bool = False) -> str:
+    def _cache_parquet_data(self, clobber: bool = False) -> str:
         """ Save the passed CSV files into Parquet files for a given currency 
         pair. 
         
@@ -25,15 +27,15 @@ class DataPreprocessor:
             str: The output directory-.
         """
         fx_pair = self._get_fx_pair()
-        output_dir = f"{constants.WORKING_DIR}/data/raw/{fx_pair}/"
-        if (not clobber) & os.path.isdir(output_dir):
-            log.info(f"Data already exists in {output_dir}")
-            return output_dir
+        if (not clobber) & os.path.isdir(self.output_dir + "{fx_pair}/"):
+            log.info(f"Data already exists in {self.output_dir}{fx_pair}/")
+            return self.output_dir
         
         df = self._load_files()
-        df.to_parquet(output_dir)
-        log.info(f"Data for {fx_pair} has been saved to \"{output_dir}\"")
-        return output_dir
+        df.to_parquet(self.output_dir + f"{fx_pair}/")
+        df.to_hdf(f"{fx_pair}.hdf", self.output_dir)
+        log.info(f"Data for {fx_pair} has been saved to \"{self.output_dir}\"")
+        return self.output_dir
     
     def _get_fx_pair(self) -> str:
         """ Get the currency pair name from data paths.

@@ -12,27 +12,27 @@ logging.basicConfig(
 
 
 def process_fx_pair(
-    currency1: Currency, 
-    currency2: Currency, 
+    base: Currency, 
+    quote: Currency, 
     clobber: bool = False
 ) -> NoReturn:
     """ Process the data corresponding to currency pair specified.
 
     Args:
-        currency1 (Currency): first currency to consider.
-        currency2 (Currency): second currency to consider.
+        base (Currency): base currency to consider.
+        qoute (Currency): quote currency to consider.
         clobber (bool): if true overwrite the data associated.
     """   
     # Unzip data
-    dd_2020 = DataExtractor((currency1, currency2), list(range(4, 12)), 2020)
+    dd_2020 = DataExtractor((base, quote), list(range(4, 12)), 2020)
     csv_files_2020 = dd_2020.prepare()
-    dd_2021 = DataExtractor((currency1, currency2), [1, 2, 3, 4], 2021)
+    dd_2021 = DataExtractor((base, quote), [1, 2, 3, 4], 2021)
     csv_files_2021 = dd_2021.prepare() 
     csv_files = csv_files_2020 + csv_files_2021
     
     # Save into Parquet files.
     dp = DataPreprocessor(csv_files)
-    dp.save_datasets(clobber) 
+    dp._cache_parquet_data(clobber) 
 
 
 if __name__ == '__main__':

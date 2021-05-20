@@ -1,0 +1,10 @@
+# local package
+-e .
+
+# external requirements
+pandas~=1.2.4
+numpy~=1.20.2
+dask~=2021.4.0
+fastparquet~=0.5.0
+setuptools~=52.0.0.post20210125
+pytables~=3.6.1

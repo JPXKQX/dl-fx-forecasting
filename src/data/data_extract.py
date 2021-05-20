@@ -35,7 +35,7 @@ class DataExtractor():
         Returns:
             List[str]: paths to the zipped files.
         """
-        m_names = [constants.months[month] for month in self.months]
+        m_names = [constants.months[month] for month in sorted(self.months)]
         paths = [f"{path_raw_data}/{self.year}/{name}.zip" for name in m_names]
         
         # Check all paths exists
