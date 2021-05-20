@@ -1,5 +1,9 @@
 from enum import Enum 
 
+import os
+
+
+WORKING_DIR = os.environ['PWD']
 
 months = ["None",
     "January", "February", "March", "April", "May", "June", "July", "August", 
@@ -13,5 +17,13 @@ class Currency(Enum):
     GBP = "GBP"
     CAD = "CAD"
     AUD = "AUD"
+    JPY = "JPY"
+    NZD = "NZD"
+    CHF = "CHF"
+    PLN = "PLN"
+    MXN = "MXN"
+    RUB = "RUB"
+    TRY = "TRY"
+    ZAR = "ZAR"
         
 col_names = ["time", "low", "high"]

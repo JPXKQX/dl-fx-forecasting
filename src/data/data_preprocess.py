@@ -1,4 +1,4 @@
-from src.data import utils
+from src.data import utils, constants
 from dataclasses import dataclass
 from typing import List
 
@@ -8,7 +8,6 @@ import logging
 
 
 log = logging.getLogger("Dataset Generator")
-WORKING_DIR = os.environ['PWD']
 
 
 @dataclass
@@ -26,7 +25,7 @@ class DataPreprocessor:
             str: The output directory-.
         """
         fx_pair = self._get_fx_pair()
-        output_dir = f"{WORKING_DIR}/data/raw/{fx_pair}/"
+        output_dir = f"{constants.WORKING_DIR}/data/raw/{fx_pair}/"
         if (not clobber) & os.path.isdir(output_dir):
             log.info(f"Data already exists in {output_dir}")
             return output_dir
