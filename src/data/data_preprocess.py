@@ -33,7 +33,6 @@ class DataPreprocessor:
         
         df = self._load_files()
         df.to_parquet(self.output_dir + f"{fx_pair}/")
-        df.to_hdf(f"{fx_pair}.hdf", self.output_dir)
         log.info(f"Data for {fx_pair} has been saved to \"{self.output_dir}\"")
         return self.output_dir
     
