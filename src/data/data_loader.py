@@ -16,7 +16,7 @@ class DataLoader:
     def read(self, period: Tuple[str, str] = None) -> dd.DataFrame:
         folder = self.dir + self.base_currency.value + self.quote_currency.value
         filter_dates = None
-        if self.period is not None:
+        if period is not None:
             start = datetime.strptime(period[0], "%Y-%m-%d")
             end = datetime.strptime(period[1], "%Y-%m-%d")
             filter_dates = [('time', '>=', start), ('time', '<=', end)]
