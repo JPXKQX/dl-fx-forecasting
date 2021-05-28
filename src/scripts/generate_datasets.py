@@ -4,6 +4,7 @@ from src.data.constants import Currency
 from typing import NoReturn
 
 import logging
+import click
 
 
 logging.basicConfig(
@@ -11,6 +12,21 @@ logging.basicConfig(
     format='%(asctime)s | %(levelname)s | %(message)s')
 
 
+class CurrencyType(click.ParamType):
+    def convert(self, value, param, ctx):
+        if isinstance(value, str):
+            try:
+                return Currency(value).name
+            except ValueError:
+                self.fail(f"{value!r} is not a valid string", param, ctx)
+
+CURRENCY_TYPE = CurrencyType()
+
+@click.command()
+@click.argument('base', type=CURRENCY_TYPE)
+@click.argument('quote', type=CURRENCY_TYPE)
+@click.option('--clobber', defautl=False, type=click.BOOL,
+              help="If data should be re-generated or not")
 def process_fx_pair(
     base: Currency, 
     quote: Currency, 
