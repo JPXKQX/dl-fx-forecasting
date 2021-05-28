@@ -58,5 +58,6 @@ class DataPreprocessor:
         dfs = [utils.read_csv_dask(f) for f in self.files]
         df = dd.concat(dfs)
         df['mid'] = (df['low'] + df['high']) / 2
+        df = df.reset_index().rename(columns={'index': 'time'})
         log.debug("DataFrame tasks have been defined.")
         return df
