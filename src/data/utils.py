@@ -1,5 +1,5 @@
 from typing import List
-from src.data.constants import col_names
+from src.data.constants import col_names, WORKING_DIR
 
 import dask.dataframe as dd
 import numpy as np
@@ -69,5 +69,21 @@ def read_csv_dask(file: str) -> dd.DataFrame:
         usecols=[1, 2, 3], 
         names=col_names
     )
-    df = df.set_index(dd.to_datetime(df.time))
+    df = df.set_index(dd.to_datetime(df.time), sorted=True) 
+    df = df.drop('time', axis=1)
+    df.index.name = 'time'
     return df.astype({'low': np.float32, 'high': np.float32})
+
+
+def list_all_fx_pairs(path: str = WORKING_DIR + "data/raw/") -> List[str]:
+    """ Get all the currency pairs downloaded.
+
+    Args:
+        path (str): Path to the raw data folder. Defaults to WORKING_DIR + 
+        "data/raw/".
+
+    Returns:
+        List[str]: Currency pairs.
+    """
+    fx_pairs = next(os.walk(path))[1]
+    return fx_pairs
