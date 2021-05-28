@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def obtain_data(
+def plot_pair_trends(
     base: Currency,
     quote: Currency, 
     period: Tuple[str, str] = None,
@@ -56,4 +56,4 @@ def obtain_data(
 
 
 if __name__ == '__main__':
-    obtain_data(Currency.EUR, Currency.USD, ('2020-04-01', '2020-06-01'))
+    plot_pair_trends(Currency.USD, Currency.EUR, ('2020-04-01', '2020-06-01'))
