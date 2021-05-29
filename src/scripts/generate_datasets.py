@@ -18,19 +18,17 @@ CURRENCY_TYPE = CurrencyType()
 @click.command()
 @click.argument('base', type=CURRENCY_TYPE)
 @click.argument('quote', type=CURRENCY_TYPE)
-@click.option('--clobber', default=False, type=click.BOOL,
+@click.option('--clobber', default=False, type=click.BOOL, 
               help="If data should be re-generated or not")
 def process_fx_pair(
     base: Currency, 
     quote: Currency, 
     clobber: bool = False
 ) -> NoReturn:
-    """ Process the data corresponding to currency pair specified.
+    """ Process the data corresponding to currency pair BASE/QUOTE specified.
 
-    Args:
-        base (Currency): base currency to consider.
-        qoute (Currency): quote currency to consider.
-        clobber (bool): if true overwrite the data associated.
+    BASE is base currency to consider.\n
+    QUOTE is the quote currency to consider.\n
     """   
     # Unzip data
     dd_2020 = DataExtractor((base, quote), list(range(4, 12)), 2020)
@@ -42,25 +40,3 @@ def process_fx_pair(
     # Save into Parquet files.
     dp = DataPreprocessor(csv_files)
     dp._cache_parquet_data(clobber) 
-
-
-if __name__ == '__main__':
-    process_fx_pair(Currency.AUD, Currency.JPY)
-    process_fx_pair(Currency.AUD, Currency.USD)
-    process_fx_pair(Currency.CAD, Currency.JPY)
-    process_fx_pair(Currency.CHF, Currency.JPY)
-    process_fx_pair(Currency.EUR, Currency.CHF)
-    process_fx_pair(Currency.EUR, Currency.GBP)
-    process_fx_pair(Currency.EUR, Currency.JPY)
-    process_fx_pair(Currency.EUR, Currency.PLN)
-    process_fx_pair(Currency.EUR, Currency.USD)
-    process_fx_pair(Currency.GBP, Currency.JPY)
-    process_fx_pair(Currency.GBP, Currency.USD)
-    process_fx_pair(Currency.NZD, Currency.USD)
-    process_fx_pair(Currency.USD, Currency.CAD)
-    process_fx_pair(Currency.USD, Currency.CHF)
-    process_fx_pair(Currency.USD, Currency.JPY)
-    process_fx_pair(Currency.USD, Currency.MXN)
-    process_fx_pair(Currency.USD, Currency.RUB)
-    process_fx_pair(Currency.USD, Currency.TRY)
-    process_fx_pair(Currency.USD, Currency.ZAR)
