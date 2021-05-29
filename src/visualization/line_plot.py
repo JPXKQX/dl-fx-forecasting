@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import numpy as np
 import dask.dataframe as dd
 import logging
+from datetime import datetime
 
 
 log = logging.getLogger("Line plotter")
@@ -78,7 +79,8 @@ class PlotCurrencyPair:
 
     def run(
         self,
-        period: Tuple[str, str] = None
+        period: Tuple[Union[str, datetime], 
+                      Union[str, datetime]] = None
     ) -> Tuple[np.array, List[str]]:
         # Get the data
         dl = DataLoader(self.base, self.quote, self.path)
