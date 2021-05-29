@@ -14,7 +14,7 @@ log = logging.getLogger("Raw Data Generator")
 @dataclass
 class DataPreprocessor:
     files: List[str]
-    output_dir = f"{constants.WORKING_DIR}/data/raw/"
+    output_dir = f"{constants.ROOT_DIR}/data/raw/"
     
     def _cache_parquet_data(self, clobber: bool = False) -> str:
         """ Save the passed CSV files into Parquet files for a given currency 
