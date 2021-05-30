@@ -15,11 +15,11 @@ logging.basicConfig(
 CURRENCY_TYPE = CurrencyType()
 
 
-@click.command()
-@click.argument('base', type=CURRENCY_TYPE)
-@click.argument('quote', type=CURRENCY_TYPE)
-@click.option('--clobber', default=False, type=click.BOOL, 
-              help="If data should be re-generated or not")
+#@click.command()
+#@click.argument('base', type=CURRENCY_TYPE)
+#@click.argument('quote', type=CURRENCY_TYPE)
+#@click.option('--clobber', default=False, type=click.BOOL, 
+#              help="If data should be re-generated or not")
 def process_fx_pair(
     base: Currency, 
     quote: Currency, 
@@ -40,3 +40,7 @@ def process_fx_pair(
     # Save into Parquet files.
     dp = DataPreprocessor(csv_files)
     dp._cache_parquet_data(clobber) 
+
+
+if __name__ == '__main__':
+    process_fx_pair(Currency.EUR, Currency.USD)

@@ -6,7 +6,7 @@ from src.data.constants import Currency
 import pytest
 
 
-@pytest.skip("Run with raw data processed.")
+@pytest.mark.skip("Run with raw data processed.")  
 def test_line_plot():
     PlotCurrencyPair(
         Currency.EUR,
@@ -15,7 +15,7 @@ def test_line_plot():
     ).run(('2020-05-01', '2020-05-31'))
     
 
-@pytest.skip("Run with raw data processed.")  
+@pytest.mark.skip("Run with raw data processed.")  
 def test_cli_line_plot():
     runner = CliRunner()
     result = runner.invoke(
