@@ -1,9 +1,9 @@
-from src.data import utils, constants
+from src.data import constants
 from dataclasses import dataclass
-from typing import List, Tuple
-from datetime import datetime
+from typing import List
 
 import dask.dataframe as dd 
+import numpy as np
 import os
 import logging
 
@@ -48,6 +48,27 @@ class DataPreprocessor:
         log.info(f"The currency pair to save is {pair}")
         return pair
     
+    def read_csv_dask(self, file_pos: int) -> dd.DataFrame:
+        """ Read and process the unzipped CSV files to the desired format.
+
+        Args:
+            file (int): position of the path to the CSV file to read.
+
+        Returns:
+            dd.DataFrame: distributed formatted dataframe.
+        """
+        df = dd.read_csv(
+            self.files[file_pos], 
+            header=None, 
+            usecols=[1, 2, 3], 
+            names=constants.col_names
+        )
+        df['time'] = dd.to_datetime(df.time)
+        df['spread'] = df['high'] - df['low']
+        df['mid'] = (df['low'] + df['high']) / 2
+        df = df.drop(['high', 'low'], axis=1)
+        return df.astype({'mid': np.float32, 'spread': np.float32})
+
     def _load_files(self) -> dd.DataFrame:
         """ Load all files preprocessed, and returns a single DataFrame with 3
         columns containing the low, mid, and high prices, indexed by the time.
@@ -55,9 +76,7 @@ class DataPreprocessor:
         Returns:
             dd.DataFrame: A DataFrame with the whole data.
         """
-        dfs = [utils.read_csv_dask(f) for f in self.files]
+        dfs = [self.read_csv_dask(i) for i in range(len(self.files))]
         df = dd.concat(dfs)
-        df['mid'] = (df['low'] + df['high']) / 2
-        df = df.reset_index().rename(columns={'index': 'time'})
         log.debug("DataFrame tasks have been defined.")
         return df

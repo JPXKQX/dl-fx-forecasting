@@ -55,27 +55,6 @@ def get_files_of_extension(folders: List[str], extension: str) -> List[str]:
     return files
 
 
-def read_csv_dask(file: str) -> dd.DataFrame:
-    """ Read and process the unzipped CSV files to the desired format.
-
-    Args:
-        file (str): path to the CSV file.
-
-    Returns:
-        dd.DataFrame: distributed formatted dataframe.
-    """
-    df = dd.read_csv(
-        file, 
-        header=None, 
-        usecols=[1, 2, 3], 
-        names=col_names
-    )
-    df = df.set_index(dd.to_datetime(df.time), sorted=True)
-    df = df.drop('time', axis=1)
-    df.index.name = 'time'
-    return df.astype({'low': np.float32, 'high': np.float32})
-
-
 def str2datetime(date: Union[str, datetime]) -> datetime:
     """ Convert from string to datetime.
 
