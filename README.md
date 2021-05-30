@@ -31,8 +31,9 @@ Read, load, preprocess and save the data for the currency pair EUR/USD. The ZIP 
 generate_datasets eur usd
 ```
 
+## Visualizations
 
-Then plot the currency pair *EUR/USD* for the period from 25 May, 202 to 30 May, 2020.
+Then, plot the currency pair *EUR/USD* for the period from 25 May, 202 to 30 May, 2020.
 
 ```
 plot_currency_pair eur usd H T S --period 2020-05-25 2020-05-31
