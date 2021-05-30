@@ -10,6 +10,7 @@ WORKDIR /app/
 COPY requirements.txt /tmp/
 COPY setup.py .
 COPY src src
+COPY tests tests
 
 RUN pip install -r /tmp/requirements.txt && \
     python setup.py install
