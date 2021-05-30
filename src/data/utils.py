@@ -70,7 +70,7 @@ def read_csv_dask(file: str) -> dd.DataFrame:
         usecols=[1, 2, 3], 
         names=col_names
     )
-    df = df.set_index(dd.to_datetime(df.time), sorted=True) 
+    df = df.set_index(dd.to_datetime(df.time), sorted=True)
     df = df.drop('time', axis=1)
     df.index.name = 'time'
     return df.astype({'low': np.float32, 'high': np.float32})

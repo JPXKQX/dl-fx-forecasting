@@ -41,12 +41,9 @@ class DataLoader:
                              engine="pyarrow-dataset")
 
         # Preprocess
-        df.attrs = {'base': self.base.value, 
-                    'quote': self.quote.value}
         df = df.set_index('time')
-        
-        # Invert in case of pairs were asked reversed.
         if to_invert: df = df.rdiv(1, fill_value=None)
         
+        df.attrs = {'base': self.base.value, 'quote': self.quote.value}
         return df
 
