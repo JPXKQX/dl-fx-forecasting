@@ -35,7 +35,7 @@ class TestDatasetGeneration:
         )
         mocker.patch.object(
             DataLoader, "_search_pair",
-            return=("tests/data/EURUSD-parquet.csv", False)
+            return_value=("tests/data/EURUSD-parquet.csv", False)
         )
         self.prepare()
         dl = DataLoader(self.base, self.quote, self.path)
