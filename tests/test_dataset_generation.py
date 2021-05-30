@@ -1,5 +1,4 @@
 from src.data.constants import ROOT_DIR, Currency, col_names
-from src.data.data_extract import DataExtractor
 from src.data.data_loader import DataLoader
 from src.data.data_preprocess import DataPreprocessor, dd
 from datetime import datetime
@@ -33,6 +32,10 @@ class TestDatasetGeneration:
         mocker.patch(
             'src.data.data_loader.dd.read_parquet',
             return_value=mock_parquet()
+        )
+        mocker.patch.object(
+            DataLoader, "_search_pair",
+            return=("tests/data/EURUSD-parquet.csv", False)
         )
         self.prepare()
         dl = DataLoader(self.base, self.quote, self.path)

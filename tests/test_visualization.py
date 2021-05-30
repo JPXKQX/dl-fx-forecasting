@@ -1,4 +1,5 @@
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 from src.visualization.line_plot import PlotCurrencyPair
 from src.scripts.plot_currency_pair import main
 from src.data.constants import Currency
@@ -6,13 +7,17 @@ from src.data.constants import Currency
 import pytest
 
 
-@pytest.mark.skip("Run with raw data processed.")  
-def test_line_plot():
+def test_line_plot(mocker: MockerFixture):
+    mocker.patch.object(
+        PlotCurrencyPair, 
+        '_search_pair',
+        return=("tests/data/EURUSD-parquet.csv", False)
+    )
     PlotCurrencyPair(
         Currency.EUR,
         Currency.USD,
-        ['D', 'H']
-    ).run(('2020-05-01', '2020-05-31'))
+        ['M', 'none']
+    ).run(('2020-05-01', '2021-05-31'))
     
 
 @pytest.mark.skip("Run with raw data processed.")  
