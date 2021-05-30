@@ -8,6 +8,7 @@ click~=8.0.0
 dask~=2021.4.0
 matplotlib~=3.4.2
 setuptools~=57.0.0
+plotly~=4.14.3
 pytest~=6.2.4
 pytest-mock~=3.6.1
 tables~=3.6.1
