@@ -12,7 +12,7 @@ import os
 class DataLoader:
     base: Currency
     quote: Currency
-    dir: str = constants.WORKING_DIR + "/data/raw/"
+    dir: str = f"{constants.ROOT_DIR}/data/raw/"
     
     def _search_pair(self) -> Tuple[str, bool]:
         if os.path.isdir(self.dir + self.base.value + self.quote.value):
@@ -27,8 +27,7 @@ class DataLoader:
     def read(
         self, 
         period: Tuple[Union[str, datetime], 
-                      Union[str, datetime]] = None,
-        agg: Callable = None
+                      Union[str, datetime]] = None
     ) -> dd.DataFrame:
         folder, to_invert = self._search_pair()
         filter_dates = None
@@ -38,7 +37,8 @@ class DataLoader:
             filter_dates = [('time', '>=', start), ('time', '<=', end)]
         
         # Read data
-        df = dd.read_parquet(folder, filters = filter_dates)
+        df = dd.read_parquet(folder, filters = filter_dates, 
+                             engine="pyarrow-dataset")
 
         # Preprocess
         df.attrs = {'base': self.base.value, 
@@ -48,8 +48,5 @@ class DataLoader:
         # Invert in case of pairs were asked reversed.
         if to_invert: df = df.rdiv(1, fill_value=None)
         
-        # Aggregate if it is asked.
-        if agg:
-            return df.agg()
         return df
 

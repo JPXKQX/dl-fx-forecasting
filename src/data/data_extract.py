@@ -1,14 +1,13 @@
 from dataclasses import dataclass
 from typing import NoReturn, Tuple, List
 from src.data import utils, constants
-from src.data.constants import Currency
+from src.data.constants import Currency, PATH_RAW_DATA
 
 import os
 import glob
 import logging
 
 log = logging.getLogger("Data Preprocessor")
-path_raw_data = os.getenv('RAW_TRUEFX_PATH')
 
 
 @dataclass
@@ -36,7 +35,7 @@ class DataExtractor():
             List[str]: paths to the zipped files.
         """
         m_names = [constants.months[month] for month in sorted(self.months)]
-        paths = [f"{path_raw_data}/{self.year}/{name}.zip" for name in m_names]
+        paths = [f"{PATH_RAW_DATA}/{self.year}/{name}.zip" for name in m_names]
         
         # Check all paths exists
         if any([not os.path.exists(path) for path in paths]):

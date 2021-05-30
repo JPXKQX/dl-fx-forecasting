@@ -23,13 +23,25 @@ _The  path **/path/to/data** refers to the directory containing the data as
 presented in the project organization below. In case all processed information is available, it is possible to execute all scripts._
 
 
-## Example
+## Data
 
-Generate the line plots for the currency pair EUR/USD.
+Read, load, preprocess and save the data for the currency pair EUR/USD. The ZIP files have to been in the host machine. The path to this folder must be specified as an environment vairable *PATH_RAW_DATA*. In this case, the historical data has been extracted from [True FX](https://www.truefx.com/truefx-historical-downloads/).
 
-´´´
-python plot
-´´´
+```
+generate_datasets eur usd
+```
+
+## Visualizations
+
+Then, plot the currency pair *EUR/USD* for the period from 25 May, 202 to 30 May, 2020.
+
+```
+plot_currency_pair eur usd H T S --period 2020-05-25 2020-05-31
+```
+
+To get the following image,
+
+![Line plot](reports/figures/eurusd_25_30May.png "EUR/USD")
 
 
 Project Organization
