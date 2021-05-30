@@ -16,7 +16,7 @@ log = logging.getLogger("Line plotter")
 freq2label = {
     "D": "Daily",
     "H": "Hourly",
-    "M": "Per Minute",
+    "T": "Per Minute",
     "S": "Per Second"
 }
 
@@ -31,9 +31,9 @@ class PlotCurrencyPair:
     def prepare_dataframes(self, df: dd.DataFrame) -> dd.DataFrame:
         dfs = []
         for freq in self.freqs:
-            if freq in ['D', 'H', 'M', 'S']:
+            if freq in ['D', 'H', 'T', 'S']:
                 log.debug(f"Resampling dataframe averaging each {freq}")
-                df_processed = df.resample('D').mean()
+                df_processed = df.resample(freq).mean()
                 dfs.append(df_processed.compute())
             else:
                 log.debug("No resampling is also included.")

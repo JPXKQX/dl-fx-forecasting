@@ -18,7 +18,7 @@ class AggregationType(click.ParamType):
             try:
                 if value.upper() == "NONE":
                     return None
-                elif value.upper() in ["D", "H", "S", "M"]:
+                elif value.upper() in ["D", "H", "T", "S"]:
                     return value.upper()
                 else:
                     raise ValueError("Invalid option.")
