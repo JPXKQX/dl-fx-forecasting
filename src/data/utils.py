@@ -1,10 +1,10 @@
 from typing import List, Union
-from src.data.constants import col_names, ROOT_DIR
+from src.data.constants import col_names, ROOT_DIR, timezone
+from datetime import datetime
 
 import dask.dataframe as dd
 import numpy as np
 import os
-from datetime import datetime
 import glob
 import zipfile
 import logging
@@ -76,7 +76,7 @@ def read_csv_dask(file: str) -> dd.DataFrame:
     return df.astype({'low': np.float32, 'high': np.float32})
 
 
-def str2datetime(string: Union[str, datetime]) -> datetime:
+def str2datetime(date: Union[str, datetime]) -> datetime:
     """ Convert from string to datetime.
 
     Args:
@@ -85,9 +85,10 @@ def str2datetime(string: Union[str, datetime]) -> datetime:
     Returns:
         datetime: date object
     """
-    if not isinstance(string, datetime.datetime):
-        return datetime.strptime(string, "%Y-%m-%d")
-    return string
+    if not isinstance(date, datetime):
+        date = datetime.strptime(date, "%Y-%m-%d")
+    
+    return timezone.localize(date)
 
 
 def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:
