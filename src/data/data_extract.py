@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import NoReturn, Tuple, List
 from src.data import utils, constants
-from src.data.constants import Currency, RAW_TRUEFX_PATH
+from src.data.constants import Currency, PATH_RAW_DATA
 
 import os
 import glob
