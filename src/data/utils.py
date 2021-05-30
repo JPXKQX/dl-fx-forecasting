@@ -1,9 +1,10 @@
-from typing import List
-from src.data.constants import col_names, WORKING_DIR
+from typing import List, Union
+from src.data.constants import col_names, ROOT_DIR
 
 import dask.dataframe as dd
 import numpy as np
 import os
+from datetime import datetime
 import glob
 import zipfile
 import logging
@@ -75,7 +76,21 @@ def read_csv_dask(file: str) -> dd.DataFrame:
     return df.astype({'low': np.float32, 'high': np.float32})
 
 
-def list_all_fx_pairs(path: str = WORKING_DIR + "data/raw/") -> List[str]:
+def str2datetime(string: Union[str, datetime]) -> datetime:
+    """ Convert from string to datetime.
+
+    Args:
+        string (Union[str, datetime.datetime]): string representing a date.
+
+    Returns:
+        datetime: date object
+    """
+    if not isinstance(string, datetime.datetime):
+        return datetime.strptime(string, "%Y-%m-%d")
+    return string
+
+
+def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:
     """ Get all the currency pairs downloaded.
 
     Args:

@@ -5,6 +5,8 @@
 pandas~=1.2.4
 numpy~=1.20.2
 dask~=2021.4.0
+matplotlib~=3.4.2
+setuptools~=57.0.0
+pytest~=6.2.4
+tables~=3.6.1
 fastparquet~=0.5.0
-setuptools~=52.0.0.post20210125
-pytables~=3.6.1

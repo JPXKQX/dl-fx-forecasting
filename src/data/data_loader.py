@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Callable, Union
 from datetime import datetime
-from src.data import constants
+from src.data import constants, utils
 from src.data.constants import Currency
 
 import dask.dataframe as dd
@@ -24,18 +24,32 @@ class DataLoader:
                              f"{self.base.value}/"
                              f"{self.quote.value}")
     
-    def read(self, period: Tuple[str, str] = None) -> dd.DataFrame:
+    def read(
+        self, 
+        period: Tuple[Union[str, datetime], 
+                      Union[str, datetime]] = None,
+        agg: Callable = None
+    ) -> dd.DataFrame:
         folder, to_invert = self._search_pair()
         filter_dates = None
         if period is not None:
-            start = datetime.strptime(period[0], "%Y-%m-%d")
-            end = datetime.strptime(period[1], "%Y-%m-%d")
+            start = utils.str2datetime(period[0])
+            end = utils.str2datetime(period[1])
             filter_dates = [('time', '>=', start), ('time', '<=', end)]
         
+        # Read data
         df = dd.read_parquet(folder, filters = filter_dates)
+
+        # Preprocess
         df.attrs = {'base': self.base.value, 
                     'quote': self.quote.value}
-        
         df = df.set_index('time')
-        return df.rdiv(1, fill_value=None) if to_invert else df
-    
+        
+        # Invert in case of pairs were asked reversed.
+        if to_invert: df = df.rdiv(1, fill_value=None)
+        
+        # Aggregate if it is asked.
+        if agg:
+            return df.agg()
+        return df
+

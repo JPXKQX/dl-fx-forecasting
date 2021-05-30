@@ -3,7 +3,7 @@ from enum import Enum
 import os
 
 
-WORKING_DIR = os.environ['PWD']
+ROOT_DIR = os.path.dirname(os.path.abspath("setup.py"))
 
 months = ["None",
     "January", "February", "March", "April", "May", "June", "July", "August", 

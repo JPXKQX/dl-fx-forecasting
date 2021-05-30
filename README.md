@@ -3,6 +3,35 @@ DL FX Forecasting
 
 Python project for forecasting mid prices of different Foreign Exchange pairs.
 
+## Run
+-------------
+
+Execute the following command to start the container:
+
+```
+docker run -it --rm jpxkqx/dl-fx-forecasting:firsttry
+```
+
+In case, the data is already in processed in the host machine, the following 
+command may be more appropriate.
+
+```
+docker run -it -v "/path/to/data:/app/data" --rm jpxkqx/dl-fx-forecasting:firsttry
+```
+
+_The  path **/path/to/data** refers to the directory containing the data as 
+presented in the project organization below. In case all processed information is available, it is possible to execute all scripts._
+
+
+## Example
+
+Generate the line plots for the currency pair EUR/USD.
+
+´´´
+python plot
+´´´
+
+
 Project Organization
 ------------
 
