@@ -1,18 +1,30 @@
 from click.testing import CliRunner
-from src.visualization.line_plot import PlotCurrencyPair
+from pytest_mock import MockerFixture
+from src.visualization.line_plot import PlotCurrencyPair, DataLoader
 from src.scripts.plot_currency_pair import main
 from src.data.constants import Currency
 
 import pytest
+import dask.dataframe as dd
 
 
-@pytest.mark.skip("Run with raw data processed.")  
-def test_line_plot():
+def mock_data():
+    df = dd.read_csv("tests/data/EURUSD-parquet.csv")
+    df = df.set_index(dd.to_datetime(df['time']), sorted=True)
+    df = df.drop('time', axis=1)
+    return df
+
+def test_line_plot(mocker: MockerFixture):
+    mocker.patch.object(
+        DataLoader, 
+        'read',
+        return_value=mock_data()
+    )
     PlotCurrencyPair(
         Currency.EUR,
         Currency.USD,
-        ['D', 'H']
-    ).run(('2020-05-01', '2020-05-31'))
+        ['S', None]
+    ).run()
     
 
 @pytest.mark.skip("Run with raw data processed.")  
