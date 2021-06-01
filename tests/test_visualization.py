@@ -33,10 +33,23 @@ def test_spread_plot(mocker: MockerFixture):
         'read',
         return_value=mock_data()
     )
-    currency_spread.PlotCurrencySpread(
+    currency_spread.PlotCDFCurrencySpread(
         Currency.EUR,
         Currency.USD,
         1000
+    ).run()
+    
+
+def test_spread_boxplot(mocker: MockerFixture):
+    mocker.patch.object(
+        currency_spread.DataLoader, 
+        'read',
+        return_value=mock_data()
+    )
+    currency_spread.PlotStatsCurrencySpread(
+        Currency.EUR,
+        Currency.USD,
+        'per second'
     ).run()
     
 
