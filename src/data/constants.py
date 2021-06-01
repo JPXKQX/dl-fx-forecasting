@@ -11,6 +11,14 @@ months = ["None",
     "September", "October", "November", "December"
 ]
 
+stat2label = {
+    'min': 'Minimum',
+    'mean': 'Mean',
+    'median': 'Median',
+    'std': 'Standard Deviation',
+    'max': 'Maximum',
+}
+
 
 class Currency(Enum):
     USD = "USD"

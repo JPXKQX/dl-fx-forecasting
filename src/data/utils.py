@@ -6,6 +6,7 @@ import os
 import glob
 import zipfile
 import logging
+import dask.dataframe as dd
 
 
 log = logging.getLogger("Data Preprocessor")
@@ -86,6 +87,33 @@ def period2str(
     date_strs = list(map(conv_func, date_interval))
     return f" (From {date_strs[0]} to {date_strs[1]})"
                 
+
+def filter_datetime_series(
+    series: dd.Series, 
+    agg_timeframe: str
+    ) -> Tuple[dd.Series, str]: 
+    """ Convert datetime series to the timeframe specified. 
+
+    Args:
+        series (dd.Series): datetime series
+        agg_timeframe (str): aggregation timeframe
+
+    Raises:
+        NotImplementedError: the timeframe specified is not supported.
+
+    Returns:
+        dd.Series: the resulting series.
+    """
+    if agg_timeframe.lower() in ['s', 'per second']:
+        return series.dt.second, 'Per second'
+    elif agg_timeframe.lower() in ['d', 'daily']:
+        return series.dt.day_of_year, 'Daily'
+    elif agg_timeframe.lower() in ['w', 'weekly']:
+        return series.dt.week_of_year, 'Weekly'
+    elif agg_timeframe.lower() in ['m', 'monthly']:
+        return series.dt.month, 'Monthly'
+    else:
+        raise NotImplementedError(f"Aggregate timeframe not implemented.")
 
 
 def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:
