@@ -35,10 +35,13 @@ class PlotCurrencyPair:
                 log.debug(f"Resampling dataframe averaging each {freq}")
                 df_processed = df.resample(freq).mean()
                 dfs.append(df_processed.compute())
-            else:
+            elif freq == None:
                 log.debug("No resampling is also included.")
                 dfs.append(df)
-            
+            else:
+                raise NotImplementedError("This aggregation timeframe is not "
+                                          "yet implemented")
+
         return dfs
 
     def show_dataframes(self, dfs: List[dd.DataFrame]) -> NoReturn:

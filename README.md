@@ -46,7 +46,7 @@ To get the following image,
 There is also the possibilitt to plot the cumulative distribution function using the following command
 
 ```
-plot_currency_spread eur usd --period 2020-05-17 2020-05-20
+plot_cdf_spread eur usd --period 2020-05-17 2020-05-20
 ```
 
 which gives the image shown below,

@@ -12,7 +12,8 @@ setup(
         'console_scripts': [
             'generate_datasets = src.scripts.generate_datasets:process_fx_pair',
             'plot_currency_pair = src.scripts.plot_currency_pair:main',
-            'plot_currency_spread = src.scripts.plot_currency_spread:main'
+            'plot_cdf_spread = src.scripts.plot_currency_spread:main_cdf'
+            'plot_stats_spread = src.scripts.plot_currency_spread:main_stats'
         ]
     }
 )
