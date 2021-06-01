@@ -1,9 +1,7 @@
-from typing import List, Union
-from src.data.constants import col_names, ROOT_DIR, timezone
+from typing import List, Union, Tuple
+from src.data.constants import ROOT_DIR, timezone
 from datetime import datetime
 
-import dask.dataframe as dd
-import numpy as np
 import os
 import glob
 import zipfile
@@ -68,6 +66,26 @@ def str2datetime(date: Union[str, datetime]) -> datetime:
         date = datetime.strptime(date, "%Y-%m-%d")
     
     return timezone.localize(date)
+
+
+def period2str(
+    date_interval: Union[Tuple[Union[str, datetime], 
+                               Union[str, datetime]],
+                         None]
+    ) -> str:
+    """ Generate a string of period of time passed as parameter.
+
+    Args:
+        date_interval: Period of time specified either by strings or datetimes.
+
+    Returns:
+        str: String of period of time covered.
+    """
+    if date_interval is None: return ""
+    conv_func = lambda x: str2datetime(x).strftime("%d %b %Y")
+    date_strs = list(map(conv_func, date_interval))
+    return f" (From {date_strs[0]} to {date_strs[1]})"
+                
 
 
 def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:

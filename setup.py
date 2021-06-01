@@ -11,7 +11,8 @@ setup(
     entry_points={
         'console_scripts': [
             'generate_datasets = src.scripts.generate_datasets:process_fx_pair',
-            'plot_currency_pair = src.scripts.plot_currency_pair:main'
+            'plot_currency_pair = src.scripts.plot_currency_pair:main',
+            'plot_currency_spread = src.scripts.plot_currency_spread:main'
         ]
     }
 )

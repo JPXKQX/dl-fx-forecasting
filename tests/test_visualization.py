@@ -1,6 +1,6 @@
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
-from src.visualization.line_plot import PlotCurrencyPair, DataLoader
+from src.visualization import line_plot, currency_spread
 from src.scripts.plot_currency_pair import main
 from src.data.constants import Currency
 
@@ -14,16 +14,29 @@ def mock_data():
     df = df.drop('time', axis=1)
     return df
 
+
 def test_line_plot(mocker: MockerFixture):
     mocker.patch.object(
-        DataLoader, 
+        line_plot.DataLoader, 
         'read',
         return_value=mock_data()
     )
-    PlotCurrencyPair(
+    line_plot.PlotCurrencyPair(
         Currency.EUR,
         Currency.USD,
         ['S', None]
+    ).run()
+    
+def test_spread_plot(mocker: MockerFixture):
+    mocker.patch.object(
+        currency_spread.DataLoader, 
+        'read',
+        return_value=mock_data()
+    )
+    currency_spread.PlotCurrencySpread(
+        Currency.EUR,
+        Currency.USD,
+        1000
     ).run()
     
 

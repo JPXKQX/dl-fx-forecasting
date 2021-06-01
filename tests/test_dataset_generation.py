@@ -48,7 +48,7 @@ class TestDatasetGeneration:
         
     def test_data_prepocess(self, mocker: MockerFixture) -> NoReturn:
         mocker.patch(
-            'src.data.utils.dd.read_csv',
+            'src.data.data_preprocess.dd.read_csv',
             return_value=mock_raw_csv()
         )
         mocker.patch.object(

@@ -40,6 +40,10 @@ class DataLoader:
         df = dd.read_parquet(folder, filters = filter_dates, 
                              engine="pyarrow-dataset")
 
+        if len(df.index) == 0: 
+            raise Exception("No data has been found. The period set may "
+                            "correspond to a noon-labor day.")
+
         # Preprocess
         df = df.set_index('time')
         if to_invert: df = df.rdiv(1, fill_value=None)

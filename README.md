@@ -43,6 +43,16 @@ To get the following image,
 
 ![Line plot](reports/figures/eurusd_25_30May.png "EUR/USD")
 
+There is also the possibilitt to plot the cumulative distribution function using the following command
+
+```
+plot_currency_spread eur usd --period 2020-05-17 2020-05-20
+```
+
+which gives the image shown below,
+
+![Spread cdf](reports/figures/eurusd_spread_17_20May.png "EUR/USD")
+
 
 Project Organization
 ------------
