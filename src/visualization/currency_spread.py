@@ -131,7 +131,3 @@ class PlotStatsCurrencySpread:
         grouper, freq = utils.filter_datetime_series(df.index, self.agg_frame)
         stats = df['spread'].groupby(grouper).aggregate(statistics)
         self.plot_boxplot(stats, [freq, utils.period2str(period)])
-
-if __name__ == '__main__':
-    pscs = PlotStatsCurrencySpread(Currency.EUR, Currency.USD)
-    pscs.run(('2020-05-04', '2020-05-05'))
