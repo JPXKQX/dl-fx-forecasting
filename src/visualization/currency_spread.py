@@ -66,8 +66,3 @@ class PlotCurrencySpread:
         df_mid = dl.read(period)
         date_string = utils.period2str(period)
         self.plot_cdf(df_mid, date_string)
-
-
-if __name__ == '__main__':
-    pcs = PlotCurrencySpread(Currency.EUR, Currency.USD)
-    pcs.run(('2020-05-17', '2020-05-21'))
