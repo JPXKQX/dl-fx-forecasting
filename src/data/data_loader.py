@@ -83,7 +83,7 @@ class DataLoader:
         ds = tf.data.Dataset.from_generator(
             self._generator_samples, args=[df, past_ticks, ticks_ahead], 
             output_types=(tf.float32, tf.float32),
-            output_shapes=([2 * self.past_ticks, ], []))
+            output_shapes=([2 * past_ticks, ], []))
         
         return ds
 
