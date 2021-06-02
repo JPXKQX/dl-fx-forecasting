@@ -6,7 +6,7 @@ import os
 import glob
 import zipfile
 import logging
-import dask.dataframe as dd
+import pandas as pd
 
 
 log = logging.getLogger("Data Preprocessor")
@@ -89,9 +89,9 @@ def period2str(
                 
 
 def filter_datetime_series(
-    series: dd.Series, 
+    series: pd.Series, 
     agg_timeframe: str
-    ) -> Tuple[dd.Series, str]: 
+    ) -> Tuple[pd.Series, str]: 
     """ Convert datetime series to the timeframe specified. 
 
     Args:
@@ -105,13 +105,13 @@ def filter_datetime_series(
         dd.Series: the resulting series.
     """
     if agg_timeframe.lower() in ['s', 'per second']:
-        return series.dt.second, 'Per second'
+        return series.floor('s').second, 'Per second'
     elif agg_timeframe.lower() in ['d', 'daily']:
-        return series.dt.day_of_year, 'Daily'
+        return series.floor('d'), 'Daily'
     elif agg_timeframe.lower() in ['w', 'weekly']:
-        return series.dt.week_of_year, 'Weekly'
+        return series.weekofyear, 'Weekly'
     elif agg_timeframe.lower() in ['m', 'monthly']:
-        return series.dt.month, 'Monthly'
+        return series.astype('<M8[h]'), 'Monthly'
     else:
         raise NotImplementedError(f"Aggregate timeframe not implemented.")
 

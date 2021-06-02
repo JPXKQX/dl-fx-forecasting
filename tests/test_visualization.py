@@ -5,12 +5,12 @@ from src.scripts.plot_currency_pair import main
 from src.data.constants import Currency
 
 import pytest
-import dask.dataframe as dd
+import pandas as pd
 
 
 def mock_data():
-    df = dd.read_csv("tests/data/EURUSD-parquet.csv")
-    df = df.set_index(dd.to_datetime(df['time']), sorted=True)
+    df = pd.read_csv("tests/data/EURUSD-parquet.csv")
+    df = df.set_index(pd.to_datetime(df['time']))
     df = df.drop('time', axis=1)
     return df
 

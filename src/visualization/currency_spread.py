@@ -7,8 +7,7 @@ from datetime import datetime
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
-import numpy as np
-import dask.dataframe as dd
+import pandas as pd
 import logging
 import math
 
@@ -30,10 +29,10 @@ class PlotCDFCurrencySpread:
         else:
             raise ValueError(f"Please select a tick augment multiple of 10.")
 
-    def plot_cdf(self, df: dd.DataFrame, date: str) -> NoReturn:
+    def plot_cdf(self, df: pd.DataFrame, date: str) -> NoReturn:
         label_ticks = self.tick_size()
         labels = [f"{self.base.value}/{self.quote.value}"]
-        fig = ff.create_distplot([self.ticks_augment * df['spread'].compute()],
+        fig = ff.create_distplot([self.ticks_augment * df['spread']],
                                  labels, bin_size=0.02, histnorm='probability')
         fig.update_layout(
             title={
@@ -87,7 +86,7 @@ class PlotStatsCurrencySpread:
 
     def plot_boxplot(
         self, 
-        df: dd.DataFrame, 
+        df: pd.DataFrame, 
         title_spec: Tuple[str, str]
     ) -> NoReturn:
         label_ticks = self.tick_size()
@@ -98,7 +97,7 @@ class PlotStatsCurrencySpread:
         for stat in df.columns:
             values = df[stat].values
             fig.add_trace(go.Box(x=self.ticks_augment * values, 
-                                 name=constants.stat2label[stat]))
+                                 name=constants.stat2label[str(stat)]))
         fig.update_layout(
             title={
                 'text': title,
@@ -129,5 +128,7 @@ class PlotStatsCurrencySpread:
         df = dl.read(period)
         statistics = ['std', 'max', 'mean', 'min']
         grouper, freq = utils.filter_datetime_series(df.index, self.agg_frame)
-        stats = df['spread'].groupby(grouper).aggregate(statistics)
+        main_stats = df['spread'].groupby(grouper).aggregate(statistics)
+        quantiles = df['spread'].groupby(grouper).quantile([0.05, 0.5, 0.95])
+        stats = pd.concat([main_stats, quantiles.unstack()], axis=1)
         self.plot_boxplot(stats, [freq, utils.period2str(period)])

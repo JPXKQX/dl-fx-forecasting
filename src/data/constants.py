@@ -17,6 +17,9 @@ stat2label = {
     'median': 'Median',
     'std': 'Standard Deviation',
     'max': 'Maximum',
+    '0.05': '5th quantile',
+    '0.5': 'Median',
+    '0.95': '95th quantile'
 }
 
 
