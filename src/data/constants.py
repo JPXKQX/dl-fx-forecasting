@@ -18,7 +18,9 @@ stat2label = {
     'std': 'Standard Deviation',
     'max': 'Maximum',
     '0.05': '5th quantile',
+    '0.25': 'First quartile',
     '0.5': 'Median',
+    '0.75': 'Second quartile',
     '0.95': '95th quantile'
 }
 

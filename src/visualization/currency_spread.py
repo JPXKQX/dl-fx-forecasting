@@ -129,6 +129,7 @@ class PlotStatsCurrencySpread:
         statistics = ['std', 'max', 'mean', 'min']
         grouper, freq = utils.filter_datetime_series(df.index, self.agg_frame)
         main_stats = df['spread'].groupby(grouper).aggregate(statistics)
-        quantiles = df['spread'].groupby(grouper).quantile([0.05, 0.5, 0.95])
+        quantiles = df['spread'].groupby(grouper).quantile([0.25, 0.5, 0.75])
         stats = pd.concat([main_stats, quantiles.unstack()], axis=1)
-        self.plot_boxplot(stats, [freq, utils.period2str(period)])
+        self.plot_boxplot(stats.iloc[:, [0, 1, -1, 2, -2, -3, 3]],
+                          [freq, utils.period2str(period)])
