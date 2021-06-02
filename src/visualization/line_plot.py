@@ -34,7 +34,7 @@ class PlotCurrencyPair:
             if freq in ['D', 'H', 'T', 'S']:
                 log.debug(f"Resampling dataframe averaging each {freq}")
                 df_processed = df.resample(freq).mean()
-                dfs.append(df_processed.compute())
+                dfs.append(df_processed)
             elif freq == None:
                 log.debug("No resampling is also included.")
                 dfs.append(df)
