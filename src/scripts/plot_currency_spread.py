@@ -48,7 +48,9 @@ def main_cdf(base, quote, period, data_path, rate):
               metavar="<str>")
 @click.option('--rate', default=1e3, type=click.INT, metavar='<int>', 
               help="Rate to augment the spread of the currency pair.")
-def main_stats(base, quote, agg_frame, period, data_path, rate):
+@click.option('--include_max', default=False, type=click.BOOL,
+              metavar='<boolean>', help='Whether to include the max spread.')
+def main_stats(base, quote, agg_frame, period, data_path, rate, include_max):
     """ Show the boxplot of the main statistics of the spread of a currency 
     pair. 
 
@@ -66,4 +68,5 @@ def main_stats(base, quote, agg_frame, period, data_path, rate):
         level=logging.INFO
     )
     
-    PlotStatsCurrencySpread(base, quote, agg_frame, rate, data_path).run(period)
+    pscs = PlotStatsCurrencySpread(base, quote, agg_frame, rate, data_path)
+    pscs.run(period, include_max)

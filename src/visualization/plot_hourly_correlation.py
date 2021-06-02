@@ -16,13 +16,13 @@ def compute_corr_matrix(
     
     for i, fx_pair1 in enumerate(fx_pairs):
         dl1 = DataLoader(Currency(fx_pair1[:3]), Currency(fx_pair1[3:]), path)
-        df_mid1 = dl1.read(period)['mid'].resample('H').mean().compute()
+        df_mid1 = dl1.read(period)['mid'].resample('H').mean()
         
         for j, fx_pair2 in enumerate(fx_pairs[i+1:], start=i+1):
             dl2 = DataLoader(Currency(fx_pair2[:3]), 
                              Currency(fx_pair2[3:]),
                              path)
-            df_mid2 = dl2.read(period)['mid'].resample('H').mean().compute()
+            df_mid2 = dl2.read(period)['mid'].resample('H').mean()
 
             # Compute the corelation between currency1 and currency2.
             corr = df_mid1.corr(df_mid2)

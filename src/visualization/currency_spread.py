@@ -121,7 +121,8 @@ class PlotStatsCurrencySpread:
     def run(
         self,
         period: Tuple[Union[str, datetime], 
-                      Union[str, datetime]] = None
+                      Union[str, datetime]] = None, 
+        include_max: bool = False
     ) -> NoReturn:
         # Get the data
         dl = DataLoader(self.base, self.quote, self.path)
@@ -129,7 +130,8 @@ class PlotStatsCurrencySpread:
         statistics = ['std', 'max', 'mean', 'min']
         grouper, freq = utils.filter_datetime_series(df.index, self.agg_frame)
         main_stats = df['spread'].groupby(grouper).aggregate(statistics)
-        quantiles = df['spread'].groupby(grouper).quantile([0.25, 0.5, 0.75])
+        quantiles = df['spread'].groupby(grouper).quantile([0.05, 0.25, 0.5, 0.75, 0.95])
         stats = pd.concat([main_stats, quantiles.unstack()], axis=1)
-        self.plot_boxplot(stats.iloc[:, [0, 1, -1, 2, -2, -3, 3]],
-                          [freq, utils.period2str(period)])
+        idx = [0, 1, -1, -2, 2, -3, -4, -5, 3]
+        if not include_max: idx.remove(1)
+        self.plot_boxplot(stats.iloc[:, idx], [freq, utils.period2str(period)])
