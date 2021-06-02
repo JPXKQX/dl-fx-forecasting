@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 from typing import NoReturn
 
 import dask
+import tensorflow as tf
 
 
 def mock_parquet():
@@ -39,12 +40,23 @@ class TestDatasetGeneration:
         )
         self.prepare()
         dl = DataLoader(self.base, self.quote, self.path)
+        
+        # Tests data reading from data storage
         df = dl.read((datetime(2020, 6, 10), datetime(2020, 6, 20)))
         mocker._mocks[0].assert_called_once()
         assert list(df.columns) == ['mid', 'spread']
         assert len(df.index) == 100
         assert df.attrs['base'] == self.base.value
         assert df.attrs['quote'] == self.quote.value
+        
+        # Test data preparation
+        past_ticks = 15
+        ds = dl.load_dataset(past_ticks, 3)
+        assert isinstance(ds, tf.data.Dataset)
+        assert ds.element_spec[0].shape == tf.TensorShape([past_ticks * 2])
+        assert ds.element_spec[1].shape == tf.TensorShape([])
+        assert ds.element_spec[0].dtype == tf.float32
+        assert ds.element_spec[1].dtype == tf.float32
         
     def test_data_prepocess(self, mocker: MockerFixture) -> NoReturn:
         mocker.patch(
