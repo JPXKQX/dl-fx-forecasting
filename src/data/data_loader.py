@@ -1,10 +1,12 @@
 from dataclasses import dataclass
-from typing import Tuple, Callable, Union
+from typing import Tuple, Union
 from datetime import datetime
 from src.data import constants, utils
 from src.data.constants import Currency
 
 import dask.dataframe as dd
+import pandas as pd
+import tensorflow as tf
 import os
 
 
@@ -28,7 +30,15 @@ class DataLoader:
         self, 
         period: Tuple[Union[str, datetime], 
                       Union[str, datetime]] = None
-    ) -> dd.DataFrame:
+    ) -> pd.DataFrame:
+        """ Read the data for the currency pair for a period of time.
+        
+        Args:
+            period (Tuple): start and end date of the period.
+            
+        Returns:
+            pd.DataFrame: the data for the currency pair
+        """
         folder, to_invert = self._search_pair()
         filter_dates = None
         if period is not None:
@@ -40,14 +50,52 @@ class DataLoader:
         df = dd.read_parquet(folder, filters = filter_dates, 
                              engine="pyarrow-dataset")
 
-        if len(df.index) == 0: 
-            raise Exception("No data has been found. The period set may "
-                            "correspond to a noon-labor day.")
-
         # Preprocess
+        df = df.compute()
         df = df.set_index('time')
-        if to_invert: df = df.rdiv(1, fill_value=None)
+        if to_invert:
+            df[['spread', 'mid']] = df[['spread', 'mid']].rdiv(1)
         
         df.attrs = {'base': self.base.value, 'quote': self.quote.value}
         return df
 
+    def load_dataset(
+        self,
+        past_ticks: int, 
+        ticks_ahead: int,
+        period: Tuple[Union[str, datetime], 
+                      Union[str, datetime]] = None
+    ) -> tf.data.Dataset:
+        """[summary]
+
+        Args:
+            past_ticks (int): amount of past ticks to consider.
+            ticks_ahead (int): forecasting horizon
+            period (Tuple): start and end date of the period to consider. 
+            Defaults to None, which consider the whole period available.
+
+        Returns:
+            tf.data.Dataset: dataset for the specified settings.
+        """
+        # Get the data
+        df = self.read(period)
+
+        ds = tf.data.Dataset.from_generator(
+            self._generator_samples, args=[df, past_ticks, ticks_ahead], 
+            output_types=(tf.float32, tf.float32),
+            output_shapes=([2 * self.past_ticks, ], []))
+        
+        return ds
+
+    def _generator_samples(
+        self, 
+        df: pd.DataFrame, 
+        past_ticks: int, 
+        ticks_ahead: int
+    ) -> Tuple[tf.Tensor, tf.Tensor]:
+        total_ticks = past_ticks + ticks_ahead
+        n_samples = df.shape[0] - total_ticks + 1  # with overlapping instances
+        for i in range(n_samples):
+            x = tf.constant(df[i:i+past_ticks, :].ravel('F'))
+            y = tf.constant(df[i+total_ticks-1, -1])
+            yield x, y
