@@ -3,7 +3,7 @@
 
 # external requirements
 pandas~=1.2.4
-numpy~=1.20.2
+numpy~=1.19.5
 click~=8.0.0
 dask~=2021.4.0
 matplotlib~=3.4.2
