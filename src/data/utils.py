@@ -116,7 +116,7 @@ def filter_datetime_series(
         raise NotImplementedError(f"Aggregate timeframe not implemented.")
 
 
-def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:
+def list_all_fx_pairs(path: str = f"{ROOT_DIR}/data/raw/") -> List[str]:
     """ Get all the currency pairs downloaded.
 
     Args:
