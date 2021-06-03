@@ -116,7 +116,7 @@ def filter_datetime_series(
         raise NotImplementedError(f"Aggregate timeframe not implemented.")
 
 
-def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:
+def list_all_fx_pairs(path: str = f"{ROOT_DIR}/data/raw/") -> List[str]:
     """ Get all the currency pairs downloaded.
 
     Args:
@@ -127,4 +127,4 @@ def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:
         List[str]: Currency pairs.
     """
     fx_pairs = next(os.walk(path))[1]
-    return fx_pairs
+    return [f"{pair[:3]}/{pair[3:]}" for pair in fx_pairs]
