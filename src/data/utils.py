@@ -127,4 +127,4 @@ def list_all_fx_pairs(path: str = f"{ROOT_DIR}data/raw/") -> List[str]:
         List[str]: Currency pairs.
     """
     fx_pairs = next(os.walk(path))[1]
-    return fx_pairs
+    return [f"{pair[:3]}/{pair[3:]}" for pair in fx_pairs]

@@ -1,18 +1,19 @@
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
-from src.visualization import line_plot, currency_spread
+from src.visualization import line_plot, currency_spread, plot_hourly_correlation
 from src.scripts.plot_currency_pair import main
 from src.data.constants import Currency
 
 import pytest
 import pandas as pd
+import numpy as np
 
 
-def mock_data():
+def mock_data(args):
     df = pd.read_csv("tests/data/EURUSD-parquet.csv")
     df = df.set_index(pd.to_datetime(df['time']))
     df = df.drop('time', axis=1)
-    return df
+    return df.add(np.random.normal(0, 1, df.shape))
 
 
 def test_line_plot(mocker: MockerFixture):
@@ -51,6 +52,19 @@ def test_spread_boxplot(mocker: MockerFixture):
         Currency.USD,
         'per second'
     ).run()
+    
+
+def test_heatmap_corrs(mocker: MockerFixture):
+    mocker.patch.object(
+        currency_spread.DataLoader, 
+        'read',
+        side_effect=mock_data
+    )
+    plot_hourly_correlation.PlotCorrelationHeatmap(
+        'mid',
+        "data/raw/", 
+        's'
+    ).plot_heatmap()
     
 
 @pytest.mark.skip("Run with raw data processed.")  
