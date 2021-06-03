@@ -2,7 +2,7 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 from src.visualization import line_plot, currency_spread, plot_hourly_correlation
 from src.scripts.plot_currency_pair import main
-from src.data.constants import Currency
+from src.data.constants import Currency, ROOT_DIR
 
 import pytest
 import pandas as pd
@@ -69,7 +69,7 @@ def test_heatmap_corrs(mocker: MockerFixture):
     )
     plot_hourly_correlation.PlotCorrelationHeatmap(
         'mid',
-        "data/raw/", 
+        f"{ROOT_DIR}/data/raw/", 
         's'
     ).plot_heatmap()
     
