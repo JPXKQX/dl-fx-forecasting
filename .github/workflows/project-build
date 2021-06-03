@@ -2,8 +2,10 @@
 name: Project Build
 
 on:
-  repository_dispatch:
-    types: [trigger-project-build]
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
 
 jobs:
   build:
