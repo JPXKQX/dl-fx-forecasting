@@ -1,4 +1,4 @@
-from src.data import utils
+from src.data import utils, constants
 from src.data.constants import Currency
 from src.data.data_loader import DataLoader
 from dataclasses import dataclass
@@ -15,7 +15,7 @@ log = logging.getLogger("Heatmap plotter")
 @dataclass
 class PlotCorrelationHeatmap:
     var: str 
-    path: str = 'data/raw/'
+    path: str = f'{constants.ROOT_DIR}/data/raw/'
     agg_by: str = 'H'
     
     def compute_corr_matrix(
@@ -69,9 +69,3 @@ class PlotCorrelationHeatmap:
             }, xaxis=dict(side='top', tickfont_size=18), 
             yaxis=dict(autorange='reversed', tickfont_size=18))
         fig.show()
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    pch = PlotCorrelationHeatmap("mid", "data/raw/")
-    pch.plot_heatmap(('2020-04-01', '2020-06-01'))

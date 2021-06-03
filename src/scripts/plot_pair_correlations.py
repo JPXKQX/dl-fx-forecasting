@@ -1,3 +1,4 @@
+from src.data import constants
 from src.visualization.plot_hourly_correlation import PlotCorrelationHeatmap
 
 import click
@@ -11,14 +12,14 @@ AGG_FRAMES = click.Choice(['H', 'S'], case_sensitive=False)
 
 @click.command()
 @click.argument('var', type=CURRENCY_VARS)
-@click.option('--agg_frame', type=AGG_FRAMES, deafult='H', help='Timeframe to '
+@click.option('--agg_frame', type=AGG_FRAMES, default='H', help='Timeframe to '
               'which to aggregate the data.')
 @click.option('--period', type=click.Tuple([DATE_TYPE, DATE_TYPE]), 
               default=None, help="Period of time to plot.")
-@click.option('--data_path', default="data/raw/", type=click.STRING, help="Path"
+@click.option('--data_path', default=f"{constants.ROOT_DIR}/data/raw/", type=click.STRING, help="Path"
               " to the folfer containing the different currency pairs.", 
               metavar="<str>")
-def main_cdf(var, agg_frame, period, data_path):
+def main(var, agg_frame, period, data_path):
     """ Plot the heatmap of the correlation between the different currency 
     pairs.
 
@@ -30,4 +31,4 @@ def main_cdf(var, agg_frame, period, data_path):
         level=logging.INFO
     )
     
-    PlotCorrelationHeatmap(var, agg_frame, data_path).plot_heatmap(period)
+    PlotCorrelationHeatmap(var, data_path, agg_frame).plot_heatmap(period)
