@@ -67,6 +67,14 @@ def test_heatmap_corrs(mocker: MockerFixture):
         'read',
         side_effect=mock_data_randomly
     )
+    mocker.patch.object(
+        plot_hourly_correlation.utils, 
+        'list_all_fx_pairs',
+        return_value=['EUR/PLN', 'USD/MXN', 'NZD/USD', 'USD/TRY', 'EUR/JPY', 
+                      'AUD/USD', 'CHF/JPY', 'CAD/JPY', 'USD/ZAR', 'EUR/USD', 
+                      'AUD/JPY', 'GBP/JPY', 'USD/CAD', 'EUR/CHF', 'USD/CHF', 
+                      'EUR/GBP', 'USD/JPY', 'GBP/USD']
+    )
     plot_hourly_correlation.PlotCorrelationHeatmap(
         'mid',
         f"{ROOT_DIR}/data/raw/", 
