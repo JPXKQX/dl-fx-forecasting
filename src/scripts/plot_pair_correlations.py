@@ -16,9 +16,9 @@ AGG_FRAMES = click.Choice(['H', 'S'], case_sensitive=False)
               'which to aggregate the data.')
 @click.option('--period', type=click.Tuple([DATE_TYPE, DATE_TYPE]), 
               default=None, help="Period of time to plot.")
-@click.option('--data_path', default=f"{constants.ROOT_DIR}/data/raw/", type=click.STRING, help="Path"
-              " to the folfer containing the different currency pairs.", 
-              metavar="<str>")
+@click.option('--data_path', default=f"{constants.ROOT_DIR}/data/raw/", 
+              type=click.STRING, help="Path to the folfer containing the "
+              "different currency pairs.", metavar="<str>")
 def main(var, agg_frame, period, data_path):
     """ Plot the heatmap of the correlation between the different currency 
     pairs.
