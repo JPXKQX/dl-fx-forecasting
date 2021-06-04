@@ -25,7 +25,11 @@ presented in the project organization below. In case all processed information i
 
 ## Data
 
-Read, load, preprocess and save the data for the currency pair EUR/USD. The ZIP files have to been in the host machine. The path to this folder must be specified as an environment variable *PATH_RAW_DATA*. 
+Read, load, preprocess and save the data for the currency pair specified. To go through this pipeline, the ZIP files have to be in the host machine, and the path to the folder containing this data must be specified as an environment variable called *PATH_RAW_DATA*. The following command process the data available in the host machine for currency pair EUR/USD.
+
+```
+generate_datasets eur usd
+```
 
 In this case, the historical data has been extracted from [True FX](https://www.truefx.com/truefx-historical-downloads/), whose first prices are shown below.
 
@@ -45,11 +49,7 @@ In this case, the historical data has been extracted from [True FX](https://www.
 
 </center>
 
-This data is processed by the following command, which computes the mid price and spread and filter some erroneus data points.
-
-```
-generate_datasets eur usd
-```
+This data is processed by the following command, which computes the mid price and spread and filter some erroneus data points. The processed information is stored using [Apache Parquet](https://parquet.apache.org/) in order to achieve faster reading times.
 
 ## Visualizations
 
