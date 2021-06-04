@@ -25,7 +25,27 @@ presented in the project organization below. In case all processed information i
 
 ## Data
 
-Read, load, preprocess and save the data for the currency pair EUR/USD. The ZIP files have to been in the host machine. The path to this folder must be specified as an environment vairable *PATH_RAW_DATA*. In this case, the historical data has been extracted from [True FX](https://www.truefx.com/truefx-historical-downloads/).
+Read, load, preprocess and save the data for the currency pair EUR/USD. The ZIP files have to been in the host machine. The path to this folder must be specified as an environment variable *PATH_RAW_DATA*. 
+
+In this case, the historical data has been extracted from [True FX](https://www.truefx.com/truefx-historical-downloads/), whose first prices are shown below.
+
+
+<center>
+
+| FX pair | Timestamp | Low | High |
+| -------|-----------------------|---------|---------|
+|EUR/USD | 20200401 00:00:00.094 | 1.10256 | 1.10269 |
+|EUR/USD | 20200401 00:00:00.105 | 1.10257 | 1.1027 |
+|EUR/USD | 20200401 00:00:00.193 | 1.10258 | 1.1027 |
+|EUR/USD | 20200401 00:00:00.272 | 1.10256 | 1.1027 |
+|EUR/USD | 20200401 00:00:00.406 | 1.10258 | 1.1027 |
+|EUR/USD | 20200401 00:00:00.415 | 1.10256 | 1.1027 |
+|EUR/USD | 20200401 00:00:00.473 | 1.10257 | 1.1027 |
+|EUR/USD | 20200401 00:00:00.557 | 1.10255 | 1.10268 |
+
+</center>
+
+This data is processed by the following command, which computes the mid price and spread and filter some erroneus data points.
 
 ```
 generate_datasets eur usd
