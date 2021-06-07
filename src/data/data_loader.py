@@ -34,7 +34,8 @@ class DataLoader:
     def read(
         self, 
         period: Tuple[Union[str, datetime], 
-                      Union[str, datetime]] = None
+                      Union[str, datetime]] = None, 
+        tick_size: int = 1e4
     ) -> pd.DataFrame:
         """ Read the data for the currency pair for a period of time.
         
@@ -60,10 +61,20 @@ class DataLoader:
         df = df.compute()
         df = df.set_index('time')
         df = df[~df.index.duplicated(keep='first')]
-        if to_invert:
-            df[['spread', 'mid']] = df[['spread', 'mid']].rdiv(1)
         
-        df.attrs = {'base': self.base.value, 'quote': self.quote.value}
+        df['increment'] = df.mid.diff() * tick_size
+        df['spread'] = df['spread'] * tick_size
+        
+        if to_invert:
+            log.info(f"The currency pair {self.quote.value}/{self.base.value} "
+                     "is selected.")
+            temp = self.quote
+            self.quote = self.base
+            self.base = temp
+        
+        df.attrs = {'base': self.base.value, 
+                    'quote': self.quote.value, 
+                    'scale': tick_size}
         return df
 
     def load_dataset(
@@ -165,7 +176,3 @@ def get_daily_volatility(price: pd.Series, span: int = 100):
     df0 = price.loc[df0.index] / price.loc[df0.values].values - 1 # daily returns
     df0 = df0.ewm(span=span).std()
     return df0
-
-
-dl = DataLoader(Currency.EUR, Currency.USD)
-dl.load_dataset(100, 10, ('2020-04-01', '2020-06-01'))

@@ -51,7 +51,7 @@ class TestDatasetGeneration:
         
         # Test data preparation
         past_ticks = 15
-        ds = dl.load_dataset(past_ticks, 3)
+        ds = dl.load_dataset('linspace', past_ticks, 3)
         assert isinstance(ds, tf.data.Dataset)
         assert ds.element_spec[0].shape == tf.TensorShape([past_ticks * 2])
         assert ds.element_spec[1].shape == tf.TensorShape([])

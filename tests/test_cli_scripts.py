@@ -32,12 +32,15 @@ def test_cli_spread_plots(mocker: MockerFixture):
     )
     runner = CliRunner()
     result1 = runner.invoke(
-        plot_currency_spread.main_stats, ['eur', 'usd', 's'])
+        plot_currency_spread.main_stats, ['eur', 'usd', 'increment', 's'])
     result2 = runner.invoke(
-        plot_currency_spread.main_cdf, ['eur', 'usd'])
+        plot_currency_spread.main_cdf, ['eur', 'usd', 'spread'])
+    result3 = runner.invoke(
+        plot_currency_spread.main_cdf, ['eur', 'usd', 'spred'])
 
     assert result1.exit_code == 0
     assert result2.exit_code == 0
+    assert result3.exit_code == 2
 
 
 def test_cli_heatmap(mocker: MockerFixture):

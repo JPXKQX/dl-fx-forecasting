@@ -16,24 +16,27 @@ log = logging.getLogger("Line plotter")
 
 
 @dataclass
-class PlotCDFCurrencySpread:
+class PlotCDFCurrencyPair:
     base: Currency
     quote: Currency
-    ticks_augment: int = 1000
+    which: str
+    ticks_augment: int = 1
     path: str = "data/raw/"
 
-    def tick_size(self):
-        tick_pow = math.log10(self.ticks_augment)
+    def tick_size(self, scale_ticks: int = 1):
+        tick_pow = math.log10(self.ticks_augment * scale_ticks)
         if tick_pow.is_integer():
             return f"Sample size (10<sup>{-tick_pow:.0f}</sup> ticks)"
         else:
             raise ValueError(f"Please select a tick augment multiple of 10.")
 
     def plot_cdf(self, df: pd.DataFrame, date: str) -> NoReturn:
-        label_ticks = self.tick_size()
+        scale_ticks = df.attrs['scale'] if 'scale' in df.attrs else 1
+        label_ticks = self.tick_size(scale_ticks)
         labels = [f"{self.base.value}/{self.quote.value}"]
-        fig = ff.create_distplot([self.ticks_augment * df['spread']],
-                                 labels, bin_size=0.02, histnorm='probability')
+        fig = ff.create_distplot(
+            [self.ticks_augment * scale_ticks * df[self.which]],
+            labels, bin_size=0.02, histnorm='probability')
         fig.update_layout(
             title={
                 'text': f"Spread of {self.base.value}/{self.quote.value}{date}",
@@ -70,15 +73,16 @@ class PlotCDFCurrencySpread:
 
 
 @dataclass
-class PlotStatsCurrencySpread:
+class PlotStatsCurrencyPair:
     base: Currency
     quote: Currency
+    which: str
     agg_frame: str = 'D'
     ticks_augment: int = 1000
     path: str = "data/raw/"
 
-    def tick_size(self):
-        tick_pow = math.log10(self.ticks_augment)
+    def tick_size(self, scale_ticks: int = 1):
+        tick_pow = math.log10(self.ticks_augment * scale_ticks)
         if tick_pow.is_integer():
             return f"Sample size (10<sup>{-tick_pow:.0f}</sup> ticks)"
         else:
@@ -89,14 +93,16 @@ class PlotStatsCurrencySpread:
         df: pd.DataFrame, 
         title_spec: Tuple[str, str]
     ) -> NoReturn:
-        label_ticks = self.tick_size()
-        title = f"{title_spec[0]} spread of {self.base.value}/{self.quote.value} {title_spec[1]}"
+        scale_ticks = df.attrs['scale'] if 'scale' in df.attrs else 1
+        label_ticks = self.tick_size(scale_ticks)
+        title = f"{title_spec[0]} spread of {self.base.value}/" \
+                f"{self.quote.value} {title_spec[1]}"
                 
         fig = go.Figure()
     
         for stat in df.columns:
             values = df[stat].values
-            fig.add_trace(go.Box(x=self.ticks_augment * values, 
+            fig.add_trace(go.Box(x=self.ticks_augment * scale_ticks * values, 
                                  name=constants.stat2label[str(stat)]))
         fig.update_layout(
             title={
@@ -129,8 +135,9 @@ class PlotStatsCurrencySpread:
         df = dl.read(period)
         statistics = ['std', 'max', 'mean', 'min']
         grouper, freq = utils.filter_datetime_series(df.index, self.agg_frame)
-        main_stats = df['spread'].groupby(grouper).aggregate(statistics)
-        quantiles = df['spread'].groupby(grouper).quantile([0.05, 0.25, 0.5, 0.75, 0.95])
+        df_gropued = df[self.which].groupby(grouper)
+        main_stats = df_gropued.aggregate(statistics)
+        quantiles = df_gropued.quantile([0.05, 0.25, 0.5, 0.75, 0.95])
         stats = pd.concat([main_stats, quantiles.unstack()], axis=1)
         idx = [0, 1, -1, -2, 2, -3, -4, -5, 3]
         if not include_max: idx.remove(1)
