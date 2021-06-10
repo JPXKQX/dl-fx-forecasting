@@ -1,5 +1,5 @@
 from src.data import constants
-from src.visualization.plot_hourly_correlation import PlotCorrelationHeatmap
+from src.visualization.plot_correlations import PlotCorrelationHeatmap
 
 import click
 import logging

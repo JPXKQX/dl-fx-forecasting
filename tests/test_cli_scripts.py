@@ -2,7 +2,7 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 from tests.mocks import *
 from src.data import constants
-from src.visualization import line_plot, currency_pair, plot_hourly_correlation
+from src.visualization import line_plot, currency_pair, plot_correlations
 from src.scripts import plot_currency_pair, plot_pair_correlations
 
 import pytest
@@ -49,7 +49,7 @@ def test_cli_heatmap(mocker: MockerFixture):
         side_effect=mock_data_randomly
     )
     mocker.patch.object(
-        plot_hourly_correlation.utils, 
+        plot_correlations.utils, 
         'list_all_fx_pairs',
         return_value=['EUR/PLN', 'USD/MXN', 'NZD/USD', 'USD/TRY', 'EUR/JPY', 
                       'AUD/USD', 'CHF/JPY', 'CAD/JPY', 'USD/ZAR', 'EUR/USD', 

@@ -1,6 +1,6 @@
 from tests.mocks import *
 from pytest_mock import MockerFixture
-from src.visualization import line_plot, currency_pair, plot_hourly_correlation
+from src.visualization import line_plot, currency_pair, plot_correlations
 from src.data.constants import Currency, ROOT_DIR
 
 import pytest
@@ -53,14 +53,14 @@ def test_heatmap_corrs(mocker: MockerFixture):
         side_effect=mock_data_randomly
     )
     mocker.patch.object(
-        plot_hourly_correlation.utils, 
+        plot_correlations.utils, 
         'list_all_fx_pairs',
         return_value=['EUR/PLN', 'USD/MXN', 'NZD/USD', 'USD/TRY', 'EUR/JPY', 
                       'AUD/USD', 'CHF/JPY', 'CAD/JPY', 'USD/ZAR', 'EUR/USD', 
                       'AUD/JPY', 'GBP/JPY', 'USD/CAD', 'EUR/CHF', 'USD/CHF', 
                       'EUR/GBP', 'USD/JPY', 'GBP/USD']
     )
-    plot_hourly_correlation.PlotCorrelationHeatmap(
+    plot_correlations.PlotCorrelationHeatmap(
         'mid',
         f"{ROOT_DIR}/data/raw/", 
         's'

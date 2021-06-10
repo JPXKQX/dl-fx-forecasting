@@ -1,5 +1,5 @@
 from typing import List, Union, Tuple
-from src.data.constants import ROOT_DIR, timezone
+from src.data.constants import ROOT_DIR, timezone, Currency
 from datetime import datetime
 
 import os
@@ -128,3 +128,17 @@ def list_all_fx_pairs(path: str = f"{ROOT_DIR}/data/raw/") -> List[str]:
     """
     fx_pairs = next(os.walk(path))[1]
     return [f"{pair[:3]}/{pair[3:]}" for pair in fx_pairs]
+
+
+def list_currencies_against(
+    currency: Currency,
+    path: str = f"{ROOT_DIR}/data/raw/"
+) -> List[Currency]:
+    fx_pairs = next(os.walk(path))[1]
+    against = []
+    for pair in fx_pairs:
+        if pair[:3] == currency.value:
+            against.append(Currency(pair[-3:]))
+        elif pair[-3:] == currency.value:
+            against.append(Currency(pair[:3]))
+    return against

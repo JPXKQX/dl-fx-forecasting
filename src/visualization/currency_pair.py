@@ -56,6 +56,7 @@ class PlotCDFCurrencyPair:
             title_font={"family": "Courier New, monospace", "size": 20})
         fig['layout']['yaxis2'].update(title_text='')
         fig.update_xaxes(
+            type='log',
             title_text=label_ticks,
             title_standoff = 15,
             title_font={"family": "Courier New, monospace", "size": 20})

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
-from tqdm import tqdm
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.data import constants, utils
 from src.data.constants import Currency
 
@@ -59,11 +58,14 @@ class DataLoader:
 
         # Preprocess
         df = df.compute()
-        df = df.set_index('time')
         df = df[~df.index.duplicated(keep='first')]
         
         df['increment'] = df.mid.diff() * tick_size
         df['spread'] = df['spread'] * tick_size
+        
+        # Skip the first observation of each day
+        df['select'] = df['time'].diff() < timedelta(hours=1)
+        df = df[df.select].set_index('time').drop('select', axis=1)
         
         if to_invert:
             log.info(f"The currency pair {self.quote.value}/{self.base.value} "

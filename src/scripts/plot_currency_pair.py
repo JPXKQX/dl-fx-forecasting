@@ -81,8 +81,8 @@ def main_cdf(base, quote, which, period, data_path, rate):
 @click.option('--data_path', default="data/raw/", type=click.STRING, help="Path"
               " to the folfer containing the different currency pairs.", 
               metavar="<str>")
-@click.option('--rate', default=1e3, type=click.INT, metavar='<int>', 
-              help="Rate to augment the spread of the currency pair.")
+@click.option('--rate', default=1, type=click.INT, metavar='<int>', 
+              help="Rate to augment the variable considered.")
 @click.option('--include_max', default=False, type=click.BOOL,
               metavar='<boolean>', help='Whether to include the max spread.')
 def main_stats(base, quote, which, agg_frame, period, data_path, rate, include_max):
