@@ -44,7 +44,7 @@ class TestDatasetGeneration:
         # Tests data reading from data storage
         df = dl.read((datetime(2020, 6, 10), datetime(2020, 6, 20)))
         mocker._mocks[0].assert_called_once()
-        assert list(df.columns) == ['mid', 'spread']
+        assert list(df.columns) == ['mid', 'spread', 'increment']
         assert len(df.index) == 100
         assert df.attrs['base'] == self.base.value
         assert df.attrs['quote'] == self.quote.value
