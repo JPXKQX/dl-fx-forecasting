@@ -66,7 +66,7 @@ To get the following image,
 There is also the possibility to plot the cumulative distribution function using the following command
 
 ```
-plot_cdf_spread eur usd --period 2020-05-17 2020-05-20
+plot_cdf eur usd spread --period 2020-05-17 2020-05-20
 ```
 
 which gives the image shown below,
@@ -77,7 +77,7 @@ which gives the image shown below,
 In order to plot the distribution of the main daily statistic of the spread, the following command can be used.
 
 ```
-plot_stats_spread eur usd D --period 2020-04-01 2020-06-01
+plot_stats eur usd spread D --period 2020-04-01 2020-06-01
 ```
 
 ![Daily spread](reports/figures/eurusd_spread_dailystats_Apr_May.png "EUR/USD")
