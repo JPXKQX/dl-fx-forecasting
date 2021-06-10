@@ -11,6 +11,12 @@ months = ["None",
     "September", "October", "November", "December"
 ]
 
+var2label = {
+    "mid": "mid prices",
+    "spread": "spreads",
+    "increment": "price increments"
+}
+
 stat2label = {
     'min': 'Minimum',
     'mean': 'Mean',

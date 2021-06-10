@@ -1,12 +1,12 @@
 from src.data import constants
-from src.visualization.plot_hourly_correlation import PlotCorrelationHeatmap
+from src.visualization.plot_correlations import PlotCorrelationHeatmap
 
 import click
 import logging
 
 
 DATE_TYPE = click.DateTime()
-CURRENCY_VARS = click.Choice(['mid', 'spread'], case_sensitive=False)
+CURRENCY_VARS = click.Choice(['mid', 'spread', 'increment'], case_sensitive=False)
 AGG_FRAMES = click.Choice(['H', 'S'], case_sensitive=False)
 
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.data import constants, utils
 from src.data.constants import Currency
 
@@ -8,6 +8,10 @@ import dask.dataframe as dd
 import pandas as pd
 import tensorflow as tf
 import os
+import logging
+
+
+log = logging.getLogger("DataLoader")
 
 
 @dataclass
@@ -29,7 +33,8 @@ class DataLoader:
     def read(
         self, 
         period: Tuple[Union[str, datetime], 
-                      Union[str, datetime]] = None
+                      Union[str, datetime]] = None, 
+        tick_size: int = 1e4
     ) -> pd.DataFrame:
         """ Read the data for the currency pair for a period of time.
         
@@ -45,6 +50,7 @@ class DataLoader:
             start = utils.str2datetime(period[0])
             end = utils.str2datetime(period[1])
             filter_dates = [('time', '>=', start), ('time', '<=', end)]
+            log.info(f"Data between {start} and {end} is considered.")
         
         # Read data
         df = dd.read_parquet(folder, filters = filter_dates, 
@@ -52,27 +58,48 @@ class DataLoader:
 
         # Preprocess
         df = df.compute()
-        df = df.set_index('time')
-        if to_invert:
-            df[['spread', 'mid']] = df[['spread', 'mid']].rdiv(1)
+        df = df[~df.index.duplicated(keep='first')]
         
-        df.attrs = {'base': self.base.value, 'quote': self.quote.value}
+        df['increment'] = df.mid.diff() * tick_size
+        df['spread'] = df['spread'] * tick_size
+        
+        # Skip the first observation of each day
+        df['select'] = df['time'].diff() < timedelta(hours=1)
+        df = df[df.select].set_index('time').drop('select', axis=1)
+        
+        if to_invert:
+            log.info(f"The currency pair {self.quote.value}/{self.base.value} "
+                     "is selected.")
+            temp = self.quote
+            self.quote = self.base
+            self.base = temp
+        
+        df.attrs = {'base': self.base.value, 
+                    'quote': self.quote.value, 
+                    'scale': tick_size}
         return df
 
     def load_dataset(
         self,
+        gen_method: str,
         past_ticks: int, 
         ticks_ahead: int,
         period: Tuple[Union[str, datetime], 
-                      Union[str, datetime]] = None
+                      Union[str, datetime]] = None, 
+        **kwargs
     ) -> tf.data.Dataset:
-        """[summary]
+        """ Generate a dataset using linspace sampling.
 
         Args:
+            gen_method (str): method for sampling from structured data. Options 
+            available are \'linspace\' for linspace sampling of consecutive price 
+            bars, and \'event_based\' for sampling using CUSUM filter.
             past_ticks (int): amount of past ticks to consider.
             ticks_ahead (int): forecasting horizon
             period (Tuple): start and end date of the period to consider. 
             Defaults to None, which consider the whole period available.
+            **kwargs: Arguments to pass to generator sampler. For example, the 
+            threshold for CUSUM filter.
 
         Returns:
             tf.data.Dataset: dataset for the specified settings.
@@ -80,14 +107,55 @@ class DataLoader:
         # Get the data
         df = self.read(period)
 
+        if gen_method == 'linspace':
+            log.info("Linspace sampling is used.")
+            generator = self._linspace_generator
+            args = [df, past_ticks, ticks_ahead]
+        elif gen_method == 'event_based':
+            log.info("Event-based sampling is used.")
+            generator = self._event_based_generator
+            args = [df, past_ticks, ticks_ahead]
+            if 'h' in kwargs.keys(): 
+                args.append(kwargs['h'])
+            else:
+                log.info(f"A dynamic threshold will be used with daily "
+                             "volatility estimates.")
+        else:
+            raise NotImplementedError(f"The generator method \'{gen_method}\' "
+                                      "is not implemented.")
+            
         ds = tf.data.Dataset.from_generator(
-            self._generator_samples, args=[df, past_ticks, ticks_ahead], 
+            generator, args=args, 
             output_types=(tf.float32, tf.float32),
             output_shapes=([2 * past_ticks, ], []))
         
         return ds
+    
+    def _event_based_generator(
+        self, 
+        df: pd.DataFrame, 
+        past_ticks: int, 
+        ticks_ahead: int,
+        h: float = 0.001
+    ) -> Tuple[tf.Tensor, tf.Tensor]:
+        cusum_pos, cusum_neg = 0, 0
+        diff = df.mid.diff()
+        for i, ind in enumerate(diff.index[past_ticks:-ticks_ahead], 
+                                start=past_ticks):
+            cusum_pos = max(0, cusum_pos + diff.loc[ind])
+            cusum_neg = min(0, cusum_neg + diff.loc[ind])
+            if cusum_neg < -h:
+                cusum_neg = 0
+                x = tf.constant(df.iloc[i-past_ticks+1:i+1, :].ravel('F'))
+                y = tf.constant(df.iloc[i+ticks_ahead, -1])
+                yield x, y
+            elif cusum_pos > h:
+                cusum_pos = 0
+                x = tf.constant(df.iloc[i-past_ticks+1:i+1, :].ravel('F'))
+                y = tf.constant(df.iloc[i+ticks_ahead, -1])
+                yield x, y
 
-    def _generator_samples(
+    def _linspace_generator(
         self, 
         df: pd.DataFrame, 
         past_ticks: int, 
@@ -99,3 +167,14 @@ class DataLoader:
             x = tf.constant(df[i:i+past_ticks, :].ravel('F'))
             y = tf.constant(df[i+total_ticks-1, -1])
             yield x, y
+
+
+def get_daily_volatility(price: pd.Series, span: int = 100):
+    # daily vol, reindexed to close
+    df0 = price.index.searchsorted(price.index - pd.Timedelta(days=1))
+    df0 = df0[df0 > 0]
+    df0 = pd.Series(price.index[df0 - 1], 
+                    index=price.index[price.shape[0]-df0.shape[0]:])
+    df0 = price.loc[df0.index] / price.loc[df0.values].values - 1 # daily returns
+    df0 = df0.ewm(span=span).std()
+    return df0

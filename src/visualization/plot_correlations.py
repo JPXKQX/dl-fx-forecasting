@@ -63,9 +63,25 @@ class PlotCorrelationHeatmap:
         
         fig.update_layout(
             title={
-                'text': f'Correlation of {self.var} prices between currency pairs{utils.period2str(period)}',
+                'text': f'Correlation of {constants.var2label[self.var]} '
+                        f'between currency pairs{utils.period2str(period)}',
                 'font_size': 24, 
                 'xanchor': 'left'
             }, xaxis=dict(side='top', tickfont_size=18), 
             yaxis=dict(autorange='reversed', tickfont_size=18))
         fig.show()
+
+
+@dataclass
+class PlotACFCurreny:
+    currency: Currency
+    varname: str = 'increment'
+    agg_frame: str = 'S'
+    path: str = f'{constants.ROOT_DIR}/data/raw/'
+
+    def plot_heatmap(
+        self, 
+        period: Tuple[str, str] = None
+    ) -> NoReturn:
+        utils.list_currencies_against(self.currency)
+        
