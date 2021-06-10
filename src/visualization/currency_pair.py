@@ -39,7 +39,8 @@ class PlotCDFCurrencyPair:
             labels, bin_size=0.02, histnorm='probability')
         fig.update_layout(
             title={
-                'text': f"Spread of {self.base.value}/{self.quote.value}{date}",
+                'text': f"{constants.var2label[self.which]} of "
+                        f"{self.base.value}/{self.quote.value}{date}",
                 "x": 0.05,
                 "y": 0.95,
                 "xanchor": "left",
@@ -95,8 +96,8 @@ class PlotStatsCurrencyPair:
     ) -> NoReturn:
         scale_ticks = df.attrs['scale'] if 'scale' in df.attrs else 1
         label_ticks = self.tick_size(scale_ticks)
-        title = f"{title_spec[0]} spread of {self.base.value}/" \
-                f"{self.quote.value} {title_spec[1]}"
+        title = f"{title_spec[0]} {constants.var2label[self.which]} of " \
+                f"{self.base.value}/{self.quote.value} {title_spec[1]}"
                 
         fig = go.Figure()
     

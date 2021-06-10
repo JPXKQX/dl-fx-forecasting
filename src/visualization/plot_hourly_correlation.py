@@ -63,7 +63,8 @@ class PlotCorrelationHeatmap:
         
         fig.update_layout(
             title={
-                'text': f'Correlation of {self.var} prices between currency pairs{utils.period2str(period)}',
+                'text': f'Correlation of {constants.var2label[self.var]} '
+                        f'between currency pairs{utils.period2str(period)}',
                 'font_size': 24, 
                 'xanchor': 'left'
             }, xaxis=dict(side='top', tickfont_size=18), 

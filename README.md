@@ -85,10 +85,10 @@ plot_stats eur usd spread D --period 2020-04-01 2020-06-01
 Lastly, the correlation between the different currency pairs aggregated by any timeframe can also be plotted for any given period of time. 
 
 ```
-plot_pair_correlations mid --period 2020-04-01 2020-06-01 --agg_frame H
+plot_pair_correlations increment --period 2020-04-01 2020-06-01 --agg_frame H
 ```
 
-![Mid correlations](reports/figures/mid_correlations_Apr_May.png "Correlations")
+![Increment correlations](reports/figures/mid_correlations_Apr_May.png "Correlations")
 
 
 Project Organization
