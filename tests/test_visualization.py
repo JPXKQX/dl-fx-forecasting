@@ -18,7 +18,7 @@ def test_line_plot(mocker: MockerFixture):
         ['S', None]
     ).run()
     
-def test_spread_plot(mocker: MockerFixture):
+def test_cdf_plot(mocker: MockerFixture):
     mocker.patch.object(
         currency_pair.DataLoader, 
         'read',
@@ -32,7 +32,7 @@ def test_spread_plot(mocker: MockerFixture):
     ).run()
     
 
-def test_spread_boxplot(mocker: MockerFixture):
+def test_boxplot(mocker: MockerFixture):
     mocker.patch.object(
         currency_pair.DataLoader, 
         'read',

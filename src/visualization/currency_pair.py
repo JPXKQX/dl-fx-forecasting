@@ -5,7 +5,7 @@ from typing import Tuple, Union, NoReturn
 from dataclasses import dataclass
 from datetime import datetime
 
-import plotly.figure_factory as ff
+import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import logging
@@ -26,7 +26,7 @@ class PlotCDFCurrencyPair:
     def tick_size(self, scale_ticks: int = 1):
         tick_pow = math.log10(self.ticks_augment * scale_ticks)
         if tick_pow.is_integer():
-            return f"Sample size (10<sup>{-tick_pow:.0f}</sup> ticks)"
+            return f"1 pip = 10<sup> {-tick_pow:.0f} </sup>"
         else:
             raise ValueError(f"Please select a tick augment multiple of 10.")
 
@@ -34,15 +34,15 @@ class PlotCDFCurrencyPair:
         scale_ticks = df.attrs['scale'] if 'scale' in df.attrs else 1
         label_ticks = self.tick_size(scale_ticks)
         labels = [f"{self.base.value}/{self.quote.value}"]
-        fig = ff.create_distplot(
-            [self.ticks_augment * scale_ticks * df[self.which]],
-            labels, bin_size=0.02, histnorm='probability')
+        fig = px.histogram(self.ticks_augment * scale_ticks * df, labels=labels,
+                           x=self.which, marginal='violin', nbins=60, 
+                           histnorm='probability', opacity=0.75)
         fig.update_layout(
             title={
-                'text': f"{constants.var2label[self.which]} of "
+                'text': f"{constants.var2label[self.which].capitalize()} of "
                         f"{self.base.value}/{self.quote.value}{date}",
                 "x": 0.05,
-                "y": 0.95,
+                "y": 0.97,
                 "xanchor": "left",
                 "yanchor": "top"
             },
@@ -54,12 +54,17 @@ class PlotCDFCurrencyPair:
         fig.update_yaxes(
             title_text="Probability", title_standoff = 20, 
             title_font={"family": "Courier New, monospace", "size": 20})
-        fig['layout']['yaxis2'].update(title_text='')
         fig.update_xaxes(
-            type='log',
-            title_text=label_ticks,
+            title_text="Size (in pips)",
             title_standoff = 15,
             title_font={"family": "Courier New, monospace", "size": 20})
+        fig['layout']['yaxis2'].update(title_text='')
+        fig['layout']['xaxis2'].update(title_text='')
+        # TODO: Fix Bug: Extra "\" when including pip size annotation.
+        # fig.add_annotation(text=label_ticks, x=1, y=-0.1, xref='paper',
+        #                    yref='paper', xanchor='right', yanchor='top',
+        #                    font_size=12)
+        
         fig.show()
 
     def run(
@@ -80,13 +85,13 @@ class PlotStatsCurrencyPair:
     quote: Currency
     which: str
     agg_frame: str = 'D'
-    ticks_augment: int = 1000
+    ticks_augment: int = 1
     path: str = "data/raw/"
 
     def tick_size(self, scale_ticks: int = 1):
         tick_pow = math.log10(self.ticks_augment * scale_ticks)
         if tick_pow.is_integer():
-            return f"Sample size (10<sup>{-tick_pow:.0f}</sup> ticks)"
+            return f"1 pip = 10<sup>{-tick_pow:.0f}</sup>"
         else:
             raise ValueError(f"Please select a tick augment multiple of 10.")
 
@@ -108,7 +113,7 @@ class PlotStatsCurrencyPair:
                                  name=constants.stat2label[str(stat)]))
         fig.update_layout(
             title={
-                'text': title,
+                'text': title.capitalize(),
                 "x": 0.05,
                 "y": 0.95,
                 "xanchor": "left",
@@ -121,9 +126,13 @@ class PlotStatsCurrencyPair:
             ))
         fig.update_yaxes(showticklabels=False)
         fig.update_xaxes(
-            title_text=label_ticks,
+            title_text="Size (in pips)",
             title_standoff = 15,
             title_font={"family": "Courier New, monospace", "size": 20})
+        # TODO: Fix Bug: Extra "\" when including pip size annotation.
+        # fig.add_annotation(text=label_ticks, x=1, y=-0.1, xref='paper',
+        #                    yref='paper', xanchor='right', yanchor='top',
+        #                    font_size=12)
         fig.show()
 
     def run(

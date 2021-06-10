@@ -5,17 +5,18 @@ from datetime import datetime
 from pytest_mock import MockerFixture
 from typing import NoReturn
 
-import dask
+import dask.dataframe as dd
 import tensorflow as tf
 
 
 def mock_parquet():
-    df = dask.dataframe.read_csv(f"{ROOT_DIR}/tests/data/EURUSD-parquet.csv")
+    df = dd.read_csv(f"{ROOT_DIR}/tests/data/EURUSD-parquet.csv")
+    df['time'] = dd.to_datetime(df['time'])
     return df
 
 
 def mock_raw_csv():
-    return dask.dataframe.read_csv(
+    return dd.read_csv(
         f"{ROOT_DIR}/tests/data/EURUSD-raw.csv", 
         header=None, 
         usecols=[2, 3, 4], 
@@ -45,7 +46,7 @@ class TestDatasetGeneration:
         df = dl.read((datetime(2020, 6, 10), datetime(2020, 6, 20)))
         mocker._mocks[0].assert_called_once()
         assert list(df.columns) == ['mid', 'spread', 'increment']
-        assert len(df.index) == 100
+        assert len(df.index) == 99  # The first obs is substracted
         assert df.attrs['base'] == self.base.value
         assert df.attrs['quote'] == self.quote.value
         
