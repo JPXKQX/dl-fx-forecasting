@@ -66,12 +66,12 @@ To get the following image,
 There is also the possibility to plot the cumulative distribution function using the following command
 
 ```
-plot_cdf eur usd spread --period 2020-05-17 2020-05-20
+plot_cdf eur usd increment --period 2020-04-01 2020-06-01
 ```
 
 which gives the image shown below,
 
-![Spread cdf](reports/figures/eurusd_spread_17_20May.png "EUR/USD")
+![Increment cdf](reports/figures/eurusd_increments_cdf_AprMay.png "EUR/USD")
 
 
 In order to plot the distribution of the main daily statistic of the spread, the following command can be used.
@@ -88,7 +88,7 @@ Lastly, the correlation between the different currency pairs aggregated by any t
 plot_pair_correlations increment --period 2020-04-01 2020-06-01 --agg_frame H
 ```
 
-![Increment correlations](reports/figures/mid_correlations_Apr_May.png "Correlations")
+![Increment correlations](reports/figures/increment_correlations_AprMay.png "Correlations")
 
 
 Project Organization

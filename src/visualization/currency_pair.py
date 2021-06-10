@@ -20,11 +20,11 @@ class PlotCDFCurrencyPair:
     base: Currency
     quote: Currency
     which: str
-    ticks_augment: int = 1
+    ticks_augment: int = 1000
     path: str = "data/raw/"
 
     def tick_size(self, scale_ticks: int = 1):
-        tick_pow = math.log10(self.ticks_augment * scale_ticks)
+        tick_pow = math.log10(self.ticks_augment / scale_ticks)
         if tick_pow.is_integer():
             return f"1 pip = 10<sup> {-tick_pow:.0f} </sup>"
         else:
@@ -34,8 +34,8 @@ class PlotCDFCurrencyPair:
         scale_ticks = df.attrs['scale'] if 'scale' in df.attrs else 1
         label_ticks = self.tick_size(scale_ticks)
         labels = [f"{self.base.value}/{self.quote.value}"]
-        fig = px.histogram(self.ticks_augment * scale_ticks * df, labels=labels,
-                           x=self.which, marginal='violin', nbins=60, 
+        fig = px.histogram(self.ticks_augment / scale_ticks * df, labels=labels,
+                           x=self.which, marginal='violin', nbins=125, 
                            histnorm='probability', opacity=0.75)
         fig.update_layout(
             title={
@@ -85,11 +85,11 @@ class PlotStatsCurrencyPair:
     quote: Currency
     which: str
     agg_frame: str = 'D'
-    ticks_augment: int = 1
+    ticks_augment: int = 1000
     path: str = "data/raw/"
 
     def tick_size(self, scale_ticks: int = 1):
-        tick_pow = math.log10(self.ticks_augment * scale_ticks)
+        tick_pow = math.log10(self.ticks_augment / scale_ticks)
         if tick_pow.is_integer():
             return f"1 pip = 10<sup>{-tick_pow:.0f}</sup>"
         else:
@@ -109,7 +109,7 @@ class PlotStatsCurrencyPair:
     
         for stat in df.columns:
             values = df[stat].values
-            fig.add_trace(go.Box(x=self.ticks_augment * scale_ticks * values, 
+            fig.add_trace(go.Box(x=self.ticks_augment / scale_ticks * values, 
                                  name=constants.stat2label[str(stat)]))
         fig.update_layout(
             title={
@@ -153,3 +153,7 @@ class PlotStatsCurrencyPair:
         idx = [0, 1, -1, -2, 2, -3, -4, -5, 3]
         if not include_max: idx.remove(1)
         self.plot_boxplot(stats.iloc[:, idx], [freq, utils.period2str(period)])
+
+
+if __name__ == '__main__':
+    PlotCDFCurrencyPair(Currency.EUR, Currency.USD, 'increment').run(('2020-04-01', '2020-05-01'))
