@@ -3,6 +3,9 @@ from src.data.constants import Currency
 from src.data.data_loader import DataLoader
 from dataclasses import dataclass
 from typing import List, Tuple, NoReturn
+from plotly.subplots import make_subplots
+from scipy.signal import correlate
+from statsmodels.tsa.stattools import acf
 
 import plotly.graph_objects as go
 import numpy as np
@@ -77,11 +80,58 @@ class PlotACFCurreny:
     currency: Currency
     varname: str = 'increment'
     agg_frame: str = 'S'
+    nlags: int = 100
     path: str = f'{constants.ROOT_DIR}/data/raw/'
 
-    def plot_heatmap(
+    def _plot_acf(
         self, 
+        fig: go.Figure, 
+        base_df, 
+        base_curr: Currency, 
+        row: int,
+        period: Tuple[str, str] = None
+    ) -> go.Figure:
+        df_c = DataLoader(self.currency, base_curr, self.path).read(period)
+        pair = df_c.attrs['base'] + "/" + df_c.attrs['quote']
+        df_c = df_c[self.varname].resample(self.agg_frame).mean().dropna()
+        data = base_df.merge(df_c, left_index=True, right_index=True)
+        values = correlate(data.iloc[:, 0], data.iloc[:, 1])
+        idx = np.arange(-self.nlags // 2, self.nlags // 2 + 1)
+        l = len(values) // 2
+        y = values[l-self.nlags//2:self.nlags//2-l]
+        fig['layout'].annotations[row-1].update(text=f"with {pair}")
+        fig.add_trace(go.Scatter(x=idx, y=y), row=row, col=1)
+        return fig
+
+    def run(
+        self, 
+        base: Currency,
         period: Tuple[str, str] = None
     ) -> NoReturn:
-        utils.list_currencies_against(self.currency)
+        currencies = utils.list_currencies_against(self.currency)
+        if base in currencies:
+            currencies.remove(base)
+        else:
+            raise ValueError("The base currency pair is not considered.")
         
+        df = DataLoader(self.currency, base, self.path).read(period)
+        ref_pair = df.attrs['base'] + "/" + df.attrs['quote']
+        df = df[[self.varname]].resample(self.agg_frame).mean().dropna()
+
+        # Create figure with one plot for each pair
+        fig = make_subplots(rows=len(currencies) + 1, cols=1, 
+                            subplot_titles=[' '] * (len(currencies) + 1))
+
+        df_acf = acf(df, nlags=self.nlags)
+        fig.add_trace(go.Scatter(x=np.arange(self.nlags+1), y=df_acf), row=1, 
+                      col=1)
+        fig['layout'].annotations[0].update(text=f"with {ref_pair} (ACF)")
+        for i, currency in enumerate(currencies, start=2):
+            fig = self._plot_acf(fig, df, currency, i, period)
+        
+        last_ax = f'xaxis{len(currencies)+1}'
+        fig['layout'][last_ax].update(title_text=f'Lag')
+        fig.update_layout(showlegend=False)
+        fig.update_layout(
+            title=dict(text=f"Cross-Correlation of {ref_pair}", font_size=28))
+        fig.show()

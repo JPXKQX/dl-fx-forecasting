@@ -58,6 +58,25 @@ def test_cli_heatmap(mocker: MockerFixture):
     )
     runner = CliRunner()
     result = runner.invoke(
-        plot_pair_correlations.main, ['mid', '--agg_frame', 'S'])
+        plot_pair_correlations.main_corr, ['mid', '--agg_frame', 'S'])
+    
+    assert result.exit_code == 0
+
+
+def test_cli_crosscorrs(mocker: MockerFixture):
+    mocker.patch.object(
+        currency_pair.DataLoader, 
+        'read',
+        side_effect=mock_data_randomly
+    )
+    mocker.patch.object(
+        plot_correlations.utils, 
+        'list_currencies_against',
+        return_value=[constants.Currency.USD, constants.Currency.GBP]
+    )
+    runner = CliRunner()
+    result = runner.invoke(
+        plot_pair_correlations.main_acf, 
+        ['increment', 'eur', 'usd', '--agg_frame', 'S'])
     
     assert result.exit_code == 0

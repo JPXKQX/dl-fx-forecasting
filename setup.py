@@ -14,7 +14,8 @@ setup(
             'plot_currency_pair = src.scripts.plot_currency_pair:main',
             'plot_cdf = src.scripts.plot_currency_pair:main_cdf',
             'plot_stats = src.scripts.plot_currency_pair:main_stats',
-            'plot_pair_correlations = src.scripts.plot_pair_correlations:main'
-        ]
+            'plot_pair_correlations = src.scripts.plot_pair_correlations:main_corrs',
+            'plot_pair_acf = src.scripts.plot_pair_correlations:main_acf'
+]
     }
 )

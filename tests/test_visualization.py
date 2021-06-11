@@ -65,3 +65,22 @@ def test_heatmap_corrs(mocker: MockerFixture):
         f"{ROOT_DIR}/data/raw/", 
         's'
     ).plot_heatmap()
+
+
+def test_cross_corrs(mocker: MockerFixture):
+    mocker.patch.object(
+        currency_pair.DataLoader, 
+        'read',
+        side_effect=mock_data_randomly
+    )
+    mocker.patch.object(
+        plot_correlations.utils, 
+        'list_currencies_against',
+        return_value=[Currency.USD, Currency.GBP]
+    )
+    plot_correlations.PlotACFCurreny(
+        Currency.EUR,
+        'increment',
+        's',
+        path=f"{ROOT_DIR}/data/raw/"
+    ).run(Currency.USD)
