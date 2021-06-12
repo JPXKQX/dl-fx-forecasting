@@ -132,6 +132,7 @@ class PlotACFCurreny:
         last_ax = f'xaxis{len(currencies)+1}'
         fig['layout'][last_ax].update(title_text=f'Lag')
         fig.update_layout(showlegend=False)
-        fig.update_layout(
-            title=dict(text=f"Cross-Correlation of {ref_pair}{utils.period2str(period)}", font_size=28))
+        fig.update_layout(title={
+            "text": f"Cross-Correlation of {ref_pair}{utils.period2str(period)}", 
+            "font_size": 28})
         fig.show()
