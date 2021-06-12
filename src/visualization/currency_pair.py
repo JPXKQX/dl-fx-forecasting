@@ -153,7 +153,3 @@ class PlotStatsCurrencyPair:
         idx = [0, 1, -1, -2, 2, -3, -4, -5, 3]
         if not include_max: idx.remove(1)
         self.plot_boxplot(stats.iloc[:, idx], [freq, utils.period2str(period)])
-
-
-if __name__ == '__main__':
-    PlotCDFCurrencyPair(Currency.EUR, Currency.USD, 'increment').run(('2020-04-01', '2020-05-01'))

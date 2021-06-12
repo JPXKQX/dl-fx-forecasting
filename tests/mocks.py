@@ -15,4 +15,6 @@ def mock_data_randomly(args):
     df = df.set_index(pd.to_datetime(df['time']))
     df['increment'] = df.mid.diff()
     df = df.drop('time', axis=1)
-    return df.add(np.random.normal(0, 1, df.shape))
+    df =  df.add(np.random.normal(0, 1, df.shape))
+    df.attrs = {'base': 'Test1', 'quote': 'Test2'}
+    return df
