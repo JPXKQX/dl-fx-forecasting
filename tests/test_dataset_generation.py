@@ -76,11 +76,20 @@ class TestDatasetGeneration:
 
 
 class TestDatasetPreparation:
-    def test_instances(self):
+    def test_instances_overlapping(self):
         past_ticks, ticks_ahead = 10, 1
         df = mock_parquet().compute()
         df['increment'] = df.spread.diff()
         df = df.iloc[1:, :]
-        x, y = build_features.get_xy(df, past_ticks, ticks_ahead)
+        x, y = build_features.get_xy_overlapping(df, past_ticks, ticks_ahead)
         assert x.shape == (len(df) - past_ticks - ticks_ahead + 2, 2 * past_ticks)
         assert y.shape[0] == len(df) - past_ticks - ticks_ahead + 2
+
+    def test_instances_nonoverlapping(self):
+        past_ticks, ticks_ahead = 10, 1
+        df = mock_parquet().compute()
+        df['increment'] = df.spread.diff()
+        df = df.iloc[1:, :]
+        x, y = build_features.get_xy_nonoverlapping(df, past_ticks, ticks_ahead)
+        assert x.shape == (len(df) // (past_ticks + ticks_ahead), 2 * past_ticks)
+        assert y.shape[0] == len(df) // (past_ticks + ticks_ahead)
