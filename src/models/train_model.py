@@ -75,31 +75,12 @@ class ModelTrainer:
         clf = GridSearchCV(model, param_grid=params, cv=self.tscv, verbose=2, 
                            scoring=val_metrics, refit=val_metrics[0], n_jobs=-1)
         clf.fit(self.X_train, self.y_train)
-        
-        exp_var, maxerr, mae, mse, r2 = evaluate_predictions(
-            clf.best_estimator_, self.X_test, self.y_test)
 
         results = pd.DataFrame(clf.cv_results_)
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
-        test_date = "-".join(map(lambda x: x.replace("-", ""), self.test_period))
-        results.attrs = {
-            'model': model_name,
-            'pair': f"{self.base.value}/{self.quote.value}",
-            'train_period': train_date,
-            'samples': 'non-overlapping',
-            'past_n_obs': self.past_n_obs,
-            'future_obs': self.future_obs,
-            'best_params': clf.best_params_,
-            'test' : {
-                'period': test_date,
-                'explained_variance': exp_var,
-                'max_errors': maxerr,
-                'mean_absolute_error': mae,
-                'mean_squared_error': mse,
-                'r2': r2
-            }
-        }
-        results.to_csv(f"{ROOT_DIR}/models/{model_name}/training_{model_name}_"
+
+        # Save results of model selection.
+        results.to_csv(f"{ROOT_DIR}/models/{model_name}/model_sel_{model_name}_"
                        f"{self.base.value}{self.quote.value}_{self.past_n_obs}"
                        f"-{self.future_obs}_{train_date}.csv")
         return clf.best_estimator_
@@ -164,14 +145,7 @@ if __name__ == '__main__':
     mt.train_model(
         {'LinearRegression': dict(model=linear_model.LinearRegression)})
     mt.select_and_train_model({
-        'RandomForest': {
-            'model': RandomForestRegressor,
-            'params': {
-                'n_estimators': [100, 200, 500],
-                'max_depth': [10, 25, 50],
-                'min_samples_leaf': [1, 10, 50]
-            }
-        }, 'ElasticNet': {
+        'ElasticNet': {
             'model': linear_model.ElasticNet, 
             'params': {'alpha': [0, 0.5, 0.8, 1.0, 1.2],
                        'l1_ratio': [0, 0.25, 0.5, 0.75, 1]}}
