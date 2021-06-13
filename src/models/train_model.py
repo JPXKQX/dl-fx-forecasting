@@ -145,7 +145,14 @@ if __name__ == '__main__':
     mt.train_model(
         {'LinearRegression': dict(model=linear_model.LinearRegression)})
     mt.select_and_train_model({
-        'ElasticNet': {
+        'RandomForest': {
+            'model': RandomForestRegressor,
+            'params': {
+                'n_estimators': [100, 200, 500],
+                'max_depth': [10, 25, 50],
+                'min_samples_leaf': [1, 10, 50]
+            }
+        }, 'ElasticNet': {
             'model': linear_model.ElasticNet, 
             'params': {'alpha': [0, 0.5, 0.8, 1.0, 1.2],
                        'l1_ratio': [0, 0.25, 0.5, 0.75, 1]}}
