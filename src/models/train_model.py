@@ -79,10 +79,10 @@ class ModelTrainer:
         exp_var, maxerr, mae, mse, r2 = evaluate_predictions(
             clf.best_estimator_, self.X_test, self.y_test)
 
-        results_en = pd.DataFrame(clf.cv_results_)
+        results = pd.DataFrame(clf.cv_results_)
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
         test_date = "-".join(map(lambda x: x.replace("-", ""), self.test_period))
-        results_en.attrs = {
+        results.attrs = {
             'model': model_name,
             'pair': f"{self.base.value}/{self.quote.value}",
             'train_period': train_date,
@@ -99,6 +99,9 @@ class ModelTrainer:
                 'r2': r2
             }
         }
+        results.to_csv(f"{ROOT_DIR}/models/{model_name}/training_{model_name}_"
+                       f"{self.base.value}{self.quote.value}_{self.past_n_obs}"
+                       f"-{self.future_obs}_{train_date}.csv")
         return clf.best_estimator_
 
     def save_model_results(self, model, name_model):
@@ -107,7 +110,7 @@ class ModelTrainer:
                                                              self.y_test)
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
         test_date = "-".join(map(lambda x: x.replace("-", ""), self.test_period))
-        attrs = {
+        data = {
             'model': name_model,
             'params': model.get_params(),
             'pair': f"{self.base.value}/{self.quote.value}",
@@ -132,7 +135,7 @@ class ModelTrainer:
         # Save results.
         log.debug(f"Saving result of {name_model} to {path_results}.")
         with open(path_results, 'w') as outfile:
-            yaml.dump(attrs, outfile, default_flow_style=False)
+            yaml.dump(data, outfile, default_flow_style=False)
 
         # Save evaluated model.
         log.debug(f"Saving model {name_model} to {path_model}.")
