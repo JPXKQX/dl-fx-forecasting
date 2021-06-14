@@ -1,0 +1,32 @@
+model: RandomForest
+pair: EUR/GBP
+params:
+  bootstrap: true
+  ccp_alpha: 0.0
+  criterion: mse
+  max_depth: 10
+  max_features: auto
+  max_leaf_nodes: null
+  max_samples: null
+  min_impurity_decrease: 0.0
+  min_impurity_split: null
+  min_samples_leaf: 50
+  min_samples_split: 2
+  min_weight_fraction_leaf: 0.0
+  n_estimators: 100
+  n_jobs: null
+  oob_score: false
+  random_state: null
+  verbose: 0
+  warm_start: false
+past_ticks: 100
+samples: non-overlapping
+test:
+  explained_variance: -0.0018721132847911992
+  max_errors: 0.4539690657564199
+  mean_absolute_error: 0.07712051529126814
+  mean_squared_error: 0.008452035918603839
+  period: 20200501-20200510
+  r2: -0.0025248892622948826
+ticks_ahead: 5
+train_period: 20200401-20200501

@@ -1,6 +1,7 @@
 from src.data.constants import ROOT_DIR, Currency, col_names
 from src.data.data_loader import DataLoader
 from src.data.data_preprocess import DataPreprocessor, dd
+from src.features import build_features
 from datetime import datetime
 from pytest_mock import MockerFixture
 from typing import NoReturn
@@ -72,3 +73,23 @@ class TestDatasetGeneration:
         dp._cache_parquet_data()
         mocker._mocks[0].assert_called_once()
         mocker._mocks[1].assert_called_once()
+
+
+class TestDatasetPreparation:
+    def test_instances_overlapping(self):
+        past_ticks, ticks_ahead = 10, 1
+        df = mock_parquet().compute()
+        df['increment'] = df.spread.diff()
+        df = df.iloc[1:, :]
+        x, y = build_features.get_xy_overlapping(df, past_ticks, ticks_ahead)
+        assert x.shape == (len(df) - past_ticks - ticks_ahead + 2, 2 * past_ticks)
+        assert y.shape[0] == len(df) - past_ticks - ticks_ahead + 2
+
+    def test_instances_nonoverlapping(self):
+        past_ticks, ticks_ahead = 10, 1
+        df = mock_parquet().compute()
+        df['increment'] = df.spread.diff()
+        df = df.iloc[1:, :]
+        x, y = build_features.get_xy_nonoverlapping(df, past_ticks, ticks_ahead)
+        assert x.shape == (len(df) // (past_ticks + ticks_ahead), 2 * past_ticks)
+        assert y.shape[0] == len(df) // (past_ticks + ticks_ahead)

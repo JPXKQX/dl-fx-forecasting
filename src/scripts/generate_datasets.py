@@ -8,10 +8,6 @@ import logging
 import click
 
 
-logging.basicConfig(
-    level=logging.INFO,  
-    format='%(asctime)s | %(levelname)s | %(message)s')
-
 CURRENCY_TYPE = CurrencyType()
 
 
@@ -29,7 +25,10 @@ def process_fx_pair(
 
     BASE is base currency to consider.\n
     QUOTE is the quote currency to consider.\n
-    """   
+    """
+    logging.basicConfig(
+        level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+    
     # Unzip data
     dd_2020 = DataExtractor((base, quote), list(range(4, 12)), 2020)
     csv_files_2020 = dd_2020.prepare()
@@ -40,3 +39,4 @@ def process_fx_pair(
     # Save into Parquet files.
     dp = DataPreprocessor(csv_files)
     dp._cache_parquet_data(clobber)
+    logging.info("FX pair processed!!!")
