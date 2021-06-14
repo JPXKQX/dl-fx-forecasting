@@ -138,22 +138,36 @@ def evaluate_predictions(model, features, labels):
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
-    mt = ModelTrainer(
-        Currency.EUR, Currency.GBP, 100, 5, ('2020-04-01', '2020-05-01'), 
-        ('2020-05-01', '2020-05-10'))
+    mt5 = ModelTrainer(
+        Currency.EUR, Currency.GBP, 100, 5, ('2020-04-01', '2020-06-01'), 
+        ('2020-06-01', '2020-07-01'))
+    mt10 = ModelTrainer(
+        Currency.EUR, Currency.GBP, 100, 10, ('2020-04-01', '2020-06-01'), 
+        ('2020-06-01', '2020-07-01'))
+    mt20 = ModelTrainer(
+        Currency.EUR, Currency.GBP, 100, 20, ('2020-04-01', '2020-06-01'), 
+        ('2020-06-01', '2020-07-01'))
 
-    mt.train_model(
-        {'LinearRegression': dict(model=linear_model.LinearRegression)})
-    mt.select_and_train_model({
+    models_and_params = {
         'RandomForest': {
             'model': RandomForestRegressor,
             'params': {
-                'n_estimators': [100, 200, 500],
-                'max_depth': [10, 25, 50],
-                'min_samples_leaf': [1, 10, 50]
+                'n_estimators': [75, 100, 150, 200],
+                'max_depth': [6, 10, 15, 20],
+                'min_samples_leaf': [35, 50, 75, 100]
             }
         }, 'ElasticNet': {
             'model': linear_model.ElasticNet, 
             'params': {'alpha': [0, 0.5, 0.8, 1.0, 1.2],
                        'l1_ratio': [0, 0.25, 0.5, 0.75, 1]}}
-    })
+    }
+    linear_regression = {
+        'LinearRegression': dict(model=linear_model.LinearRegression)
+    }
+
+    mt5.train_model(linear_regression)
+    mt5.select_and_train_model(models_and_params)
+    mt10.train_model(linear_regression)
+    mt10.select_and_train_model(models_and_params)    
+    mt20.train_model(linear_regression)
+    mt20.select_and_train_model(models_and_params)
