@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='fx-forecasting',
+    name='dl-fx-forecasting',
     packages=find_packages(),
     packages_dir = {'': 'src'},
     version='0.1.0',

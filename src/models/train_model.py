@@ -1,13 +1,15 @@
 from src.data.data_loader import DataLoader
 from src.data.constants import Currency, ROOT_DIR
+from src.models.neural_network import MultiLayerPerceptron
 from sklearn import linear_model, metrics
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from dataclasses import dataclass
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List, NoReturn, Union
 
 import pandas as pd
 import yaml
+import os
 import pickle
 import logging
 
@@ -53,23 +55,26 @@ class ModelTrainer:
             'linspace', self.past_n_obs, self.future_obs, self.test_period, 
             is_pandas=True, overlapping=False)
 
-    def train_model(self, models: Dict[str, object]):
+    def train(self, models: Dict[str, object]):
         for name, model in models.items():
-            # Train models
             log.info(f"Training model {name} for period "
-                     f"{' '.join(self.train_period)}.")
-            mo = model['model']()
-            mo = mo.fit(self.X_train, self.y_train)
-            self.save_model_results(mo, name)
+                    f"{' '.join(self.train_period)}.")
+            if 'params' in model.keys():
+                self.select_and_train_model(model, name)
+            else:
+                self.train_model(model, name)
+    def train_model(self, model, name: str):
+        # Train models
+        mo = model['model']()
+        mo = mo.fit(self.X_train, self.y_train)
+        self.save_model_results(mo, name)
 
-    def select_and_train_model(self, models: Dict[str, object]):        
-        for name, model in models.items():
-            log.info(f"Training model {name} for period "
-                     f"{' '.join(self.train_period)}.")
-            # Model selection & model training
-            mo = model['model']()
-            best_mo = self.model_selection(mo, name, model['params'])
-            self.save_model_results(best_mo, name)
+    def select_and_train_model(self, model, name: str):        
+        # Model selection & model training
+        mo = model['model']()
+        best_mo = self.model_selection(mo, name, model['params'])
+        best_mo.fit(self.X_train, self.y_train)
+        self.save_model_results(best_mo, name)
 
     def model_selection(self, model, model_name, params):
         clf = GridSearchCV(model, param_grid=params, cv=self.tscv, verbose=2, 
@@ -80,9 +85,11 @@ class ModelTrainer:
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
 
         # Save results of model selection.
-        results.to_csv(f"{ROOT_DIR}/models/{model_name}/model_sel_{model_name}_"
-                       f"{self.base.value}{self.quote.value}_{self.past_n_obs}"
-                       f"-{self.future_obs}_{train_date}.csv")
+        pair = f"{self.base.value}{self.quote.value}"
+        path = f"{ROOT_DIR}/models/{model_name}/{pair}/"
+        os.makedirs(path, exist_ok=True)
+        results.to_csv(f"{path}model_sel_{model_name}_{pair}_{self.past_n_obs}-"
+                       f"{self.future_obs}_{train_date}.csv")
         return clf.best_estimator_
 
     def save_model_results(self, model, name_model):
@@ -108,19 +115,20 @@ class ModelTrainer:
                 'r2': r2
             }
         }
+        pair = self.base.value + self.quote.value
         filename = f'{name_model}_{self.base.value}{self.quote.value}_' \
                    f'{self.past_n_obs}-{self.future_obs}_{train_date}'
-        path_results = f"{ROOT_DIR}/models/{name_model}/test_{filename}.yml"
-        path_model = f"{ROOT_DIR}/models/{name_model}/{filename}.pkl"
-        
+        path = f"{ROOT_DIR}/models/{name_model}/{pair}/"
+        os.makedirs(path, exist_ok=True)
+
         # Save results.
-        log.debug(f"Saving result of {name_model} to {path_results}.")
-        with open(path_results, 'w') as outfile:
+        log.debug(f"Saving result of {name_model} to {path}test_{filename}.yml")
+        with open(path + f"test_{filename}.yml", 'w') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)
 
         # Save evaluated model.
-        log.debug(f"Saving model {name_model} to {path_model}.")
-        with open(path_model, 'wb') as f:
+        log.debug(f"Saving model {name_model} to {path}{filename}.pkl")
+        with open(path + f"{filename}.pkl", 'wb') as f:
             pickle.dump(model, f)
 
 
@@ -135,21 +143,49 @@ def evaluate_predictions(model, features, labels):
     return exp_var, maxerr, mae, mse, r2
 
 
+def train_regressions(
+    base: Currency,
+    quote: Currency,
+    models: Dict,
+    past_obs: Union[int, List[int]],
+    future_obs: Union[int, List[int]],
+    train_period: Tuple[str, str], 
+    test_period: Tuple[str, str]
+) -> NoReturn:
+    if isinstance(past_obs, int):
+        past_obs = [past_obs]
+
+    if isinstance(future_obs, int):
+        future_obs = [future_obs]
+
+    for n_past in past_obs:
+        for n_fut in future_obs:
+            log.info(f"Modeling increments in price using last {n_past} "
+                     f"observations to forecast the increment in {n_fut} "
+                     f"observations ahead.")
+            mt = ModelTrainer(base, quote, n_past, n_fut, train_period, 
+                              test_period)
+            mt.train(models)
+
+
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
-    mt5 = ModelTrainer(
-        Currency.EUR, Currency.GBP, 100, 5, ('2020-04-01', '2020-06-01'), 
-        ('2020-06-01', '2020-07-01'))
-    mt10 = ModelTrainer(
-        Currency.EUR, Currency.GBP, 100, 10, ('2020-04-01', '2020-06-01'), 
-        ('2020-06-01', '2020-07-01'))
-    mt20 = ModelTrainer(
-        Currency.EUR, Currency.GBP, 100, 20, ('2020-04-01', '2020-06-01'), 
-        ('2020-06-01', '2020-07-01'))
+    train_period = '2020-04-01', '2020-06-01'
+    test_period = '2020-06-01', '2020-07-01'
 
-    models_and_params = {
-        'RandomForest': {
+
+    models = {
+        'MultiLayerPerceptron': {
+            'model': MultiLayerPerceptron,
+            'params': {
+                'n_neurons': [
+                    (32, 64, 128, 64, 32), 
+                    (32, 64, 32), 
+                    (32, 128, 32)],
+                'f_act': ['relu', 'sigmoid', 'tanh']
+            }
+        }, 'RandomForest': {
             'model': RandomForestRegressor,
             'params': {
                 'n_estimators': [75, 100, 150, 200],
@@ -158,16 +194,11 @@ if __name__ == '__main__':
             }
         }, 'ElasticNet': {
             'model': linear_model.ElasticNet, 
-            'params': {'alpha': [0, 0.5, 0.8, 1.0, 1.2],
-                       'l1_ratio': [0, 0.25, 0.5, 0.75, 1]}}
+            'params': {'alpha': [0, 0.1, 0.2, 0.3, 0.4, 0.5],
+                       'l1_ratio': [0, 0.10, 0.15, 0.25, 0.3]}
+        }, 'LinearRegression': {
+            'model': linear_model.LinearRegression
+        }
     }
-    linear_regression = {
-        'LinearRegression': dict(model=linear_model.LinearRegression)
-    }
-
-    mt5.train_model(linear_regression)
-    mt5.select_and_train_model(models_and_params)
-    mt10.train_model(linear_regression)
-    mt10.select_and_train_model(models_and_params)    
-    mt20.train_model(linear_regression)
-    mt20.select_and_train_model(models_and_params)
+    train_regressions(Currency.EUR, Currency.USD, models, 100, [20], train_period, test_period)
+    train_regressions(Currency.GBP, Currency.USD, models, 100, [20], train_period, test_period)
