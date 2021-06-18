@@ -21,7 +21,7 @@ class MultiLayerPerceptron:
         for i, neurons in enumerate(self.n_neurons):
             if i == 0:
                 layers.append(Dense(neurons, activation=self.f_act[i], 
-                                    input_shape=input_shape))
+                                    input_shape=(input_shape, )))
             else:
                 layers.append(Dense(neurons, activation=self.f_act[i]))
         
@@ -35,7 +35,9 @@ class MultiLayerPerceptron:
         y,
         epochs: int = 200,
     ):
-        self.compile(X.shape[1], y.shape[1])
+        n_features = X.shape[1] if len(X.shape) > 1 else 1
+        n_labels = y.shape[1] if len(y.shape) > 1 else 1
+        self.compile(n_features, n_labels)
         return self.model.fit(X, y, epochs=epochs, verbose=1)
 
     def predict(self, X):

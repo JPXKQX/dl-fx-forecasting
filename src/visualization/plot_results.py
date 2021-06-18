@@ -3,6 +3,7 @@ from pydantic.dataclasses import dataclass
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pandas as pd
 import yaml
 import glob
 import pickle
@@ -10,6 +11,8 @@ import logging
 
 
 logger = logging.getLogger("Plotter Coefficients")
+
+metrics = ['explained_var', 'maxe', 'mae', 'mse', 'r2']
 
 
 @dataclass
@@ -44,18 +47,43 @@ class PlotCoefsModel:
         plt.tight_layout()
         plt.show()
 
-    def get_results(self):
+    def get_results(self, metric: str = 'mse'):
         paths = glob.glob(self.models_path + f"**/{self.pair}/*.yml")
+        columns = ['model', 'n_past', 'n_fut', *metrics]
+                   
+        df = pd.DataFrame(columns=columns)
         for i, path in enumerate(paths):
-            with open(path) as results_file:
-                results = yaml.load(results_file)
-            _, mo, pair, freq, period = path.split("/")[-1].replace(".pkl", 
-                                                                "").split("_")
+            _, mo, pair, freq, period = path.split("/")[-1].replace(".yml", "").split("_")
             prev_obs, next_obs = map(int, freq.split("-"))
             logger.info(f"Results loaded for model {mo} for predicting price "
                         f"increment in {pair} at {next_obs} observations ahead,"
                         f"with the last {prev_obs} observations.")
+            row = pd.Series([mo, prev_obs, next_obs, *get_test_results(path)], 
+                            index = df.columns)
+            df = df.append(row, ignore_index=True)
 
+        fig, axs = plt.subplots(len(metrics), 1)
+        for i, metric in enumerate(metrics):
+            sns.lineplot(data=df, x='n_fut', y=metric, hue='model', ax=axs[i], 
+                         legend=False)
+
+        handles = axs[0].get_lines()
+        fig.legend(handles, list(df.model.unique()), loc='center right')
+        plt.suptitle(pair + f" ({period})", fontsize=22)
+        plt.xlabel("Observations  ahead")
+        plt.show()
+        print(df)
+
+def get_test_results(path):
+    with open(path) as results_file:
+        results = yaml.load(results_file)
+    test_results = results['test']
+    explained_var = test_results['explained_variance']
+    maxe = test_results['max_errors']
+    mae = test_results['mean_absolute_error']
+    mse = test_results['mean_squared_error']
+    r2 = test_results['r2']
+    return explained_var, maxe, mae, mse, r2
 
 if __name__ == '__main__':
     PlotCoefsModel().get_results()

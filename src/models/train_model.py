@@ -1,6 +1,6 @@
 from src.data.data_loader import DataLoader
 from src.data.constants import Currency, ROOT_DIR
-from src.models.neural_network import MultiLayerPerceptron
+from neural_network import MultiLayerPerceptron
 from sklearn import linear_model, metrics
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
@@ -200,5 +200,5 @@ if __name__ == '__main__':
             'model': linear_model.LinearRegression
         }
     }
-    train_regressions(Currency.EUR, Currency.USD, models, 100, [20], train_period, test_period)
-    train_regressions(Currency.GBP, Currency.USD, models, 100, [20], train_period, test_period)
+    train_regressions(Currency.EUR, Currency.USD, models, 100, [5, 10, 20], train_period, test_period)
+    train_regressions(Currency.GBP, Currency.USD, models, 100, [5, 10, 20], train_period, test_period)
