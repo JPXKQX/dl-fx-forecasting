@@ -99,7 +99,7 @@ class PlotACFCurreny:
         values = correlate(data.iloc[:, 0], data.iloc[:, 1])
         idx = np.arange(-self.nlags // 2, self.nlags // 2 + 1)
         l = len(values) // 2
-        y = values[l-self.nlags//2:self.nlags//2-l]
+        y = values[l - self.nlags // 2: self.nlags // 2 - l]
         
         row, col = n_subplot // 2, (n_subplot % 2) +1
         annot_pos = row - 1 if n_cols == 1 else 2 * row + col - 3
