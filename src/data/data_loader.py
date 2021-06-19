@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
 from datetime import datetime, timedelta
-from src.data import constants, utils
-from src.features import build_features
-from src.data.constants import Currency
+from . import constants, utils
+from .constants import Currency
+from src.features import get_blocks
 
 import dask.dataframe as dd
 import pandas as pd
@@ -59,7 +59,7 @@ class DataLoader:
 
         # Preprocess
         df = df.compute()
-        df = df[~df.index.duplicated(keep='first')]
+        df = df[~df.time.duplicated(keep='first')]
         
         df['increment'] = df.mid.diff() * tick_size
         df['spread'] = df['spread'] * tick_size
@@ -78,7 +78,7 @@ class DataLoader:
         df.attrs = {'base': self.base.value, 
                     'quote': self.quote.value, 
                     'scale': tick_size}
-        return df
+        return df.sort_index()
 
     def load_dataset(
         self,
@@ -136,10 +136,10 @@ class DataLoader:
                 while df.shape[0] > past_ticks + ticks_ahead:
                     id_next = df.iloc[1:, :].select.idxmin()
                     if ('overlapping' in kwargs) and kwargs['overlapping']:
-                        x, y = build_features.get_xy_overlapping(
+                        x, y = get_blocks.get_xy_overlapping(
                             df.iloc[:id_next, :], past_ticks, ticks_ahead)
                     else:
-                        x, y = build_features.get_xy_nonoverlapping(
+                        x, y = get_blocks.get_xy_nonoverlapping(
                             df.iloc[:id_next, :], past_ticks, ticks_ahead)
                     xs.append(x)
                     ys.append(y)

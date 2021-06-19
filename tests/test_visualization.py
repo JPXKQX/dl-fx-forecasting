@@ -1,4 +1,4 @@
-from tests.mocks import *
+from mocks import *
 from pytest_mock import MockerFixture
 from src.visualization import line_plot, currency_pair, plot_correlations
 from src.data.constants import Currency, ROOT_DIR

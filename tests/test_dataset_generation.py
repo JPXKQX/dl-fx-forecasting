@@ -1,13 +1,14 @@
 from src.data.constants import ROOT_DIR, Currency, col_names
 from src.data.data_loader import DataLoader
 from src.data.data_preprocess import DataPreprocessor, dd
-from src.features import build_features
+from src.features import get_blocks, build_features
 from datetime import datetime
 from pytest_mock import MockerFixture
 from typing import NoReturn
 
 import dask.dataframe as dd
 import tensorflow as tf
+import pandas as pd
 
 
 def mock_parquet():
@@ -81,7 +82,7 @@ class TestDatasetPreparation:
         df = mock_parquet().compute()
         df['increment'] = df.spread.diff()
         df = df.iloc[1:, :]
-        x, y = build_features.get_xy_overlapping(df, past_ticks, ticks_ahead)
+        x, y = get_blocks.get_xy_overlapping(df, past_ticks, ticks_ahead)
         assert x.shape == (len(df) - past_ticks - ticks_ahead + 2, 2 * past_ticks)
         assert y.shape[0] == len(df) - past_ticks - ticks_ahead + 2
 
@@ -90,6 +91,20 @@ class TestDatasetPreparation:
         df = mock_parquet().compute()
         df['increment'] = df.spread.diff()
         df = df.iloc[1:, :]
-        x, y = build_features.get_xy_nonoverlapping(df, past_ticks, ticks_ahead)
+        x, y = get_blocks.get_xy_nonoverlapping(df, past_ticks, ticks_ahead)
         assert x.shape == (len(df) // (past_ticks + ticks_ahead), 2 * past_ticks)
         assert y.shape[0] == len(df) // (past_ticks + ticks_ahead)
+
+    def test_features(self, mocker: MockerFixture):
+        mocker.patch.object(
+            build_features.data_loader.dd,
+            'read_parquet',
+            return_value=mock_parquet())
+        freqs = [1, 2, 3, 5]
+        fb = build_features.FeatureBuilder(Currency.EUR, Currency.USD)
+        X, y = fb.build(freqs, 5, pair=(Currency.EUR, Currency.GBP))
+        assert X.shape[0] == y.shape[0]
+        assert X.shape[1] == 2 * len(freqs)
+        assert y.shape[1] == 1
+        assert isinstance(X, pd.DataFrame)
+        assert isinstance(y, pd.DataFrame)

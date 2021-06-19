@@ -88,7 +88,8 @@ class PlotACFCurreny:
         fig: go.Figure, 
         base_df, 
         base_curr: Currency, 
-        row: int,
+        n_subplot: int,
+        n_cols: int,
         period: Tuple[str, str] = None
     ) -> go.Figure:
         df_c = DataLoader(self.currency, base_curr, self.path).read(period)
@@ -99,8 +100,11 @@ class PlotACFCurreny:
         idx = np.arange(-self.nlags // 2, self.nlags // 2 + 1)
         l = len(values) // 2
         y = values[l-self.nlags//2:self.nlags//2-l]
-        fig['layout'].annotations[row-1].update(text=f"with {pair}")
-        fig.add_trace(go.Scatter(x=idx, y=y), row=row, col=1)
+        
+        row, col = n_subplot // 2, (n_subplot % 2) +1
+        annot_pos = row - 1 if n_cols == 1 else 2 * row + col - 3
+        fig['layout'].annotations[annot_pos].update(text=f"with {pair}")
+        fig.add_trace(go.Scatter(x=idx, y=y), row=row, col=col)
         return fig
 
     def run(
@@ -118,17 +122,32 @@ class PlotACFCurreny:
         ref_pair = df.attrs['base'] + "/" + df.attrs['quote']
         df = df[[self.varname]].resample(self.agg_frame).mean().dropna()
 
+        # Get params of subplots
+        specs = None
+        if len(currencies) > 4:
+            rows, cols = (len(currencies) + 1) // 2, 2
+            step_subplots = 1
+            if (len(currencies) + 1) % 2 == 1:
+                first_subplot = 4
+                specs = [[{"colspan": 2}, None], [{}, {}] * len(currencies)]
+            else:
+                first_subplot = 3
+        else:
+            rows, cols = len(currencies) + 1, 1
+            first_subplot, step_subplots = 2, 2
+
         # Create figure with one plot for each pair
-        fig = make_subplots(rows=len(currencies) + 1, cols=1, 
+        fig = make_subplots(rows=rows, cols=cols, specs=specs, 
                             subplot_titles=[' '] * (len(currencies) + 1))
 
         df_acf = acf(df, nlags=self.nlags)
         fig.add_trace(go.Scatter(x=np.arange(self.nlags+1), y=df_acf), row=1, 
                       col=1)
         fig['layout'].annotations[0].update(text=f"with {ref_pair} (ACF)")
-        for i, currency in enumerate(currencies, start=2):
-            fig = self._plot_acf(fig, df, currency, i, period)
-        
+        for i, currency in enumerate(currencies, start=first_subplot):
+            fig = self._plot_acf(fig, df, currency, step_subplots * i, cols,
+                                 period)
+
         last_ax = f'xaxis{len(currencies)+1}'
         fig['layout'][last_ax].update(title_text=f'Lag')
         fig.update_layout(showlegend=False)

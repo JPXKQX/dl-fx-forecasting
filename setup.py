@@ -4,7 +4,7 @@ setup(
     name='dl-fx-forecasting',
     packages=find_packages(),
     packages_dir = {'': 'src'},
-    version='0.1.0',
+    version='1.0.0',
     description='A Python repository for forecasting mid prices of different Foreign Exchange pairs.',
     author='Mario Santa Cruz Lopez',
     author_email='mariosanta_cruz@hotmail.com',
