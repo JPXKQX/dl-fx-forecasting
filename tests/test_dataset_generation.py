@@ -97,9 +97,11 @@ class TestDatasetPreparation:
 
     def test_features(self, mocker: MockerFixture):
         mocker.patch.object(
-            build_features.data_loader.dd,
-            'read_parquet',
+            build_features.data_loader.dd, 'read_parquet',
             return_value=mock_parquet())
+        mocker.patch.object(
+            DataLoader, "_search_pair", return_value=("fake.csv", False)
+        )
         freqs = [1, 2, 3, 5]
         fb = build_features.FeatureBuilder(Currency.EUR, Currency.USD)
         X, y = fb.build(freqs, 5, pair=(Currency.EUR, Currency.GBP))
