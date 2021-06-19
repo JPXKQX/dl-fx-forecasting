@@ -52,7 +52,9 @@ def main(base, quote, period, freqs, data_path):
               metavar="<str>")
 @click.option('--rate', default=1e3, type=click.INT, metavar='<int>', 
               help="Rate to augment the spread of the currency pair.")
-def main_cdf(base, quote, which, period, data_path, rate):
+@click.option('--group_hourly', deafult=False, type=click.BOOL, isflag=True,
+              metavar='<boolean>', help="Show data separated by hour")
+def main_cdf(base, quote, which, period, data_path, rate, group_hourly):
     """ Plot the Cumulative Distribution function (CDF) of the currency pair
     chosen.
 
@@ -68,7 +70,8 @@ def main_cdf(base, quote, which, period, data_path, rate):
         level=logging.INFO
     )
     
-    PlotCDFCurrencyPair(base, quote, which, rate, data_path).run(period)
+    plotter = PlotCDFCurrencyPair(base, quote, which, rate, data_path)
+    plotter.run(period, group_hourly)
 
 
 @click.command()
