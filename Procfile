@@ -1,1 +1,1 @@
-web: gunicorn src/dash_apps/stats_table:server
+web: gunicorn apps.table_pair_stats:server
