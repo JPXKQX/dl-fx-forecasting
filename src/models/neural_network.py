@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
+from tensorflow.keras.callbacks import EarlyStopping
 from typing import List, Union, NoReturn
 
 
@@ -34,11 +35,13 @@ class MultiLayerPerceptron:
         X,
         y,
         epochs: int = 200,
+        patience: int = 10
     ):
         n_features = X.shape[1] if len(X.shape) > 1 else 1
         n_labels = y.shape[1] if len(y.shape) > 1 else 1
         self.compile(n_features, n_labels)
-        return self.model.fit(X, y, epochs=epochs, verbose=1)
+        early = EarlyStopping(self.loss, patience=patience)
+        return self.model.fit(X, y, epochs=epochs, verbose=2, callbacks=[early])
 
     def predict(self, X):
         return self.model.predict(X)
