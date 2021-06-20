@@ -1,4 +1,4 @@
-from src.data.constants import Currency
+from src.data.constants import Currency, ROOT_DIR
 from src.models.model_selection import ModelTrainer
 from neural_network import MultiLayerPerceptron
 from sklearn import linear_model
@@ -60,7 +60,9 @@ def train_regressions_raw_data(
 
 if __name__ == '__main__':
     logging.basicConfig(
-        level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+        level=logging.DEBUG, 
+        filename=ROOT_DIR + "/logs/training.log",
+        format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
     models = {
         'MultiLayerPerceptron': {
@@ -87,13 +89,16 @@ if __name__ == '__main__':
             'model': linear_model.LinearRegression
         }
     }
-    train_period = '2020-04-01', '2020-06-01'
+    train_period = '2020-04-01', '2020-05-01'
     test_period = '2020-06-01', '2020-07-01'
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
     
+    train_regressions_features(
+        Currency.EUR, Currency.GBP, models, freqs, [5, 10, 20], 
+        train_period, test_period, (Currency.GBP, Currency.JPY))
     train_regressions_features(
         Currency.EUR, Currency.USD, models, freqs, [5, 10, 20], 
         train_period, test_period, (Currency.EUR, Currency.JPY))
     train_regressions_features(
         Currency.GBP, Currency.USD, models, freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.EUR, Currency.USD))
+        train_period, test_period, (Currency.USD, Currency.MXN))

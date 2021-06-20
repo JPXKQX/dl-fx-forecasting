@@ -1,0 +1,1 @@
+web: gunicorn src/dash_apps/stats_table:server

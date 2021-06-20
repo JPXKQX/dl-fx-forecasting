@@ -1,7 +1,7 @@
 from src.data.constants import Currency
 from src.data.data_loader import DataLoader
 from src.data import utils, constants
-from typing import Tuple, Union, NoReturn
+from typing import Tuple, Union, NoReturn, Dict
 from dataclasses import dataclass
 from datetime import datetime
 from plotly.subplots import make_subplots
@@ -10,10 +10,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import logging
+import os
 import math
 
 
-log = logging.getLogger("Line plotter")
+log = logging.getLogger("Pair plotter")
 
 
 @dataclass
@@ -203,3 +204,46 @@ class PlotStatsCurrencyPair:
         idx = [0, 1, -1, -2, 2, -3, -4, -5, 3]
         if not include_max: idx.remove(1)
         self.plot_boxplot(stats.iloc[:, idx], [freq, utils.period2str(period)])
+
+    def get_table(
+        self,
+        period: Tuple[Union[str, datetime], 
+                      Union[str, datetime]] = None,
+        output_dir: str = "/tmp/"
+    ) -> Tuple[Dict, str, str]:
+        variables = ['mid', 'spread', 'increment']
+        statistics = ['std', 'max', 'mean', 'min']
+        quantiles = [0.0005, 0.05, 0.25, 0.5, 0.75, 0.95, 0.9995]
+        results = {}
+        
+        # Load statistics already computed.
+        remaining_vars = []
+        for var in variables:
+            filename = f"{output_dir}hourly_stats_{var}_{self.base.value}" \
+                       f"{self.quote.value}.csv"
+            if os.path.isfile(filename):
+                log.debug(f"Data loaded from files cached at {filename}")
+                results[var] = pd.read_csv(filename, index_col=0)
+                continue
+            else:
+                remaining_vars.append(var)
+        
+        if len(remaining_vars):
+            dl = DataLoader(self.base, self.quote, self.path)
+            df = dl.read(period)
+            for var in remaining_vars:
+                filename = f"{output_dir}hourly_stats_{var}_{self.base.value}" \
+                           f"{self.quote.value}.csv"
+                log.debug(f"Caching {var} statistics at {filename}")
+                df_gropued = df[var].groupby(df.index.hour)
+                main_stats = df_gropued.aggregate(statistics)
+                quantiles_stats = df_gropued.quantile(quantiles).unstack()
+                results_df = pd.concat([main_stats, quantiles_stats], axis=1)
+                results_df.reindex(
+                    ['std', 'min', '0.0005', '0.05', '0.25', '0.5', 'mean',
+                     '0.75', '0.95', '0.9995', 'max'], 
+                    axis=1, inplace=True)
+                results[var] = results_df
+                results[var].to_csv(filename)
+        return results, utils.period2str(period), \
+            self.base.value + self.quote.value
