@@ -50,12 +50,16 @@ class ModelTrainer:
         # Get fold to cross validation
         self.tscv = TimeSeriesSplit(n_splits=5)
         if self.get_features:
+            log.debug("Loading instances using feature selection.")
             fb = FeatureBuilder(self.base, self.quote)
             self.X_train, self.y_train = fb.build(
-                self.freqs_features, self.train_period, self.aux_pair)
+                self.freqs_features, self.future_obs, self.train_period,
+                self.aux_pair)
             self.X_test, self.y_test = fb.build(
-                self.freqs_features, self.test_period, self.aux_pair)
+                self.freqs_features, self.future_obs, self.test_period,
+                self.aux_pair)
         else:
+            log.debug("Loading the instances using all past increments.")
             dl = DataLoader(self.base, self.quote)
             self.X_train, self.y_train = dl.load_dataset(
                 'linspace', max(self.freqs_features), self.future_obs,  
@@ -63,6 +67,8 @@ class ModelTrainer:
             self.X_test, self.y_test = dl.load_dataset(
                 'linspace', max(self.freqs_features), self.future_obs, 
                 self.test_period, is_pandas=True, overlapping=False)
+        log.info(f"Train({self.X_train.shape[0]}) and test"
+                 f"({self.X_test.shape[0]}) datasets have been loaded")
 
     def get_num_prev_obs(self) -> int:
         if self.get_features:
