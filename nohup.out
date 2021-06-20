@@ -1,0 +1,211 @@
+2021-06-20 10:00:27.428978: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+Traceback (most recent call last):
+  File "/home/mario/Academia/Imperial College/Thesis/dl_fx_forecasting/src/models/train_model.py", line 62, in <module>
+    logging.basicConfig(
+  File "/home/mario/miniconda3/envs/dl-fx-forecasting/lib/python3.9/logging/__init__.py", line 2025, in basicConfig
+    raise ValueError('Unrecognised argument(s): %s' % keys)
+ValueError: Unrecognised argument(s): filenames
+2021-06-20 10:01:26.127678: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:12:37.551188: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:16:18.153952: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+Fitting 5 folds for each of 9 candidates, totalling 45 fits
+2021-06-20 10:16:35.290103: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:16:35.290102: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:16:35.290110: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:16:35.290102: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:17:46.691325: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcuda.so.1
+2021-06-20 10:17:46.691375: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcuda.so.1
+2021-06-20 10:17:46.691395: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcuda.so.1
+2021-06-20 10:17:46.699265: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcuda.so.1
+2021-06-20 10:17:46.752041: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:937] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-20 10:17:46.756146: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:937] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-20 10:17:46.757713: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:937] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-20 10:17:46.758404: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:937] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-20 10:17:46.768821: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1733] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: GeForce GTX 1650 computeCapability: 7.5
+coreClock: 1.74GHz coreCount: 14 deviceMemorySize: 3.82GiB deviceMemoryBandwidth: 119.24GiB/s
+2021-06-20 10:17:46.771140: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:17:46.771252: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1733] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: GeForce GTX 1650 computeCapability: 7.5
+coreClock: 1.74GHz coreCount: 14 deviceMemorySize: 3.82GiB deviceMemoryBandwidth: 119.24GiB/s
+2021-06-20 10:17:46.771334: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:17:46.771372: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1733] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: GeForce GTX 1650 computeCapability: 7.5
+coreClock: 1.74GHz coreCount: 14 deviceMemorySize: 3.82GiB deviceMemoryBandwidth: 119.24GiB/s
+2021-06-20 10:17:46.771452: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:17:46.771492: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1733] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: GeForce GTX 1650 computeCapability: 7.5
+coreClock: 1.74GHz coreCount: 14 deviceMemorySize: 3.82GiB deviceMemoryBandwidth: 119.24GiB/s
+2021-06-20 10:17:46.771561: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcudart.so.11.0
+2021-06-20 10:17:46.818589: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublas.so.11
+2021-06-20 10:17:46.819064: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublas.so.11
+2021-06-20 10:17:46.818994: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublas.so.11
+2021-06-20 10:17:46.819174: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublasLt.so.11
+2021-06-20 10:17:46.819239: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublasLt.so.11
+2021-06-20 10:17:46.819352: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublasLt.so.11
+2021-06-20 10:17:46.819019: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublas.so.11
+2021-06-20 10:17:46.819505: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcublasLt.so.11
+2021-06-20 10:17:46.834045: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcufft.so.10
+2021-06-20 10:17:46.834374: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcufft.so.10
+2021-06-20 10:17:46.834671: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcufft.so.10
+2021-06-20 10:17:46.834954: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcufft.so.10
+2021-06-20 10:17:46.839354: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcurand.so.10
+2021-06-20 10:17:46.841529: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcurand.so.10
+2021-06-20 10:17:46.841761: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcurand.so.10
+2021-06-20 10:17:46.841976: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcurand.so.10
+2021-06-20 10:17:46.845914: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusolver.so.11
+2021-06-20 10:17:46.846823: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusolver.so.11
+2021-06-20 10:17:46.847782: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusolver.so.11
+2021-06-20 10:17:46.848371: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusolver.so.11
+2021-06-20 10:17:46.863626: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusparse.so.11
+2021-06-20 10:17:46.864058: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusparse.so.11
+2021-06-20 10:17:46.864464: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusparse.so.11
+2021-06-20 10:17:46.864924: I tensorflow/stream_executor/platform/default/dso_loader.cc:53] Successfully opened dynamic library libcusparse.so.11
+2021-06-20 10:17:46.868587: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-06-20 10:17:46.867956: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-06-20 10:17:46.868666: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1766] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-20 10:17:46.868161: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-06-20 10:17:46.868906: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1766] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-20 10:17:46.868377: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-06-20 10:17:46.869085: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1766] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-20 10:17:46.868633: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1766] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-20 10:17:46.881493: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-20 10:17:46.881784: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1258] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-20 10:17:46.881819: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1264]      
+2021-06-20 10:17:46.881571: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-20 10:17:46.882007: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1258] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-20 10:17:46.882036: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1264]      
+2021-06-20 10:17:46.881606: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-20 10:17:46.882203: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1258] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-20 10:17:46.882238: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1264]      
+2021-06-20 10:17:46.882331: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-20 10:17:46.882478: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1258] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-20 10:17:46.882505: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1264]      
+2021-06-20 10:17:47.480648: W tensorflow/core/framework/cpu_allocator_impl.cc:80] Allocation of 90063360 exceeds 10% of free system memory.
+2021-06-20 10:17:47.704133: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:176] None of the MLIR Optimization Passes are enabled (registered 2)
+2021-06-20 10:17:47.735168: I tensorflow/core/platform/profile_utils/cpu_utils.cc:114] CPU Frequency: 3092935000 Hz
+2021-06-20 10:17:48.111828: W tensorflow/core/framework/cpu_allocator_impl.cc:80] Allocation of 180126432 exceeds 10% of free system memory.
+2021-06-20 10:17:48.151501: W tensorflow/core/framework/cpu_allocator_impl.cc:80] Allocation of 270189504 exceeds 10% of free system memory.
+2021-06-20 10:17:48.659355: W tensorflow/core/framework/cpu_allocator_impl.cc:80] Allocation of 360252576 exceeds 10% of free system memory.
+2021-06-20 10:17:48.906018: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:176] None of the MLIR Optimization Passes are enabled (registered 2)
+2021-06-20 10:17:48.908387: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:176] None of the MLIR Optimization Passes are enabled (registered 2)
+2021-06-20 10:17:48.908903: I tensorflow/core/platform/profile_utils/cpu_utils.cc:114] CPU Frequency: 3092935000 Hz
+2021-06-20 10:17:48.927135: I tensorflow/core/platform/profile_utils/cpu_utils.cc:114] CPU Frequency: 3092935000 Hz
+Epoch 1/200
+19545/19545 - 41s - loss: 0.0522
+Epoch 2/200
+19545/19545 - 24s - loss: 0.0346
+Epoch 1/200
+39090/39090 - 64s - loss: 0.0332
+Epoch 3/200
+19545/19545 - 24s - loss: 0.0328
+Epoch 4/200
+19545/19545 - 23s - loss: 0.0322
+Epoch 1/200
+78180/78180 - 111s - loss: 0.0258
+Epoch 2/200
+39090/39090 - 50s - loss: 0.0270
+Epoch 5/200
+19545/19545 - 24s - loss: 0.0304
+Epoch 6/200
+19545/19545 - 24s - loss: 0.0308
+Epoch 3/200
+39090/39090 - 50s - loss: 0.0262
+Epoch 7/200
+19545/19545 - 25s - loss: 0.0322
+Epoch 2/200
+78180/78180 - 96s - loss: 0.0221
+Epoch 8/200
+19545/19545 - 24s - loss: 0.0321
+Epoch 4/200
+39090/39090 - 52s - loss: 0.0254
+Epoch 9/200
+19545/19545 - 23s - loss: 0.0315
+Epoch 10/200
+19545/19545 - 26s - loss: 0.0321
+Epoch 5/200
+39090/39090 - 54s - loss: 0.0252
+Epoch 11/200
+19545/19545 - 26s - loss: 0.0316
+Epoch 3/200
+78180/78180 - 98s - loss: 0.0217
+Epoch 12/200
+19545/19545 - 24s - loss: 0.0293
+Epoch 6/200
+39090/39090 - 57s - loss: 0.0257
+Epoch 13/200
+19545/19545 - 34s - loss: 0.0295
+Epoch 14/200
+19545/19545 - 26s - loss: 0.0304
+Epoch 7/200
+39090/39090 - 55s - loss: 0.0260
+Epoch 15/200
+19545/19545 - 25s - loss: 0.0323
+Epoch 4/200
+78180/78180 - 109s - loss: 0.0213
+Epoch 16/200
+19545/19545 - 24s - loss: 0.0324
+Epoch 8/200
+39090/39090 - 51s - loss: 0.0257
+Epoch 17/200
+19545/19545 - 23s - loss: 0.0303
+Epoch 18/200
+19545/19545 - 24s - loss: 0.0309
+Epoch 9/200
+39090/39090 - 51s - loss: 0.0249
+Epoch 19/200
+19545/19545 - 25s - loss: 0.0309
+Epoch 5/200
+78180/78180 - 98s - loss: 0.0213
+Epoch 20/200
+19545/19545 - 26s - loss: 0.0295
+Epoch 10/200
+39090/39090 - 51s - loss: 0.0250
+Epoch 21/200
+19545/19545 - 23s - loss: 0.0296
+Epoch 22/200
+19545/19545 - 23s - loss: 0.0305
+Epoch 23/200
+19545/19545 - 24s - loss: 0.0299
+Epoch 11/200
+39090/39090 - 49s - loss: 0.0250
+Epoch 6/200
+78180/78180 - 94s - loss: 0.0210
+Epoch 24/200
+19545/19545 - 24s - loss: 0.0292
+Epoch 25/200
+19545/19545 - 23s - loss: 0.0285
+Epoch 12/200
+39090/39090 - 50s - loss: 0.0245
+Epoch 26/200
+19545/19545 - 25s - loss: 0.0289
+Epoch 27/200
+19545/19545 - 24s - loss: 0.0295
+Epoch 13/200
+39090/39090 - 51s - loss: 0.0262
+Epoch 7/200
+78180/78180 - 95s - loss: 0.0211
+Epoch 28/200
+19545/19545 - 23s - loss: 0.0294
+Epoch 29/200
+19545/19545 - 24s - loss: 0.0305
+Epoch 14/200
+39090/39090 - 50s - loss: 0.0244
+Epoch 30/200
+19545/19545 - 23s - loss: 0.0290
+Epoch 31/200
+19545/19545 - 26s - loss: 0.0288
+Epoch 15/200
+39090/39090 - 56s - loss: 0.0250
+Epoch 8/200
+78180/78180 - 102s - loss: 0.0209
+Epoch 32/200
+19545/19545 - 29s - loss: 0.0293

@@ -1,0 +1,12 @@
+version: "0.1"
+environment: 
+    DOCKER_USERNAME: "JPXKQX"
+    DOCKER_IMAGE: "dl-fx-forecasting:firsttry"
+
+services: 
+    py_package: 
+        image: $DOCKER_USERNAME/$DOCKER_IMAGE
+        volumes:
+            - type: bind
+              source: $HOST/data
+              target: /app/data

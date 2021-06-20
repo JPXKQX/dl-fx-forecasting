@@ -1,44 +1,50 @@
+from dataclasses import dataclass
+from typing import Tuple, List
+from datetime import timedelta
+from src.data.constants import Currency, ROOT_DIR
+from src.data import data_loader
+
 import pandas as pd
-import numpy as np
+import logging
+
+logger = logging.getLogger("Feature Builder")
 
 
-def get_xy_overlapping(
-    data: pd.DataFrame, 
-    past_ticks: int, 
-    ticks_ahead: int
-) -> np.ndarray:
-    x_inc = pd.DataFrame(columns=list(range(past_ticks)))
-    x_spread = pd.DataFrame(columns=list(range(past_ticks)))
+@dataclass
+class FeatureBuilder:
+    base: Currency
+    quote: Currency
+    path: str = f"{ROOT_DIR}/data/"
 
-    global row
-    row = 0
+    def build(
+        self,
+        freqs: List[int],
+        obs_ahead: int,
+        period: Tuple[str, str] = None, 
+        pair: Tuple[Currency, Currency] = None
+    ):
+        dl = data_loader.DataLoader(self.base, self.quote, self.path + "raw/")
+        df_inc = dl.read(period)[['increment']]
+        df = get_features(df_inc.increment, freqs)
+        
+        # Merge As Of if there is a new currency pair
+        if pair is not None:
+            dl = data_loader.DataLoader(*pair, self.path + "raw/")
+            df_aux = dl.read(period)['increment']
+            df_aux = get_features(df_aux, freqs)
+            df = pd.merge_asof(df, df_aux, left_index=True, right_index=True)
 
-    def compute(window, df):
-        global row
-        df.loc[row, :] = window.values
-        row += 1    
-        return 1
-    
-    data.increment.rolling(past_ticks).apply(compute, kwargs={'df': x_inc})
-    row = 0
-    data.spread.rolling(past_ticks).apply(compute, kwargs={'df': x_spread})
-    x = pd.concat([x_inc, x_spread], axis=1)
-    y = data.loc[past_ticks + ticks_ahead - 1:].increment
-    return x, y
+        first_obs = df.reset_index().time.diff(max(freqs)) < timedelta(hours=1)
+        last_obs = df.reset_index().time.diff(-obs_ahead) > timedelta(hours=-1)
+        mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
+        X = df[mask[0]]
+        y = df_inc.diff(-obs_ahead)[mask[0]]
+        return X, y
 
 
-def get_xy_nonoverlapping(
-    data: pd.DataFrame, 
-    past_ticks: int, 
-    ticks_ahead: int
-) -> np.ndarray:
-    l = data.shape[0]
-    total_ticks = past_ticks + ticks_ahead
-    n_samples = l // total_ticks
-    to_del = l % total_ticks
-    if to_del > 0: data = data[:-to_del]
-    incs = data.increment.values.reshape((n_samples, -1))
-    spreads = data.spread.values.reshape((n_samples, -1))
-    x = np.concatenate([incs[:, :past_ticks], spreads[:, :past_ticks]], axis=1)
-    y = data.iloc[total_ticks -1::total_ticks, :].increment
-    return pd.DataFrame(x), y
+def get_features(df: pd.DataFrame, freqs_features: List[int]) -> pd.DataFrame:
+    features = {}
+    for n_obs in freqs_features:
+        features[n_obs] = df.ewm(span=n_obs).mean()
+    df = pd.DataFrame(features)
+    return df

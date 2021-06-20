@@ -1,6 +1,6 @@
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
-from tests.mocks import *
+from mocks import *
 from src.data import constants
 from src.visualization import line_plot, currency_pair, plot_correlations
 from src.scripts import plot_currency_pair, plot_pair_correlations

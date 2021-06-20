@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
 from datetime import datetime, timedelta
-from src.data import constants, utils
-from src.data.constants import Currency
+from . import constants, utils
+from .constants import Currency
+from src.features import get_blocks
 
 import dask.dataframe as dd
 import pandas as pd
@@ -58,7 +59,7 @@ class DataLoader:
 
         # Preprocess
         df = df.compute()
-        df = df[~df.index.duplicated(keep='first')]
+        df = df[~df.time.duplicated(keep='first')]
         
         df['increment'] = df.mid.diff() * tick_size
         df['spread'] = df['spread'] * tick_size
@@ -77,7 +78,7 @@ class DataLoader:
         df.attrs = {'base': self.base.value, 
                     'quote': self.quote.value, 
                     'scale': tick_size}
-        return df
+        return df.sort_index()
 
     def load_dataset(
         self,
@@ -86,8 +87,9 @@ class DataLoader:
         ticks_ahead: int,
         period: Tuple[Union[str, datetime], 
                       Union[str, datetime]] = None, 
+        is_pandas: bool = False,
         **kwargs
-    ) -> tf.data.Dataset:
+    ) -> Union[pd.DataFrame, tf.data.Dataset]:
         """ Generate a dataset using linspace sampling.
 
         Args:
@@ -98,6 +100,7 @@ class DataLoader:
             ticks_ahead (int): forecasting horizon
             period (Tuple): start and end date of the period to consider. 
             Defaults to None, which consider the whole period available.
+            is_pandas (bool): Whether to return pandas dataframe or tf.Dataset
             **kwargs: Arguments to pass to generator sampler. For example, the 
             threshold for CUSUM filter.
 
@@ -106,23 +109,75 @@ class DataLoader:
         """
         # Get the data
         df = self.read(period)
+        
+        if is_pandas:
+            return self._load_df_dataset(df, gen_method, past_ticks,
+                                         ticks_ahead, **kwargs)
+        else:
+            return self._load_tf_dataset(df, gen_method, past_ticks,
+                                         ticks_ahead, **kwargs)
+        
+    def _load_df_dataset(
+        self,
+        df: pd.DataFrame,
+        gen_method: str,
+        past_ticks: int, 
+        ticks_ahead: int,
+        **kwargs
+    ) -> pd.DataFrame:
+        if gen_method == 'linspace':
+            log.info("Linspace sampling is used.")
+            if ('overlapping' in kwargs) and kwargs['overlapping']:
+                raise("This option has not been implemented.")
+            else:
+                df = df.reset_index()
+                df['select'] = (df.time.diff() < timedelta(hours=1)).values
+                xs, ys = [], []
+                while df.shape[0] > past_ticks + ticks_ahead:
+                    id_next = df.iloc[1:, :].select.idxmin()
+                    if ('overlapping' in kwargs) and kwargs['overlapping']:
+                        x, y = get_blocks.get_xy_overlapping(
+                            df.iloc[:id_next, :], past_ticks, ticks_ahead)
+                    else:
+                        x, y = get_blocks.get_xy_nonoverlapping(
+                            df.iloc[:id_next, :], past_ticks, ticks_ahead)
+                    xs.append(x)
+                    ys.append(y)
+                    df = df.iloc[id_next:, :]
+                return pd.concat(xs), pd.concat(ys)
 
+        else:
+            raise NotImplementedError(f"The generator method \'{gen_method}\' "
+                                      f"is not implemented for returning a "
+                                      f"pd.DataFrame.")
+    def _load_tf_dataset(
+        self,
+        data: pd.DataFrame,
+        gen_method: str,
+        past_ticks: int, 
+        ticks_ahead: int,
+        **kwargs
+    ) -> tf.data.Dataset:
         if gen_method == 'linspace':
             log.info("Linspace sampling is used.")
             generator = self._linspace_generator
-            args = [df, past_ticks, ticks_ahead]
+            if ('overlapping' in kwargs) and kwargs['overlapping']:
+                step = 1
+            else:
+                step = past_ticks + ticks_ahead  
+            args = [data, past_ticks, ticks_ahead, step]
         elif gen_method == 'event_based':
             log.info("Event-based sampling is used.")
             generator = self._event_based_generator
-            args = [df, past_ticks, ticks_ahead]
+            args = [data, past_ticks, ticks_ahead]
             if 'h' in kwargs.keys(): 
                 args.append(kwargs['h'])
             else:
                 log.info(f"A dynamic threshold will be used with daily "
-                             "volatility estimates.")
+                          "volatility estimates.")
         else:
             raise NotImplementedError(f"The generator method \'{gen_method}\' "
-                                      "is not implemented.")
+                                      f"is not implemented.")
             
         ds = tf.data.Dataset.from_generator(
             generator, args=args, 
@@ -159,14 +214,16 @@ class DataLoader:
         self, 
         df: pd.DataFrame, 
         past_ticks: int, 
-        ticks_ahead: int
+        ticks_ahead: int,
+        step: int = 1
     ) -> Tuple[tf.Tensor, tf.Tensor]:
+        i = past_ticks - 1
         total_ticks = past_ticks + ticks_ahead
-        n_samples = df.shape[0] - total_ticks + 1  # with overlapping instances
-        for i in range(n_samples):
-            x = tf.constant(df[i:i+past_ticks, :].ravel('F'))
-            y = tf.constant(df[i+total_ticks-1, -1])
+        while i + ticks_ahead < df.shape[0]:
+            x = tf.constant(df[i-past_ticks:i+1, :].ravel('F'))
+            y = tf.constant(df[i+total_ticks, -1])
             yield x, y
+            i += step
 
 
 def get_daily_volatility(price: pd.Series, span: int = 100):

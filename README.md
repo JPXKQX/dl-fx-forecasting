@@ -133,18 +133,44 @@ Project Organization
     │   ├── __init__.py    <- Makes src a Python module
     │   │
     │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
+    │   │   ├── __init__.py
+    │   │   ├── data_extract.py
+    │   │   ├── data_loader.py
+    │   │   ├── data_preprocess.py
+    │   │   ├── utils.py
+    │   │   └── constants.py
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
+    │   │   ├── __init__.py
+    │   │   ├── get_blocks.py
     │   │   └── build_features.py
     │   │
     │   ├── models         <- Scripts to train models and then use trained models to make
     │   │   │                 predictions
+    │   │   ├── __init__.py
+    │   │   ├── neural_network.py
     │   │   ├── predict_model.py
     │   │   └── train_model.py
     │   │
+    │   ├── scripts        <- Scripts to create CLI entrypoints
+    │   │   ├── __init__.py
+    │   │   ├── click_utils.py
+    │   │   ├── generate_datasets.py
+    │   │   ├── plot_currency_pair.py
+    │   │   └── plot_pair_correlations.py
+    │   │
     │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
+    |       ├── __init__.py
+    |       ├── line_plot.py
+    |       ├── plot_correlations.py
+    │       └── currency_pair.py
+    │  
+    ├── tests
+    │   ├── data           <- Data needed to test the functionalities.
+    │   ├── mocks.py
+    │   ├── test_cli_scripts.py
+    │   ├── test_dataset_generation.py
+    │   └── test_visualization.py
     │
     └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
 
