@@ -40,7 +40,7 @@ class MultiLayerPerceptron:
         n_features = X.shape[1] if len(X.shape) > 1 else 1
         n_labels = y.shape[1] if len(y.shape) > 1 else 1
         self.compile(n_features, n_labels)
-        early = EarlyStopping(self.loss, patience=patience)
+        early = EarlyStopping("loss", patience=patience)
         return self.model.fit(X, y, epochs=epochs, verbose=2, callbacks=[early])
 
     def predict(self, X):
