@@ -1,10 +1,7 @@
 from src.data.constants import Currency, ROOT_DIR
 from src.models.model_selection import ModelTrainer
 from src.models import model_utils
-from neural_network import MultiLayerPerceptron
-from sklearn import linear_model
-from sklearn.ensemble import RandomForestRegressor
-from typing import Tuple, Dict, List, NoReturn, Union
+from typing import Tuple, List, NoReturn, Union
 
 import logging
 
@@ -53,7 +50,7 @@ def train_regressions_raw_data(
     if isinstance(future_obs, int):
         future_obs = [future_obs]
 
-    models = model_utils.read_yaml(models_path + models_file + ".yaml")
+    models = model_utils.read_yaml_models(models_path + models_file + ".yaml")
 
     for n_past in past_obs:
         for n_fut in future_obs:
@@ -71,31 +68,6 @@ if __name__ == '__main__':
         filename=ROOT_DIR + "/logs/training.log",
         format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
-    models = {
-        'LinearRegression': {
-            'model': linear_model.LinearRegression
-        }, 'ElasticNet': {
-            'model': linear_model.ElasticNet, 
-            'params': {'alpha': [0, 0.2, 0.4, 0.5, 1],
-                       'l1_ratio': [0, 0.25, 0.5, 0.75, 1]}
-        }, 'MultiLayerPerceptron': {
-            'model': MultiLayerPerceptron,
-            'params': {
-                'n_neurons': [
-                    (32, 64, 128, 64, 32), 
-                    (32, 64, 32), 
-                    (32, 128, 32)],
-                'f_act': ['relu', 'sigmoid', 'tanh']
-            }
-        }, 'RandomForest': {
-            'model': RandomForestRegressor,
-            'params': {
-                'n_estimators': [75, 100, 150, 200],
-                'max_depth': [6, 10, 15, 20],
-                'min_samples_leaf': [35, 50, 75, 100]
-            }
-        }
-    }
     train_period = '2020-04-06', '2020-04-11'
     test_period = '2020-04-12', '2020-04-18'
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
