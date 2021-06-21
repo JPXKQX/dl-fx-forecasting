@@ -72,7 +72,7 @@ class ModelTrainer:
 
     def get_num_prev_obs(self) -> int:
         if self.get_features:
-            return map(self.freqs_features)
+            return max(self.freqs_features)
         else:
             return self.freqs_features
 
