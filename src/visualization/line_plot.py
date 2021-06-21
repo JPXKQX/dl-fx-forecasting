@@ -49,7 +49,7 @@ class PlotCurrencyPair:
     def show_dataframes(self, dfs: List[dd.DataFrame]) -> NoReturn:
         fig = make_subplots(
             rows=len(self.freqs), cols=1, shared_xaxes=True,
-            subplot_titles=[constants.var2label(self.var)] + \
+            subplot_titles=[constants.var2label[self.var].capitalize()] + \
                 [""] * len(self.freqs[:-1]), 
             vertical_spacing=0.12)
         fig.update_annotations(font_size=20)

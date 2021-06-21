@@ -95,8 +95,9 @@ class PlotACFCurreny:
         df_c = DataLoader(self.currency, base_curr, self.path).read(period)
         pair = df_c.attrs['base'] + "/" + df_c.attrs['quote']
         df_c = df_c[self.varname].resample(self.agg_frame).mean().dropna()
+        df_c = df_c / df_c.std()
         data = base_df.merge(df_c, left_index=True, right_index=True)
-        values = correlate(data.iloc[:, 0], data.iloc[:, 1])
+        values = correlate(data.iloc[:, 0], data.iloc[:, 1]) / df_c.shape[0]
         idx = np.arange(-self.nlags // 2, self.nlags // 2 + 1)
         l = len(values) // 2
         y = values[l - self.nlags // 2: self.nlags // 2 - l]
@@ -121,6 +122,7 @@ class PlotACFCurreny:
         df = DataLoader(self.currency, base, self.path).read(period)
         ref_pair = df.attrs['base'] + "/" + df.attrs['quote']
         df = df[[self.varname]].resample(self.agg_frame).mean().dropna()
+        df = df / df.std()
 
         # Get params of subplots
         specs = None

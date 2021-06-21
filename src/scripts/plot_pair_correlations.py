@@ -22,7 +22,7 @@ AGG_FRAMES = click.Choice(['H', 'S'], case_sensitive=False)
 @click.option('--data_path', default=f"{constants.ROOT_DIR}/data/raw/", 
               type=click.STRING, help="Path to the folfer containing the "
               "different currency pairs.", metavar="<str>")
-def main_corr(var, agg_frame, period, data_path):
+def main_corrs(var, agg_frame, period, data_path):
     """ Plot the heatmap of the correlation between the different currency 
     pairs.
 

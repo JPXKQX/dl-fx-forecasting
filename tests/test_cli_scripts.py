@@ -58,7 +58,7 @@ def test_cli_heatmap(mocker: MockerFixture):
     )
     runner = CliRunner()
     result = runner.invoke(
-        plot_pair_correlations.main_corr, ['mid', '--agg_frame', 'S'])
+        plot_pair_correlations.main_corrs, ['mid', '--agg_frame', 'S'])
     
     assert result.exit_code == 0
 
