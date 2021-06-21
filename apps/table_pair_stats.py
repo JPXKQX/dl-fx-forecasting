@@ -67,6 +67,7 @@ app.layout = html.Div([
                     {'label': 'Mid prices', 'value': 'mid'},
                     {'label': 'Spread', 'value': 'spread'}
                 ],
+                clearable=False,
                 value='increment'
             )
             ], style=dict(width='40%', display='inline-block'))
