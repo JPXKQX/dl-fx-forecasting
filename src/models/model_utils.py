@@ -34,7 +34,7 @@ def read_yaml_models(filename: Union[str, Path]) -> Dict:
     for key, value in json.items():
         if 'model' in value:
             try:
-                json[key]['model'] = str2model(value['model'])
+                json[key]['model'] = str2model[value['model']]
                 log.debug(f"Model {value['model']} was obtained successfully.")
             except KeyError as e:
                 log.error(e)
