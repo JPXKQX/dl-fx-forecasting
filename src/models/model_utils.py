@@ -31,7 +31,7 @@ def read_yaml_models(filename: Union[str, Path]) -> Dict:
             log.error(e)
             raise e
     
-    for key, value in json.item():
+    for key, value in json.items():
         if 'model' in value:
             try:
                 json[key]['model'] = str2model(value['model'])

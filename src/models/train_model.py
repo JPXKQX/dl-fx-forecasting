@@ -23,7 +23,7 @@ def train_regressions_features(
     if isinstance(future_obs, int):
         future_obs = [future_obs]
 
-    models = model_utils.read_yaml(models_path + models_file + ".yaml")
+    models = model_utils.read_yaml_models(models_path + models_file + ".yaml")
 
     for n_fut in future_obs:
         log.info(f"Modeling increments in price using last {max(freqs)} "
