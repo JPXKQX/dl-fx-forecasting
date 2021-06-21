@@ -11,7 +11,7 @@ import pandas as pd
 import yaml
 import logging
 import os
-import pickle
+import dill as pickle
 
 
 log = logging.getLogger("Model trainer")
@@ -150,7 +150,12 @@ class ModelTrainer:
         with open(path + f"test_{filename}.yml", 'w') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)
 
-        # Save evaluated model.
-        log.debug(f"Saving model {name_model} to {path}{filename}.pkl")
-        with open(path + f"{filename}.pkl", 'wb') as f:
-            pickle.dump(model, f)
+        attr = getattr(model, "save", None)
+        if callable(attr):            
+            log.debug(f"Saving model {name_model} to {path}{filename}.h5")
+            model.save(filename, path)
+        else:
+            # Save evaluated model.
+            log.debug(f"Saving model {name_model} to {path}{filename}.pkl")
+            with open(path + f"{filename}.pkl", 'wb') as f:
+                pickle.dump(model, f)
