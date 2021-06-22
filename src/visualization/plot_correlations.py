@@ -8,6 +8,7 @@ from scipy.signal import correlate
 from statsmodels.tsa.stattools import acf
 
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 import numpy as np
 import logging
 
@@ -71,6 +72,8 @@ class PlotCorrelationHeatmap:
                 'font_size': 24, 
                 'xanchor': 'left'
             }, xaxis=dict(side='top', tickfont_size=18), 
+            plot_bgcolor= 'rgba(0, 0, 0, 0)',
+            paper_bgcolor= 'rgba(0, 0, 0, 0)',
             yaxis=dict(autorange='reversed', tickfont_size=18))
         fig.show()
 
@@ -104,7 +107,8 @@ class PlotACFCurreny:
         
         row, col = n_subplot // 2, (n_subplot % 2) +1
         annot_pos = row - 1 if n_cols == 1 else 2 * row + col - 3
-        fig['layout'].annotations[annot_pos].update(text=f"with {pair}")
+        fig['layout'].annotations[annot_pos].update(text=f"with {pair}", 
+                                                    font_size=28)
         fig.add_trace(go.Scatter(x=idx, y=y), row=row, col=col)
         return fig
 
@@ -145,7 +149,8 @@ class PlotACFCurreny:
         df_acf = acf(df, nlags=self.nlags)
         fig.add_trace(go.Scatter(x=np.arange(self.nlags+1), y=df_acf), row=1, 
                       col=1)
-        fig['layout'].annotations[0].update(text=f"with {ref_pair} (ACF)")
+        fig['layout'].annotations[0].update(text=f"with {ref_pair} (ACF)",
+                                            font_size=28)
         for i, currency in enumerate(currencies, start=first_subplot):
             fig = self._plot_acf(fig, df, currency, step_subplots * i, cols,
                                  period)
@@ -153,7 +158,14 @@ class PlotACFCurreny:
         last_ax = f'xaxis{len(currencies)+1}'
         fig['layout'][last_ax].update(title_text=f'Lag')
         fig.update_layout(showlegend=False)
-        fig.update_layout(title={
-            "text": f"Cross-Correlation of {ref_pair}{utils.period2str(period)}", 
-            "font_size": 28})
+        fig.update_layout(
+            title={
+                "text": 
+                    f"Cross-Correlation of {ref_pair}{utils.period2str(period)}", 
+                "font_size": 32
+            },
+            font_size=24,
+            template='simple_white',
+            plot_bgcolor='rgba(0, 0, 0, 0)',
+            paper_bgcolor= 'rgba(0, 0, 0, 0)',)
         fig.show()
