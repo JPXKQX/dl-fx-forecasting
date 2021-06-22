@@ -109,13 +109,15 @@ class PlotCoefsModel:
                         vmin=-4, vmax=4, cbar_ax=None if i else cbar_ax,
                         yticklabels=["EURGBP", "GBPJPY"], 
                         xticklabels=features)
+            ax.set_yticklabels(ax.get_yticks(), size = 24)
+            ax.set_xticklabels(ax.get_xticks(), size = 24)
 
         for i, mo in enumerate(models):
-            axs[0, i].set_title(mo)
-            axs[-1, i].set_xlabel("Span of features")
+            axs[0, i].set_title(mo, fontsize=28)
+            axs[-1, i].set_xlabel("Span of features", fontsize=28)
             
         for i, next_o in enumerate(obs_aheads):
-            axs[i, 0].set_ylabel(f"Next {next_o} observations")
+            axs[i, 0].set_ylabel(f"Next {next_o} observations", fontsize=28)
         
         plt.xticks(rotation=90)
         fig.tight_layout(rect=[0, 0, .9, 1])

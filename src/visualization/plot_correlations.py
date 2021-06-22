@@ -1,3 +1,4 @@
+from timeit import main
 from src.data import utils, constants
 from src.data.constants import Currency
 from src.data.data_loader import DataLoader
