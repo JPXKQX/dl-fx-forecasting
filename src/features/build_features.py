@@ -38,7 +38,7 @@ class FeatureBuilder:
         last_obs = df.reset_index().time.diff(-obs_ahead) > timedelta(hours=-1)
         mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
         X = df[mask[0]]
-        y = df_inc.diff(-obs_ahead)[mask[0]]
+        y = df_inc.shift(-obs_ahead)[mask[0]]
         return X, y
 
 
