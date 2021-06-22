@@ -43,7 +43,7 @@ class FeatureBuilder:
         last_obs = df.reset_index().time.diff(-obs_ahead) > timedelta(hours=-1)
         mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
         X = df[mask[0]]
-        y = df_base.increment.rolling(obs_ahead).sum().shift(-obs_ahead+1)[mask[0]]
+        y = df_base.increment.rolling(obs_ahead).sum().shift(-obs_ahead)[mask[0]]
         return X, y
 
 
