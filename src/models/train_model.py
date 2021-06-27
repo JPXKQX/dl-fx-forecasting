@@ -23,7 +23,7 @@ def train_regressions_features(
     if isinstance(future_obs, int):
         future_obs = [future_obs]
 
-    models = model_utils.read_yaml_models(models_path + models_file + ".yaml")
+    models = model_utils.read_yaml_models(models_path + models_file + ".yml")
 
     for n_fut in future_obs:
         log.info(f"Modeling increments in price using last {max(freqs)} "
@@ -50,7 +50,7 @@ def train_regressions_raw_data(
     if isinstance(future_obs, int):
         future_obs = [future_obs]
 
-    models = model_utils.read_yaml_models(models_path + models_file + ".yaml")
+    models = model_utils.read_yaml_models(models_path + models_file + ".yml")
 
     for n_past in past_obs:
         for n_fut in future_obs:
@@ -68,16 +68,13 @@ if __name__ == '__main__':
         filename=ROOT_DIR + "/logs/training.log",
         format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
-    train_period = '2020-04-06', '2020-04-11'
+    train_period = '2020-04-05', '2020-04-11'
     test_period = '2020-04-12', '2020-04-18'
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
-    
+
     train_regressions_features(
-        Currency.EUR, Currency.GBP, "initial_models", freqs, [10, 20], 
-        train_period, test_period, (Currency.GBP, Currency.JPY))
-    #train_regressions_features(
-    #    Currency.EUR, Currency.USD, models, freqs, [5, 10, 20], 
-    #    train_period, test_period, (Currency.EUR, Currency.JPY))
-    #train_regressions_features(
-    #    Currency.GBP, Currency.USD, models, freqs, [5, 10, 20], 
-    #    train_period, test_period, (Currency.USD, Currency.MXN))
+        Currency.EUR, Currency.GBP, "regressions", freqs, [5, 10, 20], 
+        train_period, test_period, (Currency.GBP, Currency.USD))
+    train_regressions_features(
+        Currency.EUR, Currency.GBP, "mlp", freqs, [5, 10, 20], 
+        train_period, test_period, (Currency.GBP, Currency.USD))
