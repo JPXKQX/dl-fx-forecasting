@@ -5,7 +5,7 @@ from .model_utils import evaluate_predictions
 
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from dataclasses import dataclass
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Union
 
 import pandas as pd
 import yaml
@@ -39,34 +39,25 @@ class ModelTrainer:
     """
     base: Currency
     quote: Currency    
-    freqs_features: List[int]
+    freqs_features: Union[int,List[int]]
     future_obs: int
     train_period: Tuple[str, str]
     test_period: Tuple[str, str]
     get_features: bool = True
-    aux_pair: Tuple[Currency, Currency] = None
+    aux_pair: Tuple[Currency, ...] = None
 
     def __post_init__(self):
         # Get fold to cross validation
         self.tscv = TimeSeriesSplit(n_splits=5)
-        if self.get_features:
-            log.debug("Loading instances using feature selection.")
-            fb = FeatureBuilder(self.base, self.quote)
-            self.X_train, self.y_train = fb.build(
-                self.freqs_features, self.future_obs, self.train_period,
-                self.aux_pair)
-            self.X_test, self.y_test = fb.build(
-                self.freqs_features, self.future_obs, self.test_period,
-                self.aux_pair)
-        else:
-            log.debug("Loading the instances using all past increments.")
-            dl = DataLoader(self.base, self.quote)
-            self.X_train, self.y_train = dl.load_dataset(
-                'linspace', max(self.freqs_features), self.future_obs,  
-                self.train_period, is_pandas=True, overlapping=False)
-            self.X_test, self.y_test = dl.load_dataset(
-                'linspace', max(self.freqs_features), self.future_obs, 
-                self.test_period, is_pandas=True, overlapping=False)
+        fb = FeatureBuilder(self.base, self.quote)
+        
+        self.X_train, self.y_train = fb.build(
+            self.freqs_features, self.future_obs, self.train_period,
+            self.aux_pair)
+        self.X_test, self.y_test = fb.build(
+            self.freqs_features, self.future_obs, self.test_period,
+            self.aux_pair)
+
         log.info(f"Train({self.X_train.shape[0]}) and test"
                  f"({self.X_test.shape[0]}) datasets have been loaded")
 
@@ -84,6 +75,7 @@ class ModelTrainer:
                 self.select_and_train_model(model, name)
             else:
                 self.train_model(model, name)
+
     def train_model(self, model, name: str):
         # Train models
         mo = model['model']()
@@ -106,12 +98,12 @@ class ModelTrainer:
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
 
         # Save results of model selection.
-        pair = f"{self.base.value}{self.quote.value}"
-        path = f"{ROOT_DIR}/models/{model_name}/{pair}/"
+        path = self.get_output_folder(model_name)
         os.makedirs(path, exist_ok=True)
         n_prev_obs = self.get_num_prev_obs()
-        results.to_csv(f"{path}model_sel_{model_name}_{pair}_{n_prev_obs}-"
-                       f"{self.future_obs}_{train_date}.csv")
+        results.to_csv(f"{path}model_sel_{model_name}_{self.base.value}"
+                       f"{self.quote.value}_{n_prev_obs}-{self.future_obs}_"
+                       f"{train_date}.csv")
         return clf.best_estimator_
 
     def save_model_results(self, model, name_model):
@@ -139,10 +131,9 @@ class ModelTrainer:
             }
         }
         if self.get_features: data['features'] = self.freqs_features
-        pair = self.base.value + self.quote.value
         filename = f'{name_model}_{self.base.value}{self.quote.value}_' \
                    f'{n_prev_obs}-{self.future_obs}_{train_date}'
-        path = f"{ROOT_DIR}/models/{name_model}/{pair}/"
+        path = self.get_output_folder(name_model)
         os.makedirs(path, exist_ok=True)
 
         # Save results.
@@ -159,3 +150,13 @@ class ModelTrainer:
             log.debug(f"Saving model {name_model} to {path}{filename}.pkl")
             with open(path + f"{filename}.pkl", 'wb') as f:
                 pickle.dump(model, f)
+
+    def get_output_folder(self, model_name) -> str:
+        which = "features" if self.get_features else "raw"
+        if self.aux_pair:
+            aux = "".join(map(lambda x: x.value, self.aux_pair))
+        else:
+            aux = "no_aux"
+        folder = f"{ROOT_DIR}/models/{which}/{model_name}/{self.base.value}" \
+                 f"{self.quote.value}/{aux}/"
+        return folder

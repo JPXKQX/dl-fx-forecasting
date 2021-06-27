@@ -30,36 +30,8 @@ def train_regressions_features(
                  f"observations to forecast the increment in {n_fut} "
                  f"observations ahead.")
         mt = ModelTrainer(base, quote, freqs, n_fut, train_period, 
-                          test_period, aux_pair=aux_pair)
+                          test_period, get_features=True, aux_pair=aux_pair)
         mt.train(models)
-
-
-def train_regressions_raw_data(
-    base: Currency,
-    quote: Currency,
-    models_file: str,
-    past_obs: Union[int, List[int]],
-    future_obs: Union[int, List[int]],
-    train_period: Tuple[str, str], 
-    test_period: Tuple[str, str],
-    models_path: str = ROOT_DIR + "/models/configurations/"
-) -> NoReturn:
-    if isinstance(past_obs, int):
-        past_obs = [past_obs]
-
-    if isinstance(future_obs, int):
-        future_obs = [future_obs]
-
-    models = model_utils.read_yaml_models(models_path + models_file + ".yml")
-
-    for n_past in past_obs:
-        for n_fut in future_obs:
-            log.info(f"Modeling increments in price using last {n_past} "
-                     f"observations to forecast the increment in {n_fut} "
-                     f"observations ahead.")
-            mt = ModelTrainer(base, quote, n_past, n_fut, train_period, 
-                              test_period)
-            mt.train(models)
 
 
 if __name__ == '__main__':
@@ -74,7 +46,7 @@ if __name__ == '__main__':
 
     train_regressions_features(
         Currency.EUR, Currency.GBP, "regressions", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.GBP, Currency.USD))
+        train_period, test_period, (Currency.USD))
     train_regressions_features(
         Currency.EUR, Currency.GBP, "mlp", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.GBP, Currency.USD))
+        train_period, test_period, (Currency.USD))
