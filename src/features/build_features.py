@@ -121,7 +121,7 @@ class FeatureBuilder:
             product(["mid", "increment"], df.attrs['pairs'])), axis=1).dropna()
 
 
-    def run(
+    def build(
         self,
         freqs: List[int],
         obs_ahead: int,
