@@ -77,6 +77,7 @@ class DataLoader:
         
         df.attrs = {'base': self.base.value, 
                     'quote': self.quote.value, 
+                    'pair': self.pair.value + self.quote.value,
                     'scale': tick_size}
         return df.sort_index()
 
