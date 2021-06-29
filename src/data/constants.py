@@ -3,7 +3,7 @@ from enum import Enum
 import os
 import pytz
 
-ROOT_DIR = os.path.dirname(os.path.abspath("setup.py"))
+ROOT_DIR = os.getenv('ROOT_DIR', os.path.dirname(os.path.abspath("setup.py")))
 PATH_RAW_DATA = os.getenv('PATH_RAW_DATA')
 
 months = ["None",
