@@ -1,0 +1,16 @@
+#PBS -lwalltime=48:00:00
+#PBS -lselect=1:ncpus=4:mem=8gb
+
+module load anaconda3/personal
+
+conda install -c conda-forge pyarrow
+
+
+pip install -r $HOME/dl_fx_forecasting/requirements.txt
+
+export ROOT_DIR=$HOME/dl_fx_forecasting
+
+python $HOME/dl_fx_forecasting/src/models/train_model.py
+
+mkdir $WORK/$PBS_JOBID
+cp * $WORK/$PBS_JOBID
