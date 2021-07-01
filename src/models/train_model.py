@@ -17,7 +17,7 @@ def train_regressions_features(
     future_obs: Union[int, List[int]],
     train_period: Tuple[str, str], 
     test_period: Tuple[str, str],
-    aux_pair: Tuple[Currency, Currency] = None,
+    aux_pair: Tuple[Currency, ...] = None,
     models_path: str = ROOT_DIR + "/models/configurations/"
 ) -> NoReturn:
     if isinstance(future_obs, int):
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     train_regressions_features(
         Currency.EUR, Currency.GBP, "regressions", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.USD))
+        train_period, test_period, (Currency.USD, ))
     train_regressions_features(
         Currency.EUR, Currency.GBP, "mlp", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.USD))
+        train_period, test_period, (Currency.USD, ))
