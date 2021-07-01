@@ -164,7 +164,8 @@ class FeatureBuilder:
         mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
         indices = mask.where(mask).dropna().index 
         X = df[mask[0]]
-        y = incs.increment.rolling(obs_ahead).sum().shift(-obs_ahead)[indices]
+        fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
+        y = fut_inc.loc[indices]
         return X, y
 
 

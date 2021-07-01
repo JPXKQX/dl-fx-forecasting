@@ -15,6 +15,7 @@ def test_line_plot(mocker: MockerFixture):
     line_plot.PlotCurrencyPair(
         Currency.EUR,
         Currency.USD,
+        'increment',
         ['S', None]
     ).run()
     
