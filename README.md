@@ -56,7 +56,7 @@ This data is processed by the following command, which computes the mid price an
 Then, plot the currency pair *EUR/USD* for the period from 25 May, 202 to 30 May, 2020.
 
 ```
-plot_currency_pair eur usd H T S --period 2020-05-25 2020-05-31
+plot_currency_pair eur usd mid H T S --period 2020-05-25 2020-05-31
 ```
 
 To get the following image,

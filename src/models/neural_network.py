@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.callbacks import EarlyStopping
 from typing import List, Union, NoReturn
@@ -40,7 +40,7 @@ class MultiLayerPerceptron:
         n_features = X.shape[1] if len(X.shape) > 1 else 1
         n_labels = y.shape[1] if len(y.shape) > 1 else 1
         self.compile(n_features, n_labels)
-        early = EarlyStopping(self.loss, patience=patience)
+        early = EarlyStopping("loss", patience=patience)
         return self.model.fit(X, y, epochs=epochs, verbose=2, callbacks=[early])
 
     def predict(self, X):
@@ -57,4 +57,9 @@ class MultiLayerPerceptron:
         self.__post_init__()
         return self
 
-mlp = MultiLayerPerceptron()
+    def save(self, filename: str, path: str):
+        self.model.save(f"{path}/{filename}.h5")
+        
+    def load(self, filename: str):
+        self.model = load_model(filename)
+        print(self.model.summary())

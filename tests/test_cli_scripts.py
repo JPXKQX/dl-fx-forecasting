@@ -16,7 +16,7 @@ def test_cli_line_plot(mocker: MockerFixture):
     )
     runner = CliRunner()
     result = runner.invoke(
-        plot_currency_pair.main, ['eur', 'usd', 'T', 'none'])
+        plot_currency_pair.main, ['eur', 'usd', 'increment', 'T', 'none'])
     
     assert result.exit_code == 0
     assert 'Data is prepared to be shown.' in result.output
@@ -58,7 +58,7 @@ def test_cli_heatmap(mocker: MockerFixture):
     )
     runner = CliRunner()
     result = runner.invoke(
-        plot_pair_correlations.main_corr, ['mid', '--agg_frame', 'S'])
+        plot_pair_correlations.main_corrs, ['mid', '--agg_frame', 'S'])
     
     assert result.exit_code == 0
 

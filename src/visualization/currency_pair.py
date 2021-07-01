@@ -240,8 +240,8 @@ class PlotStatsCurrencyPair:
                 quantiles_stats = df_gropued.quantile(quantiles).unstack()
                 results_df = pd.concat([main_stats, quantiles_stats], axis=1)
                 results_df = results_df.reindex(
-                    ['std', 'min', '0.0005', '0.05', '0.25', '0.5', 'mean',
-                     '0.75', '0.95', '0.9995', 'max'], 
+                    ['std', 'min', 0.0005, 0.05, 0.25, 0.5, 'mean', 0.75, 0.95,
+                     0.9995, 'max'], 
                     axis=1)
                 results[var] = results_df
                 results[var].to_csv(filename)

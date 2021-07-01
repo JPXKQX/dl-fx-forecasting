@@ -1,3 +1,4 @@
+from src.data import constants
 from src.data.constants import Currency
 from src.data.data_loader import DataLoader
 from typing import List, Tuple, Union, NoReturn
@@ -25,6 +26,7 @@ freq2label = {
 class PlotCurrencyPair:
     base: Currency
     quote: Currency
+    var: str
     freqs: List[Union[str, None]] = field(default_factory=lambda: ['D', 'H'])
     path: str = "data/raw/"
 
@@ -47,7 +49,8 @@ class PlotCurrencyPair:
     def show_dataframes(self, dfs: List[dd.DataFrame]) -> NoReturn:
         fig = make_subplots(
             rows=len(self.freqs), cols=1, shared_xaxes=True,
-            subplot_titles=["Mid prices"] + [""] * len(self.freqs[:-1]), 
+            subplot_titles=[constants.var2label[self.var].capitalize()] + \
+                [""] * len(self.freqs[:-1]), 
             vertical_spacing=0.12)
         fig.update_annotations(font_size=20)
 
@@ -55,7 +58,7 @@ class PlotCurrencyPair:
             label = freq2label[self.freqs[i-1]] if self.freqs[i-1] else "No"
             fig.add_trace(
                 go.Scatter(
-                    x=df.index, y=df.mid, 
+                    x=df.index, y=df[self.var], 
                     mode='lines', 
                     name=label),
                 row=i, col=1)
@@ -68,10 +71,8 @@ class PlotCurrencyPair:
                 "yanchor": "top"
             },
             legend_title="Average",
-            font=dict(
-                family="Courier New, monospace",
-                size=18
-            ))
+            font=dict(family="Courier New, monospace", size=18)
+        )
         fig.update_yaxes(title_text=self.quote.value, 
                         title_font={"family": "Courier New, monospace", "size": 20},
                         title_standoff = 20)

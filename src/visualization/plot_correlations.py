@@ -1,3 +1,4 @@
+from timeit import main
 from src.data import utils, constants
 from src.data.constants import Currency
 from src.data.data_loader import DataLoader
@@ -8,6 +9,7 @@ from scipy.signal import correlate
 from statsmodels.tsa.stattools import acf
 
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 import numpy as np
 import logging
 
@@ -71,6 +73,8 @@ class PlotCorrelationHeatmap:
                 'font_size': 24, 
                 'xanchor': 'left'
             }, xaxis=dict(side='top', tickfont_size=18), 
+            plot_bgcolor= 'rgba(0, 0, 0, 0)',
+            paper_bgcolor= 'rgba(0, 0, 0, 0)',
             yaxis=dict(autorange='reversed', tickfont_size=18))
         fig.show()
 
@@ -95,15 +99,17 @@ class PlotACFCurreny:
         df_c = DataLoader(self.currency, base_curr, self.path).read(period)
         pair = df_c.attrs['base'] + "/" + df_c.attrs['quote']
         df_c = df_c[self.varname].resample(self.agg_frame).mean().dropna()
+        df_c = df_c / df_c.std()
         data = base_df.merge(df_c, left_index=True, right_index=True)
-        values = correlate(data.iloc[:, 0], data.iloc[:, 1])
+        values = correlate(data.iloc[:, 0], data.iloc[:, 1]) / df_c.shape[0]
         idx = np.arange(-self.nlags // 2, self.nlags // 2 + 1)
         l = len(values) // 2
         y = values[l - self.nlags // 2: self.nlags // 2 - l]
         
         row, col = n_subplot // 2, (n_subplot % 2) +1
         annot_pos = row - 1 if n_cols == 1 else 2 * row + col - 3
-        fig['layout'].annotations[annot_pos].update(text=f"with {pair}")
+        fig['layout'].annotations[annot_pos].update(text=f"with {pair}", 
+                                                    font_size=28)
         fig.add_trace(go.Scatter(x=idx, y=y), row=row, col=col)
         return fig
 
@@ -121,6 +127,7 @@ class PlotACFCurreny:
         df = DataLoader(self.currency, base, self.path).read(period)
         ref_pair = df.attrs['base'] + "/" + df.attrs['quote']
         df = df[[self.varname]].resample(self.agg_frame).mean().dropna()
+        df = df / df.std()
 
         # Get params of subplots
         specs = None
@@ -143,7 +150,8 @@ class PlotACFCurreny:
         df_acf = acf(df, nlags=self.nlags)
         fig.add_trace(go.Scatter(x=np.arange(self.nlags+1), y=df_acf), row=1, 
                       col=1)
-        fig['layout'].annotations[0].update(text=f"with {ref_pair} (ACF)")
+        fig['layout'].annotations[0].update(text=f"with {ref_pair} (ACF)",
+                                            font_size=28)
         for i, currency in enumerate(currencies, start=first_subplot):
             fig = self._plot_acf(fig, df, currency, step_subplots * i, cols,
                                  period)
@@ -151,7 +159,14 @@ class PlotACFCurreny:
         last_ax = f'xaxis{len(currencies)+1}'
         fig['layout'][last_ax].update(title_text=f'Lag')
         fig.update_layout(showlegend=False)
-        fig.update_layout(title={
-            "text": f"Cross-Correlation of {ref_pair}{utils.period2str(period)}", 
-            "font_size": 28})
+        fig.update_layout(
+            title={
+                "text": 
+                    f"Cross-Correlation of {ref_pair}{utils.period2str(period)}", 
+                "font_size": 32
+            },
+            font_size=24,
+            template='simple_white',
+            plot_bgcolor='rgba(0, 0, 0, 0)',
+            paper_bgcolor= 'rgba(0, 0, 0, 0)',)
         fig.show()

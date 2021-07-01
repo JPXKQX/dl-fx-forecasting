@@ -1,0 +1,5 @@
+site_name: Foreign Exchange (FX) rates forecasting using Deep Learning
+site_url: https://example.com/
+
+theme:
+  name: material

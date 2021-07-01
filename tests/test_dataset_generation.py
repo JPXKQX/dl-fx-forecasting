@@ -104,7 +104,8 @@ class TestDatasetPreparation:
         )
         freqs = [1, 2, 3, 5]
         fb = build_features.FeatureBuilder(Currency.EUR, Currency.USD)
-        X, y = fb.build(freqs, 5, pair=(Currency.EUR, Currency.GBP))
+        X, y = fb.build(freqs, 5, aux_currencies=(Currency.EUR, Currency.GBP),
+                        variables=['increment'])
         assert X.shape[0] == y.shape[0]
         assert X.shape[1] == 2 * len(freqs)
         assert y.shape[1] == 1

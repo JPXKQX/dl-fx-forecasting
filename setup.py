@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='dl-fx-forecasting',
-    packages=find_packages(),
+    packages=find_packages(exclude=['docs', 'tests*']),
     packages_dir = {'': 'src'},
     version='1.0.0',
     description='A Python repository for forecasting mid prices of different Foreign Exchange pairs.',
@@ -16,6 +16,6 @@ setup(
             'plot_stats = src.scripts.plot_currency_pair:main_stats',
             'plot_pair_correlations = src.scripts.plot_pair_correlations:main_corrs',
             'plot_pair_acf = src.scripts.plot_pair_correlations:main_acf'
-]
+        ]
     }
 )

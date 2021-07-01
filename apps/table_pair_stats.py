@@ -67,6 +67,7 @@ app.layout = html.Div([
                     {'label': 'Mid prices', 'value': 'mid'},
                     {'label': 'Spread', 'value': 'spread'}
                 ],
+                clearable=False,
                 value='increment'
             )
             ], style=dict(width='40%', display='inline-block'))
@@ -157,4 +158,4 @@ def cache_data_pair(
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True) 
+    app.run_server(debug=True, use_reloader=False) 
