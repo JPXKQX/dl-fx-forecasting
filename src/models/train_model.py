@@ -29,8 +29,8 @@ def train_regressions_features(
         log.info(f"Modeling increments in price using last {max(freqs)} "
                  f"observations to forecast the increment in {n_fut} "
                  f"observations ahead.")
-        mt = ModelTrainer(base, quote, freqs, n_fut, train_period, 
-                          test_period, get_features=True, aux_pair=aux_pair)
+        mt = ModelTrainer(base, quote, freqs, n_fut, train_period, test_period, 
+                          aux_pair=aux_pair, variables=['increment'])
         mt.train(models)
 
 

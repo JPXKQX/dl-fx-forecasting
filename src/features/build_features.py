@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from itertools import product
 from typing import Tuple, List, Union
 from datetime import timedelta
+
+from numpy.core.fromnumeric import var
 from src.data.constants import Currency, ROOT_DIR
 from src.data import data_loader
 
@@ -116,9 +118,9 @@ class FeatureBuilder:
         df['implicit_increment'] = df['implicit_mid'].diff()
         
         # Drop intermediary data variables
-        return df.drop(map(
+        return df.drop(list(map(
             lambda x: "_".join(x), 
-            product(["mid", "increment"], df.attrs['pairs'])), axis=1).dropna()
+            product(["mid", "increment"], df.attrs['pairs']))), axis=1).dropna()
 
 
     def build(
@@ -127,10 +129,17 @@ class FeatureBuilder:
         obs_ahead: int,
         period: Tuple[str, str] = None, 
         aux_currencies: Tuple[Currency, ...] = None, 
+        variables: List[str] = None,
         quantile: float = None,
     ):
         df, incs = self.load_synchronized(aux_currencies, period)
         df = self.compute_implicit_midprice(df)
+        
+        # Select columns
+        if variables:
+            is_var_chosen = lambda x: any([(v in x) for v in variables])
+            mask = list(filter(is_var_chosen, df.columns.values))
+            df = df.loc[:, mask]
 
         # Filter by dates from 7:00 AM to 7:00 PM
         df['filter'] = df.index.where(df.index.hour.isin(list(range(7, 19))))
@@ -183,7 +192,7 @@ def get_features(
         indices = indices.reshape((n_features, n_variables)).transpose().ravel()
         df = df.iloc[:, list(indices)]
 
-    columns = list(map(lambda x: lambda x: f"{x[0]}_{str(x[1])}", 
+    columns = list(map(lambda x: f"{x[0]}_{str(x[1])}", 
                        zip(df.columns.values, freqs_features * n_vars)))
     df.columns = columns
     return df

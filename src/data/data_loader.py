@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Tuple, Union
 from datetime import datetime, timedelta
-from . import constants, utils
-from .constants import Currency
+from src.data import constants, utils
+from src.data.constants import Currency
 from src.features import get_blocks
 
 import dask.dataframe as dd
@@ -77,7 +77,7 @@ class DataLoader:
         
         df.attrs = {'base': self.base.value, 
                     'quote': self.quote.value, 
-                    'pair': self.pair.value + self.quote.value,
+                    'pair': self.base.value + self.quote.value,
                     'scale': tick_size}
         return df.sort_index()
 

@@ -1,7 +1,6 @@
 from src.features.build_features import FeatureBuilder
-from src.data.data_loader import DataLoader
 from src.data.constants import Currency, ROOT_DIR
-from .model_utils import evaluate_predictions
+from src.models.model_utils import evaluate_predictions
 
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from dataclasses import dataclass
@@ -43,8 +42,8 @@ class ModelTrainer:
     future_obs: int
     train_period: Tuple[str, str]
     test_period: Tuple[str, str]
-    get_features: bool = True
     aux_pair: Tuple[Currency, ...] = None
+    variables: List[str] = None
 
     def __post_init__(self):
         # Get fold to cross validation
@@ -53,16 +52,16 @@ class ModelTrainer:
         
         self.X_train, self.y_train = fb.build(
             self.freqs_features, self.future_obs, self.train_period,
-            self.aux_pair)
+            self.aux_pair, self.variables)
         self.X_test, self.y_test = fb.build(
             self.freqs_features, self.future_obs, self.test_period,
-            self.aux_pair)
+            self.aux_pair, self.variables)
 
         log.info(f"Train({self.X_train.shape[0]}) and test"
                  f"({self.X_test.shape[0]}) datasets have been loaded")
 
     def get_num_prev_obs(self) -> int:
-        if self.get_features:
+        if isinstance(self.freqs_features, list):
             return max(self.freqs_features)
         else:
             return self.freqs_features
@@ -130,7 +129,10 @@ class ModelTrainer:
                 'r2': r2
             }
         }
-        if self.get_features: data['features'] = self.freqs_features
+        if isinstance(self.freqs_features, list): 
+            data['features'] = self.freqs_features
+        if self.variables:
+            data['variables'] = self.variables
         filename = f'{name_model}_{self.base.value}{self.quote.value}_' \
                    f'{n_prev_obs}-{self.future_obs}_{train_date}'
         path = self.get_output_folder(name_model)
