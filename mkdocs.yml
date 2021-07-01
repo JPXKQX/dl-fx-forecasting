@@ -1,5 +1,35 @@
 site_name: Foreign Exchange (FX) rates forecasting using Deep Learning
-site_url: https://example.com/
+site_url: https://JPXKQX.github.io/dl-fx-forecasting
+repo_url: https://github.com/JPXKQX/dl-fx-forecasting
 
 theme:
   name: material
+  palette:
+    primary: grey
+  font:
+    text: Raleway
+    code: Roboto Mono
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+
+copyright: Copyright &copy; 2021 Mario Santa Cruz López
+
+extra:
+  social:
+    - icon: fontawesome/solid/paper-plane
+      link: mailto:mariosanta_cruz@hotmail.com
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/mariosanta98
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/mariosanta-cruz/
+    - icon: fontawesome/brands/github
+      link: https://github.com/JPXKQX
+  alternate:
+  # Switch to Spanish
+  - name: Spanish
+    link: <your-site>/es/
+    lang: es
+
+plugins:
+  - git-revision-date
