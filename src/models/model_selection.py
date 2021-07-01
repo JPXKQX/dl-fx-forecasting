@@ -154,7 +154,7 @@ class ModelTrainer:
                 pickle.dump(model, f)
 
     def get_output_folder(self, model_name) -> str:
-        which = "features" if self.get_features else "raw"
+        which = "features" if isinstance(self.freqs_features, list) else "raw"
         if self.aux_pair:
             aux = "".join(map(lambda x: x.value, self.aux_pair))
         else:
