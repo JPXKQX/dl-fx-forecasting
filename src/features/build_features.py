@@ -39,6 +39,7 @@ class FeatureBuilder:
         self, 
         aux: Currency
     ) -> List[Tuple[Currency, Currency]]:
+        if isinstance(aux, (list, tuple)): aux = aux[0]
         if aux in [self.base, self.quote]:
             raise ValueError("If selecting one auxiliary currency it must be "
                              "different from the base and quote ones because "
@@ -156,7 +157,6 @@ class FeatureBuilder:
             spreads = df['spread'].where(df['spread'] <= quantiles).dropna()
             indices = spreads.index
             df = df.loc[indices]
-
 
         num_prev = max(freqs) if isinstance(freqs, list) else freqs
         first_obs = df.reset_index().time.diff(num_prev) < timedelta(hours=2)
