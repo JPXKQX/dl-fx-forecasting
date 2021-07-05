@@ -2,6 +2,9 @@
 
 <h3 align="center"> Python project for forecasting changes in several Foreign Exchange (FX) pairs. </h3>
 
+![Continuous Integration](https://github.com/JPXKQX/dl-fx-forecasting/actions/workflows/project-ci.yml/badge.svg) ![Build](https://github.com/JPXKQX/dl-fx-forecasting/actions/workflows/project-build.yml/badge.svg) ![Documentation](https://github.com/JPXKQX/dl-fx-forecasting/actions/workflows/documentation.yml/badge.svg)
+
+
 <!-- TABLE OF CONTENTS -->
 <h2 id="table-of-contents"> :book: Table of Contents</h2>
 
@@ -279,16 +282,14 @@ plot_pair_acf increment eur usd --agg_frame 'H' --period 2020-04-01 2020-06-01
 <h2 id="authors"> :bust_in_silhouette: Author</h2>
 
 <div>
-  <section>
-      <img style="float: left" src="reports/images/mario.png" alt="" width=160px id="pic_mario">
-      <p>
-        :man: <b> Mario Santa Cruz López</b> <br>
-        BSc in <strong>Mathematics</strong> at Universidad de Cantabria <br>
-        MSc in <strong>Statistics</strong> at Imperial College London <br>
-        GitHub: <a href="https://github.com/jpxkqx">@jpxkqx</a> <br>
-        LinkedIn: <a href="https://www.linkedin.com/in/mariosanta-cruz/">@mariosanta-cruz</a> <br>
-        Software developer at <a href="https://predictia.es/"> Predictia Intelligent Data Solutions </a> 
-      </p>
-  </section>
+  <img align="left" src="reports/figures/mario.png" alt="" width=180px id="pic_mario">
+  <p style='display:inline;float:right'>
+      :man: <b> Mario Santa Cruz López</b> <br>
+      BSc in <strong>Mathematics</strong> at Universidad de Cantabria <br>
+      MSc in <strong>Statistics</strong> at Imperial College London <br>
+      GitHub: <a href="https://github.com/jpxkqx">@jpxkqx</a> <br>
+      LinkedIn: <a href="https://www.linkedin.com/in/mariosanta-cruz/">@mariosanta-cruz</a> <br>
+      Software developer at <a href="https://predictia.es/"> Predictia Intelligent Data Solutions </a> 
+  </p>
 </div>
 
