@@ -109,7 +109,7 @@ class PlotCoefsModel:
                     model = pickle.load(outfile)
                 coeffs.append(model.coef_.reshape((-1, len(features))))
 
-        fig, axs = plt.subplots(3, 2, figsize=(12, 18), sharex=True, sharey=True)
+        fig, axs = plt.subplots(3, 2, figsize=(12, 7), sharex=True, sharey=True)
         c_max, c_min = np.array(coeffs).max(), np.array(coeffs).min()
         cbar_ax = fig.add_axes([.91, .2, .03, .6])
         for i, ax in enumerate(axs.flat):
