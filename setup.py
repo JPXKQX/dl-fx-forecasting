@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='dl-fx-forecasting',
-    packages=find_packages(exclude=['docs', 'tests*']),
+    packages=find_packages(exclude=['docs', 'tests*', 'notebooks']),
     packages_dir = {'': 'src'},
     version='1.0.0',
     description='A Python repository for forecasting mid prices of different Foreign Exchange pairs.',
