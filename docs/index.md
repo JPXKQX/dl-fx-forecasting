@@ -1,10 +1,32 @@
-DL FX Forecasting
-==============================
+<h1 align="center"> DL FX Forecasting </h1>
 
-Python project for forecasting mid prices of different Foreign Exchange pairs.
+<h3 align="center"> Python project for forecasting changes in several Foreign Exchange (FX) pairs. </h3>
 
-## Run
--------------
+![Continuous Integration](https://github.com/JPXKQX/dl-fx-forecasting/actions/workflows/project-ci.yml/badge.svg) ![Build](https://github.com/JPXKQX/dl-fx-forecasting/actions/workflows/project-build.yml/badge.svg) ![Documentation](https://github.com/JPXKQX/dl-fx-forecasting/actions/workflows/documentation.yml/badge.svg)
+
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+<!-- ABOUT THE PROJECT -->
+##  About the project :blue_book:
+
+FX rates forecasting in ultra high frequency setting, using Deep Learning techniques. The main focus of the research is to predict the increments in the next few seconds for a set of different FX pairs.
+
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+<!-- PREREQUISITES -->
+##  Prerequisites  :pushpin:
+
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+
+<!-- ENVIRONMET -->
+## Environment 
 
 Execute the following command to start the container:
 
@@ -23,7 +45,10 @@ _The  path **/path/to/data** refers to the directory containing the data as
 presented in the project organization below. In case all processed information is available, it is possible to execute all scripts._
 
 
-## Data
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+<!-- DATA -->
+<h2 id="data"> :1234: Data</h2>
 
 Read, load, preprocess and save the data for the currency pair specified. To go through this pipeline, the ZIP files have to be in the host machine, and the path to the folder containing this data must be specified as an environment variable called *PATH_RAW_DATA*. The following command process the data available in the host machine for currency pair EUR/USD.
 
@@ -51,7 +76,12 @@ In this case, the historical data has been extracted from [True FX](https://www.
 
 This data is processed by the following command, which computes the mid price and spread and filter some erroneus data points. The processed information is stored using [Apache Parquet](https://parquet.apache.org/) in order to achieve faster reading times.
 
-## Visualizations
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+<!-- VISUALIZATION -->
+<h2 id="visualizations"> :art: Visualizations </h2>
 
 Then, plot the currency pair *EUR/USD* for the period from 25 May, 202 to 30 May, 2020.
 
@@ -61,7 +91,8 @@ plot_currency_pair eur usd mid H T S --period 2020-05-25 2020-05-31
 
 To get the following image,
 
-![Line plot](reports/figures/eurusd_25_30May.png "EUR/USD")
+![Line plot](../reports/figures/eurusd_25_30May.png)
+
 
 There is also the possibility to plot the cumulative distribution function using the following command
 
@@ -71,7 +102,8 @@ plot_cdf eur usd increment --period 2020-04-01 2020-06-01
 
 which gives the image shown below,
 
-![Increment cdf](reports/figures/eurusd_increments_cdf_AprMay.png "EUR/USD")
+![Cumulative Distribution Function](../reports/figures/eurusd_increments_cdf_AprMay.png)
+
 
 
 In order to plot the distribution of the main daily statistic of the spread, the following command can be used.
@@ -80,7 +112,7 @@ In order to plot the distribution of the main daily statistic of the spread, the
 plot_stats eur usd spread D --period 2020-04-01 2020-06-01
 ```
 
-![Daily spread](reports/figures/eurusd_spread_dailystats_Apr_May.png "EUR/USD")
+![Boxplot](../reports/figures/eurusd_spread_dailystats_Apr_May.png)
 
 In addition, the correlation between the different currency pairs aggregated by any timeframe can also be plotted for any given period of time. 
 
@@ -88,7 +120,7 @@ In addition, the correlation between the different currency pairs aggregated by 
 plot_pair_correlations increment --period 2020-04-01 2020-06-01 --agg_frame H
 ```
 
-![Increment correlations](reports/figures/increment_correlations_AprMay.png "Correlations")
+![Correlation](../reports/figures/increment_correlations_AprMay.png)
 
 
 Lastly, the correlation between currency pairs is represented as follows,
@@ -97,11 +129,48 @@ Lastly, the correlation between currency pairs is represented as follows,
 plot_pair_acf increment eur usd --agg_frame 'H' --period 2020-04-01 2020-06-01
 ```
 
-![Cross correlations](reports/figures/increment_eur_acfs_AprMay.png "Correlations")
+![Cross correlations](../reports/figures/increment_eur_acfs_AprMay.png)
 
 
-Project Organization
-------------
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+
+
+
+
+
+<!-- MODELLING -->
+## Modelling
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+
+
+
+
+
+
+
+
+
+<!-- RESULTS -->
+## Results :trophy:
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+
+
+
+
+
+
+
+<!-- PROJECT ORGANIZATION -->
+## Project Organization :open_file_folder:
+
 
     ├── LICENSE
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
@@ -112,18 +181,27 @@ Project Organization
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
     │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
+    ├── docs               <- A deafult MkDocs project.
+    |   └── index.md
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
+    |   ├── configurations <- YAML files with model configurations
+    |   ├── features       <- Contains model selection results, test results and fitted models, under the path
+    |   |                     models/features/{ model }/{ fx_pair }/{ aux_pair}/{ variables concat with _}
+    |   |                     In particular, the models used EWMA's of a fixed number of past observations.
+    │   └── raw            <- Contains model selection results, test results and fitted models, under the path
+    |                         models/features/{ model }/{ fx_pair }/{ aux_pair}/{ variables concat with _}
+    |                         In particular, the models used all the past observations.
     │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
+    ├── notebooks          <- Jupyter notebooks. Containing the results for the training process of diffferent models
+    |   ├── train...hmtl   <- Output code to include in VC.
+    │   └── train...ipynb  <- Python notebooks considered. Not included in VC.
+    |
+    |
     ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
+    │   ├── figures        <- Generated graphics and figures to be used in reporting, README, and docs
+    │   ├── images         <- Generated graphics and figures of EDA. Not included in VC.
+    │   └── models         <- Generated graphics and figures of model results. Not included in VC
     │
     ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
     │                         generated with `pip freeze > requirements.txt`
@@ -149,7 +227,8 @@ Project Organization
     │   │   │                 predictions
     │   │   ├── __init__.py
     │   │   ├── neural_network.py
-    │   │   ├── predict_model.py
+    │   │   ├── model_selection.py
+    │   │   ├── model_utils.py
     │   │   └── train_model.py
     │   │
     │   ├── scripts        <- Scripts to create CLI entrypoints
@@ -163,6 +242,7 @@ Project Organization
     |       ├── __init__.py
     |       ├── line_plot.py
     |       ├── plot_correlations.py
+    |       ├── plot_results.py
     │       └── currency_pair.py
     │  
     ├── tests
@@ -176,3 +256,14 @@ Project Organization
 
 
 
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+<!-- FAQ -->
+## FAQ :question: 
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+
+##References :books: 
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
