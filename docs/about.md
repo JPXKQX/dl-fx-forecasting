@@ -1,4 +1,4 @@
-![Mario]("https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/mario.png?raw=true"){ align=right }
+![Mario](https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/mario.png?raw=true){ align=right }
 
 :man: **Mario Santa Cruz López** :man:
 
