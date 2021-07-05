@@ -1,6 +1,6 @@
 from src.features.build_features import FeatureBuilder
 from src.data.constants import Currency, ROOT_DIR
-from src.models.model_utils import evaluate_predictions
+from src.models.model_utils import evaluate_predictions, save_r2_time_struc
 
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from dataclasses import dataclass
@@ -42,8 +42,9 @@ class ModelTrainer:
     future_obs: int
     train_period: Tuple[str, str]
     test_period: Tuple[str, str]
-    aux_pair: Tuple[Currency, ...] = None
     variables: List[str] = None
+    vars2drop: List[str] = None
+    aux_pair: Tuple[Currency, ...] = None
 
     def __post_init__(self):
         # Get fold to cross validation
@@ -52,10 +53,10 @@ class ModelTrainer:
         
         self.X_train, self.y_train = fb.build(
             self.freqs_features, self.future_obs, self.train_period,
-            self.aux_pair, self.variables)
+            self.aux_pair, self.variables, self.vars2drop)
         self.X_test, self.y_test = fb.build(
             self.freqs_features, self.future_obs, self.test_period,
-            self.aux_pair, self.variables)
+            self.aux_pair, self.variables, self.vars2drop)
 
         log.info(f"Train({self.X_train.shape[0]}) and test"
                  f"({self.X_test.shape[0]}) datasets have been loaded")
@@ -107,8 +108,8 @@ class ModelTrainer:
 
     def save_model_results(self, model, name_model):
         log.debug(f"Obtaining results of {name_model}.")
-        exp_var, maxerr, mae, mse, r2 = evaluate_predictions(model, self.X_test, 
-                                                             self.y_test)
+        exp_var, maxerr, mae, mse, r2, r2time = evaluate_predictions(
+            model, self.X_test, self.y_test)
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
         test_date = "-".join(map(lambda x: x.replace("-", ""), self.test_period))
         n_prev_obs = self.get_num_prev_obs()
@@ -133,6 +134,8 @@ class ModelTrainer:
             data['features'] = self.freqs_features
         if self.variables:
             data['variables'] = self.variables
+        if self.vars2drop:
+            data['deleted variables'] = self.vars2drop
         filename = f'{name_model}_{self.base.value}{self.quote.value}_' \
                    f'{n_prev_obs}-{self.future_obs}_{train_date}'
         path = self.get_output_folder(name_model)
@@ -142,6 +145,11 @@ class ModelTrainer:
         log.debug(f"Saving result of {name_model} to {path}test_{filename}.yml")
         with open(path + f"test_{filename}.yml", 'w') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)
+
+        # Save R-Squared with time structure
+        plots_path = path.replace("models", "reports/models") 
+        os.makedirs(plots_path, exist_ok=True)
+        save_r2_time_struc(r2time, f"{plots_path}plot_r2time_{filename}.png")
 
         attr = getattr(model, "save", None)
         if callable(attr):            
@@ -160,5 +168,5 @@ class ModelTrainer:
         else:
             aux = "no_aux"
         folder = f"{ROOT_DIR}/models/{which}/{model_name}/{self.base.value}" \
-                 f"{self.quote.value}/{aux}/"
+                 f"{self.quote.value}/{aux}/{'_'.join(self.variables)}/"
         return folder
