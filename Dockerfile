@@ -2,8 +2,9 @@ FROM python:3.9.5-slim
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y gcc && \
-    mkdir -p /app
+    apt-get install -y gcc
+
+RUN mkdir -p /app
 WORKDIR /app/
 
 COPY requirements.txt /tmp/
