@@ -1,4 +1,4 @@
-<img src="https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/mario.png?raw=true" alt="Mario" width="200"/>
+<img src="https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/mario.png?raw=true" align="right" width=200px </img>
 
 :man: **Mario Santa Cruz López** :man:
 
