@@ -1,7 +1,11 @@
-from enum import Enum 
+from enum import Enum
+from dotenv import load_dotenv, find_dotenv
 
 import os
 import pytz
+
+
+load_dotenv(find_dotenv())
 
 ROOT_DIR = os.getenv('ROOT_DIR', os.path.dirname(os.path.abspath("setup.py")))
 PATH_RAW_DATA = os.getenv('PATH_RAW_DATA')

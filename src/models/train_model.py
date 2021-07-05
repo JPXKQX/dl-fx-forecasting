@@ -9,7 +9,7 @@ import logging
 log = logging.getLogger("Model trainer")
 
 
-def train_regressions_features(
+def train(
     base: Currency,
     quote: Currency,
     models_file: str,
@@ -17,7 +17,9 @@ def train_regressions_features(
     future_obs: Union[int, List[int]],
     train_period: Tuple[str, str], 
     test_period: Tuple[str, str],
-    aux_pair: Tuple[Currency, Currency] = None,
+    aux_pair: Tuple[Currency, ...] = None,
+    variables: List[str] = ['increment'],
+    variables_to_drop: List[str] = None,
     models_path: str = ROOT_DIR + "/models/configurations/"
 ) -> NoReturn:
     if isinstance(future_obs, int):
@@ -30,23 +32,23 @@ def train_regressions_features(
                  f"observations to forecast the increment in {n_fut} "
                  f"observations ahead.")
         mt = ModelTrainer(base, quote, freqs, n_fut, train_period, test_period, 
-                          aux_pair=aux_pair, variables=['increment'])
+                          variables=variables, vars2drop=variables_to_drop,
+                          aux_pair=aux_pair)
         mt.train(models)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.DEBUG, 
-        filename=ROOT_DIR + "/logs/training.log",
-        format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
-
     train_period = '2020-04-05', '2020-04-11'
     test_period = '2020-04-12', '2020-04-18'
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
-
-    train_regressions_features(
+    train(
         Currency.EUR, Currency.GBP, "regressions", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.USD))
-    train_regressions_features(
+        train_period, test_period, (Currency.USD, ), 
+        variables=['increment', 'difference'], 
+        variables_to_drop=['implicit_increment'])
+    train(
         Currency.EUR, Currency.GBP, "mlp", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.USD))
+        train_period, test_period, (Currency.USD, ), 
+        variables=['increment', 'difference'], 
+        variables_to_drop=['implicit_increment'])
+    

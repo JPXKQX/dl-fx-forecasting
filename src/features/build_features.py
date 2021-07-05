@@ -39,6 +39,7 @@ class FeatureBuilder:
         self, 
         aux: Currency
     ) -> List[Tuple[Currency, Currency]]:
+        if isinstance(aux, (list, tuple)): aux = aux[0]
         if aux in [self.base, self.quote]:
             raise ValueError("If selecting one auxiliary currency it must be "
                              "different from the base and quote ones because "
@@ -116,6 +117,7 @@ class FeatureBuilder:
 
         df['implicit_mid'] = implicit_base * implicit_quote
         df['implicit_increment'] = df['implicit_mid'].diff()
+        df['difference'] = df['mid'] - df['implicit_mid']
         
         # Drop intermediary data variables
         return df.drop(list(map(
@@ -130,6 +132,7 @@ class FeatureBuilder:
         period: Tuple[str, str] = None, 
         aux_currencies: Tuple[Currency, ...] = None, 
         variables: List[str] = None,
+        vars_dropped: List[str] = None,
         quantile: float = None,
     ):
         df, incs = self.load_synchronized(aux_currencies, period)
@@ -138,7 +141,12 @@ class FeatureBuilder:
         # Select columns
         if variables:
             is_var_chosen = lambda x: any([(v in x) for v in variables])
-            mask = list(filter(is_var_chosen, df.columns.values))
+            if vars_dropped:
+                is_var_dropped = lambda x: any([(v in x) for v in vars_dropped])
+            else:
+                is_var_dropped = lambda x: False
+            is_var = lambda x: (is_var_chosen(x) and not is_var_dropped(x))
+            mask = list(filter(is_var, df.columns.values))
             df = df.loc[:, mask]
 
         # Filter by dates from 7:00 AM to 7:00 PM
@@ -156,7 +164,6 @@ class FeatureBuilder:
             spreads = df['spread'].where(df['spread'] <= quantiles).dropna()
             indices = spreads.index
             df = df.loc[indices]
-
 
         num_prev = max(freqs) if isinstance(freqs, list) else freqs
         first_obs = df.reset_index().time.diff(num_prev) < timedelta(hours=2)
