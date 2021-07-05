@@ -18,7 +18,7 @@ theme:
 # Pages
 nav:
   - Home: index.md
-  - Project Code: 'https://JPXKQX.github.io/dl-fx-forecasting'
+  - Project Code: 'https://github.com/JPXKQX/dl-fx-forecasting'
   - About: about.md
 
 copyright: Copyright &copy; 2021 Mario Santa Cruz López
