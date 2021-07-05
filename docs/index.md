@@ -91,7 +91,7 @@ plot_currency_pair eur usd mid H T S --period 2020-05-25 2020-05-31
 
 To get the following image,
 
-![Line plot](../reports/figures/eurusd_25_30May.png)
+![Line plot](https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/eurusd_25_30May.png?raw=True)
 
 
 There is also the possibility to plot the cumulative distribution function using the following command
@@ -102,7 +102,7 @@ plot_cdf eur usd increment --period 2020-04-01 2020-06-01
 
 which gives the image shown below,
 
-![Cumulative Distribution Function](../reports/figures/eurusd_increments_cdf_AprMay.png)
+![Cumulative Distribution Function](https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/eurusd_increments_cdf_AprMay.png?raw=True)
 
 
 
@@ -112,7 +112,7 @@ In order to plot the distribution of the main daily statistic of the spread, the
 plot_stats eur usd spread D --period 2020-04-01 2020-06-01
 ```
 
-![Boxplot](../reports/figures/eurusd_spread_dailystats_Apr_May.png)
+![Boxplot](https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/eurusd_spread_dailystats_Apr_May.png?raw=True)
 
 In addition, the correlation between the different currency pairs aggregated by any timeframe can also be plotted for any given period of time. 
 
@@ -120,7 +120,7 @@ In addition, the correlation between the different currency pairs aggregated by 
 plot_pair_correlations increment --period 2020-04-01 2020-06-01 --agg_frame H
 ```
 
-![Correlation](../reports/figures/increment_correlations_AprMay.png)
+![Correlation](https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/increment_correlations_AprMay.png?raw=True)
 
 
 Lastly, the correlation between currency pairs is represented as follows,
@@ -129,7 +129,7 @@ Lastly, the correlation between currency pairs is represented as follows,
 plot_pair_acf increment eur usd --agg_frame 'H' --period 2020-04-01 2020-06-01
 ```
 
-![Cross correlations](../reports/figures/increment_eur_acfs_AprMay.png)
+![Cross correlations](https://github.com/JPXKQX/dl-fx-forecasting/blob/main/reports/figures/increment_eur_acfs_AprMay.png?raw=True)
 
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
