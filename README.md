@@ -42,6 +42,8 @@
 
 FX rates forecasting in ultra high frequency setting, using Deep Learning techniques. The main focus of the research is to predict the increments in the next few seconds for a set of different FX pairs.
 
+The project is explained with more detail at [documentation](https://jpxkqx.github.io/dl-fx-forecasting/).
+
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
