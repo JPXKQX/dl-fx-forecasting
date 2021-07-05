@@ -1,4 +1,5 @@
 site_name: Foreign Exchange (FX) rates forecasting using Deep Learning
+site_author: Mario Santa Cruz López
 site_url: https://JPXKQX.github.io/dl-fx-forecasting
 repo_url: https://github.com/JPXKQX/dl-fx-forecasting
 
@@ -12,6 +13,13 @@ theme:
   language: en
   icon:
     repo: fontawesome/brands/github
+
+
+# Pages
+nav:
+  - Home: index.md
+  - Project Code: 'https://JPXKQX.github.io/dl-fx-forecasting'
+  - About: about.md
 
 copyright: Copyright &copy; 2021 Mario Santa Cruz López
 
