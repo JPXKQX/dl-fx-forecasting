@@ -55,7 +55,7 @@ FX rates forecasting in ultra high frequency setting, using Deep Learning techni
 
 
 <!-- ENVIRONMET -->
-<h2 id="environment"> :pushpin: Environment </h2>-------------
+<h2 id="environment"> Environment </h2>
 
 Execute the following command to start the container:
 
