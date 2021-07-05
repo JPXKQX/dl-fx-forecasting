@@ -82,7 +82,10 @@ target/
 /logs/
 /data/
 /models/
+/notebooks/*.ipynb
 /reports/images
+/reports/models
+*.ipynb
 
 # Mac OS-specific storage files
 .DS_Store
