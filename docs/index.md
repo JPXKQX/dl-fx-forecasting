@@ -48,7 +48,7 @@ presented in the project organization below. In case all processed information i
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 <!-- DATA -->
-<h2 id="data"> :1234: Data</h2>
+##  Data :1234:
 
 Read, load, preprocess and save the data for the currency pair specified. To go through this pipeline, the ZIP files have to be in the host machine, and the path to the folder containing this data must be specified as an environment variable called *PATH_RAW_DATA*. The following command process the data available in the host machine for currency pair EUR/USD.
 
@@ -81,7 +81,7 @@ This data is processed by the following command, which computes the mid price an
 
 
 <!-- VISUALIZATION -->
-<h2 id="visualizations"> :art: Visualizations </h2>
+## Visualizations :art:
 
 Then, plot the currency pair *EUR/USD* for the period from 25 May, 202 to 30 May, 2020.
 
