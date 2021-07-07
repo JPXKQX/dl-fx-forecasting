@@ -1,6 +1,6 @@
 from sklearn import metrics
-from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
+from src.models.sklearn_models import LinearRegr, ElasticNetRegr
 from src.models.neural_network import MultiLayerPerceptron
 from pathlib import Path
 from typing import Union, Dict, NoReturn
@@ -12,8 +12,8 @@ import yaml
 
 # Dictionary with the conversion from string to object
 str2model = {
-    'LinearRegression': linear_model.LinearRegression,
-    'ElasticNet': linear_model.ElasticNet,
+    'LinearRegression': LinearRegr,
+    'ElasticNet': ElasticNetRegr,
     'MultiLayerPerceptron': MultiLayerPerceptron,
     'RandomForest': RandomForestRegressor
 }
