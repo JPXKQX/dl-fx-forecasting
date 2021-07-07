@@ -1,5 +1,5 @@
-#PBS -lwalltime=48:00:00
-#PBS -lselect=1:ncpus=4:mem=32gb
+#PBS -lwalltime=24:00:00
+#PBS -lselect=1:ncpus=4:mem=24gb:ngpus=1:gpu_type=RTX6000
 
 module load anaconda3/personal
 
