@@ -2,24 +2,25 @@
 -e .
 
 # external requirements
-pandas~=1.2.4
-numpy~=1.19.5
 click~=8.0.0
 dask~=2021.4.0
 dill~=0.3.4
-python-dotenv~=0.18.0
 gunicorn~=20.1.0
 matplotlib~=3.4.2
 mkdocs~=1.2.1
 mkdocs-git-revision-date-plugin~=0.3.1
+numpy~=1.19.5
 setuptools~=57.0.0
+pandas~=1.2.4
 plotly~=4.14.3
 pydantic~=1.8.2
 pytest~=6.2.4
 pytest-mock~=3.6.1
+python-dotenv~=0.18.0
 tables~=3.6.1
 fastparquet~=0.5.0
 tensorflow~=2.5.0
-statsmodels~=0.12.2
+seaborn~=0.11.1
 scipy~=1.6.3
 scikit-learn~=0.24.2
+statsmodels~=0.12.2
