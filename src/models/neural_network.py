@@ -1,8 +1,12 @@
+import tensorflow as tf
 from dataclasses import dataclass, field
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.callbacks import EarlyStopping
 from typing import List, Union, NoReturn
+
+
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 
 @dataclass
