@@ -127,8 +127,9 @@ class FeatureBuilder:
 
     def build(
         self,
-        freqs: List[int],
+        freqs: Union[int, List[int]],
         obs_ahead: int,
+        label: str = 'increment',
         period: Tuple[str, str] = None, 
         aux_currencies: Tuple[Currency, ...] = None, 
         variables: List[str] = None,
@@ -137,6 +138,7 @@ class FeatureBuilder:
     ):
         df, incs = self.load_synchronized(aux_currencies, period)
         df = self.compute_implicit_midprice(df)
+        vol = df.mid.ewm(max(freqs) if isinstance(freqs, list) else freqs).std()
         
         # Select columns
         if variables:
@@ -171,8 +173,16 @@ class FeatureBuilder:
         mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
         indices = mask.where(mask).dropna().index 
         X = df[mask[0]]
-        fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
-        y = fut_inc.loc[indices]
+        vol = vol[indices]
+        if label in ['increment', 'spread']:
+            fut_inc = incs[[label]].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices]
+        elif label == 'fixed-time-increment':
+            fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices]
+            y = y.where((y.increment > vol) | (y.increment < -vol), 0)
+            y = y.where(y.increment >= -vol, -1)
+            y = y.where(y.increment <= vol, 1)
         return X, y
 
 
@@ -204,6 +214,17 @@ def get_features(
                        zip(df.columns.values, freqs_features * n_vars)))
     df.columns = columns
     return df
+
+
+def get_daily_volatility(price: pd.Series, span: int = 100):
+    # daily vol, reindexed to close
+    df0 = price.index.searchsorted(price.index - pd.Timedelta(days=1))
+    df0 = df0[df0 > 0]
+    df0 = pd.Series(price.index[df0 - 1], 
+                    index=price.index[price.shape[0]-df0.shape[0]:])
+    df0 = price.loc[df0.index] / price.loc[df0.values].values - 1 # daily returns
+    df0 = df0.ewm(span=span).std()
+    return df0
 
 
 def get_x_blocks(df: pd.DataFrame, past_obs: int) -> pd.DataFrame:
