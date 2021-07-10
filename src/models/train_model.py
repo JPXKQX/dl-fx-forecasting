@@ -12,6 +12,7 @@ log = logging.getLogger("Model trainer")
 def train(
     base: Currency,
     quote: Currency,
+    target: str,
     models_file: str,
     freqs: List[int],
     future_obs: Union[int, List[int]],
@@ -31,7 +32,7 @@ def train(
         log.info(f"Modeling increments in price using last {max(freqs)} "
                  f"observations to forecast the increment in {n_fut} "
                  f"observations ahead.")
-        mt = ModelTrainer(base, quote, freqs, n_fut, train_period, test_period, 
+        mt = ModelTrainer(base, quote, target, freqs, n_fut, train_period, test_period, 
                           variables=variables, vars2drop=variables_to_drop,
                           aux_pair=aux_pair)
         mt.train(models)
@@ -41,14 +42,18 @@ if __name__ == '__main__':
     train_period = '2020-04-05', '2020-04-11'
     test_period = '2020-04-12', '2020-04-18'
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
+    future_obs = [5, 10, 20]
     train(
-        Currency.EUR, Currency.GBP, "regressions", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.USD, ), 
-        variables=['increment', 'difference'], 
-        variables_to_drop=['implicit_increment'])
+        Currency.EUR, Currency.GBP, 'increment',  "random_forest", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, ), 
+        variables=['increment', 'difference', 'spread'])
     train(
-        Currency.EUR, Currency.GBP, "mlp", freqs, [5, 10, 20], 
-        train_period, test_period, (Currency.USD, ), 
-        variables=['increment', 'difference'], 
-        variables_to_drop=['implicit_increment'])
-    
+        Currency.EUR, Currency.GBP, 'increment',  "random_forest", 
+        freqs, future_obs, train_period, test_period, 
+        (Currency.USD, Currency.GBP), 
+        variables=['increment', 'difference', 'spread'])
+    train(
+        Currency.EUR, Currency.GBP, 'increment',  "random_forest", 
+        freqs, future_obs, train_period, test_period, 
+        (Currency.USD, Currency.GBP), 
+        variables=['increment', 'difference', 'spread'])

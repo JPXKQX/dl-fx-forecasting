@@ -4,7 +4,7 @@ from src.models.model_utils import evaluate_predictions, save_r2_time_struc
 
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from dataclasses import dataclass
-from typing import Tuple, Dict, List, Union
+from typing import Tuple, Dict, List, Union, Callable
 
 import pandas as pd
 import yaml
@@ -31,13 +31,15 @@ class ModelTrainer:
     Attrs:
         base (Currency): base currency to train the model.
         quote (Currency): quote currency to train the model.
+        target_var (str): variable to predict. Choices
         past_n_obs (int): number of previous observations to consider.
         future_obs (int): horizon length of the prediction.
         train_period (Tuple[str, str]): period of training data.
         test_period (Tuple[str, str]): period of testing data.
     """
     base: Currency
-    quote: Currency    
+    quote: Currency
+    target_var: str
     freqs_features: Union[int,List[int]]
     future_obs: int
     train_period: Tuple[str, str]
@@ -45,6 +47,7 @@ class ModelTrainer:
     variables: List[str] = None
     vars2drop: List[str] = None
     aux_pair: Tuple[Currency, ...] = None
+    label_transformation: Callable = None
 
     def __post_init__(self):
         # Get fold to cross validation
@@ -52,10 +55,10 @@ class ModelTrainer:
         fb = FeatureBuilder(self.base, self.quote)
         
         self.X_train, self.y_train = fb.build(
-            self.freqs_features, self.future_obs, self.train_period,
+            self.freqs_features, self.future_obs, self.target_var, self.train_period,
             self.aux_pair, self.variables, self.vars2drop)
         self.X_test, self.y_test = fb.build(
-            self.freqs_features, self.future_obs, self.test_period,
+            self.freqs_features, self.future_obs, self.target_var, self.test_period,
             self.aux_pair, self.variables, self.vars2drop)
 
         log.info(f"Train({self.X_train.shape[0]}) and test"
@@ -78,7 +81,7 @@ class ModelTrainer:
 
     def train_model(self, model, name: str):
         # Train models
-        mo = model['model']()
+        mo = model['model'](**model['attrs'] if 'attrs' in model.keys() else None)
         mo = mo.fit(self.X_train, self.y_train)
         self.save_model_results(mo, name)
 
@@ -162,11 +165,10 @@ class ModelTrainer:
                 pickle.dump(model, f)
 
     def get_output_folder(self, model_name) -> str:
-        which = "features" if isinstance(self.freqs_features, list) else "raw"
         if self.aux_pair:
             aux = "".join(map(lambda x: x.value, self.aux_pair))
         else:
             aux = "no_aux"
-        folder = f"{ROOT_DIR}/models/{which}/{model_name}/{self.base.value}" \
+        folder = f"{ROOT_DIR}/models/{self.target_var}/{model_name}/{self.base.value}" \
                  f"{self.quote.value}/{aux}/{'_'.join(self.variables)}/"
         return folder
