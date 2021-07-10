@@ -239,7 +239,3 @@ def get_x_blocks(df: pd.DataFrame, past_obs: int) -> pd.DataFrame:
                        product(df.columns.values, list(range(1, past_obs+1)))))
 
     return pd.DataFrame(data, columns=columns, index=indices)
-
-
-if __name__ == '__main__':
-    FeatureBuilder(Currency.GBP, Currency.EUR).run([1, 2, 3, 50], 5, ('2020-04-01', '2020-04-10'), (Currency.USD))
