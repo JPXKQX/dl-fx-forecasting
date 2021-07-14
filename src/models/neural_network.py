@@ -15,6 +15,7 @@ class MultiLayerPerceptron:
     f_act: Union[str, List[str]] = 'relu'
     optimizer: str = 'adam'
     loss: str = 'mse'
+    problem: str = 'regression'
     metrics: List[str] = field(default_factory=lambda: ['mae'])
 
     def __post_init__(self) -> NoReturn:

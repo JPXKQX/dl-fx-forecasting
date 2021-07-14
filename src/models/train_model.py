@@ -44,16 +44,10 @@ if __name__ == '__main__':
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
     future_obs = [5, 10, 20]
     train(
-        Currency.EUR, Currency.GBP, 'increment',  "random_forest", 
+        Currency.EUR, Currency.GBP, 'fixed-time-increment',  "inceptiontime_classification", 
         freqs, future_obs, train_period, test_period, (Currency.USD, ), 
         variables=['increment', 'difference', 'spread'])
     train(
-        Currency.EUR, Currency.GBP, 'increment',  "random_forest", 
-        freqs, future_obs, train_period, test_period, 
-        (Currency.USD, Currency.GBP), 
-        variables=['increment', 'difference', 'spread'])
-    train(
-        Currency.EUR, Currency.GBP, 'increment',  "random_forest", 
-        freqs, future_obs, train_period, test_period, 
-        (Currency.USD, Currency.GBP), 
+        Currency.EUR, Currency.GBP, 'fixed-time-increment',  "inceptiontime_classification", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
         variables=['increment', 'difference', 'spread'])

@@ -7,6 +7,7 @@ class LinearRegr(LinearRegression):
                  positive=False):
         super(LinearRegr, self).__init__()
         self.scale = StandardScaler()
+        self.problem = 'regression'
 
     def fit(self, X, y=None, sample_weight=None):
         X = self.scale.fit_transform(X)
@@ -24,6 +25,7 @@ class ElasticNetRegr(ElasticNet):
                  random_state=None, selection='cyclic'):
         super(ElasticNetRegr, self).__init__(alpha=alpha, l1_ratio=l1_ratio)
         self.scale = StandardScaler()
+        self.problem = 'regression'
 
     def fit(self, X, y=None, sample_weight=None):
         X = self.scale.fit_transform(X)

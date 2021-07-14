@@ -32,10 +32,16 @@ class ModelTrainer:
         base (Currency): base currency to train the model.
         quote (Currency): quote currency to train the model.
         target_var (str): variable to predict. Choices
-        past_n_obs (int): number of previous observations to consider.
+        freqs_features (int): number of previous observations to consider.
         future_obs (int): horizon length of the prediction.
         train_period (Tuple[str, str]): period of training data.
         test_period (Tuple[str, str]): period of testing data.
+        variables (List[str]): variables containing any of the string passed are
+        considered for the modelling.
+        vars2drop (List[str]): variables selected containing any of these string are 
+        dropped.
+        aux_pair (tuple[Currency]): auxiliary currency to include as model features.
+        label
     """
     base: Currency
     quote: Currency
@@ -47,7 +53,6 @@ class ModelTrainer:
     variables: List[str] = None
     vars2drop: List[str] = None
     aux_pair: Tuple[Currency, ...] = None
-    label_transformation: Callable = None
 
     def __post_init__(self):
         # Get fold to cross validation
@@ -93,7 +98,7 @@ class ModelTrainer:
         self.save_model_results(best_mo, name)
 
     def model_selection(self, model, model_name, params):
-        clf = GridSearchCV(model, param_grid=params, cv=self.tscv, verbose=2, 
+        clf = GridSearchCV(model, param_grid=params, cv=self.tscv, verbose=4, 
                            scoring=val_metrics, refit=val_metrics[0], n_jobs=-1)
         clf.fit(self.X_train, self.y_train)
 
@@ -111,10 +116,12 @@ class ModelTrainer:
 
     def save_model_results(self, model, name_model):
         log.debug(f"Obtaining results of {name_model}.")
-        exp_var, maxerr, mae, mse, r2, r2time = evaluate_predictions(
-            model, self.X_test, self.y_test)
+        test_metrics, r2time = evaluate_predictions(model, self.X_test, self.y_test)
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
-        test_date = "-".join(map(lambda x: x.replace("-", ""), self.test_period))
+        test_metrics['test_date'] = "-".join(map(
+            lambda x: x.replace("-", ""), 
+            self.test_period
+        ))
         n_prev_obs = self.get_num_prev_obs()
         data = {
             'model': name_model,
@@ -124,14 +131,7 @@ class ModelTrainer:
             'past_ticks': n_prev_obs,
             'ticks_ahead': self.future_obs,
             'train_period': train_date,
-            'test' : {
-                'period': test_date,
-                'explained_variance': exp_var,
-                'max_errors': maxerr,
-                'mean_absolute_error': mae,
-                'mean_squared_error': mse,
-                'r2': r2
-            }
+            'test' : test_metrics
         }
         if isinstance(self.freqs_features, list): 
             data['features'] = self.freqs_features

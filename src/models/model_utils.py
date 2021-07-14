@@ -8,6 +8,8 @@ from typing import Union, Dict, NoReturn
 
 import matplotlib.pyplot as plt
 import logging
+import pandas as pd
+import logging
 import yaml
 
 
@@ -45,18 +47,42 @@ def read_yaml_models(filename: Union[str, Path]) -> Dict:
     return json
 
 
-def evaluate_predictions(model, features, labels) -> tuple[float, ...]:
-    log.debug(f"Computing test metrics for a total of {len(labels)} instances.")
+def evaluate_predictions(model, features, labels, type: str = 'regression'):
     preds = model.predict(features)
-    exp_var = float(metrics.explained_variance_score(labels, preds))
-    maxerr = float(metrics.max_error(labels, preds))
-    mae = float(metrics.mean_absolute_error(labels, preds))
-    mse = float(metrics.mean_squared_error(labels, preds))
-    r2 = float(metrics.r2_score(labels, preds))
-    ssd = ((labels - preds.reshape(-1, 1)) ** 2).cumsum()
+    if model.problem == 'regression':
+        return evaluate_predictions_regression(preds, labels)
+    elif model.problem == 'classification':
+        return evaluate_predictions_classification(preds, labels)
+    else:
+        raise Exception(f"Model type \'{type}\' not valid for evaluation.")
+
+
+def evaluate_predictions_regression(
+    predictions: pd.DataFrame, 
+    labels: pd.DataFrame
+) -> tuple[Dict, ...]:
+    log.debug(f"Computing test metrics for a total of {len(labels)} instances.")
+    vals = {}
+    vals['exp_var'] = float(metrics.explained_variance_score(labels, predictions))
+    vals['maxerr'] = float(metrics.max_error(labels, predictions))
+    vals['mae'] = float(metrics.mean_absolute_error(labels, predictions))
+    vals['mse'] = float(metrics.mean_squared_error(labels, predictions))
+    vals['r2'] = float(metrics.r2_score(labels, predictions))
+    ssd = ((labels - predictions.reshape(-1, 1)) ** 2).cumsum()
     sst = (labels ** 2).cumsum()
     r2time = (sst - ssd) / sst.iloc[-1]
-    return exp_var, maxerr, mae, mse, r2, r2time
+    return vals, r2time
+
+
+def evaluate_predictions_classification(
+    predictions: pd.DataFrame, 
+    labels: pd.DataFrame
+):
+    log.info(metrics.classification_report(labels, predictions, 
+                                           target_names=labels.columns))
+    values = metrics.classification_report(
+        labels, predictions, target_names=labels.columns, output_dict=True)
+    return values
 
 
 def save_r2_time_struc(r2time, outfile: Union[str, Path]) -> NoReturn:
