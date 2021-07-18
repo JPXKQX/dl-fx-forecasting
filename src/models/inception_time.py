@@ -1,16 +1,18 @@
 import os
 import logging 
-import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
+from src.models import model_constants, training_plot_utils
 from src.data.constants import ROOT_DIR
+from sklearn.utils.class_weight import compute_class_weight
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, NoReturn, Union
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.layers import Dense, Conv1D, MaxPool1D, Concatenate, Add, \
     Activation, Input, GlobalAveragePooling1D, BatchNormalization
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, Callback
 
 
 logger = logging.getLogger("InceptionTime")
@@ -39,19 +41,36 @@ class InceptionTime:
         self.output_predictions = self.output_predictions / "data" / "predictions" / \
             f"InceptionTime{self.problem.capitalize()}"
         os.makedirs(self.output_predictions, exist_ok=True)
-        self._set_callbacks()
 
     def __str__(self):
         return f"inceptionTime_{self.depth}depth_{self.n_filters}filters_" \
                f"{'-'.join(map(str, self.inception_kernels))}kernels"
 
-    def _set_callbacks(self):
+    def _set_callbacks(
+        self, 
+        patience_reduce_lr: int = 4,
+        patience_fit: int = 20,
+        include_validation: bool = True
+    ) -> NoReturn:
         logger.info("Two callbacks have been added to the model fitting: "
                     "ModelCheckpoint and ReduceLROnPlateau.")
-        reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50,
-                                      min_lr=0.0001)
-        early_stopping = EarlyStopping(monitor='val_loss', patience=10)
-        self.callbacks = [reduce_lr, early_stopping]
+        reduce_lr = ReduceLROnPlateau(
+            monitor='loss', factor=0.5, patience=patience_reduce_lr, min_lr=1e-3
+        )
+        early_stopping = EarlyStopping(
+            monitor='val_loss' if include_validation else 'loss', patience=patience_fit
+        )
+        self.callbacks = [early_stopping, reduce_lr]
+
+    def _get_metrics(self):
+        if self.problem == 'classification':
+            return model_constants.CLASSIFICATION_METRICS
+        elif self.problem == 'regression':
+            return model_constants.REGRESSION_METRICS
+        else:
+            raise Exception(f"Problem type \'{self.problem}\' is not valid. Please "
+                            f"select specify one of the following: classification or "
+                            f"regression.")
 
     def _inception_module(self, input_tensor, stride=1, activation='linear'):
         if int(input_tensor.shape[-2]) > 1:
@@ -124,30 +143,55 @@ class InceptionTime:
         self.model = Model(inputs=input_layer, outputs=output_layer)
 
         logger.info(self.model.summary())
-        self.model.compile(loss=self.loss, optimizer=self.optimizer)
+        self.model.compile(
+            loss=self.loss, 
+            optimizer=self.optimizer, 
+            metrics=self._get_metrics()
+        )
         return self.model
 
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> NoReturn:
+    def fit(
+        self,
+        X: pd.DataFrame,
+        y: pd.DataFrame, 
+        more_callbacks: Union[Callback, List[Callback]] = [],
+        validation_split: float = 0.2
+    ) -> NoReturn:
         features, labels = self.reshape_data(X, y)
 
-        # Update output dim
+        # Update output dim and build model
         self.output_dims = labels.shape[1]
         self.build_model(features.shape[1:])
+        self._set_callbacks(include_validation=bool(validation_split > 0))
+        if isinstance(more_callbacks, list):
+            self.callbacks.extend(more_callbacks)
+        else:
+            self.callbacks.append(more_callbacks)
+        
+        # Set weights for unbalanced datasets
+        if self.problem == 'classification':
+            classes = np.sort(y.iloc[:, 0].unique())
+            weights = compute_class_weight('balanced', classes, y.values.ravel())
+            class_weights = dict(enumerate(weights))
+        else:
+            class_weights = None
+
         history = self.model.fit(
-            features, labels, validation_split=0.2, epochs=self.n_epochs, 
-            verbose=self.verbose, callbacks=[self.callbacks]
+            features, labels, validation_split=validation_split, verbose=self.verbose, 
+            callbacks=[self.callbacks], epochs=self.n_epochs, class_weight=class_weights
         )
 
         # Save fig with results
-        plt.figure(figsize=(12, 9))
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['val_loss'])
-        plt.title('model loss')
-        plt.ylabel(self.loss.upper())
-        plt.xlabel('Epoch')
-        plt.legend(['train', 'valid'], loc='upper left')
-        plt.savefig("/tmp/history_{str(self)}.png")
+        training_plot_utils.plot_metrics(
+            history, "/tmp/history_{str(self)}.png", validation_split > 0, self.problem
+        )
         return history
+
+    def evaluate(self, features, labels):
+        features, labels = self.reshape_data(features, labels)
+        baseline_results = self.model.evaluate(features, labels)
+        for name, value in zip(self.model.metrics_names, baseline_results):
+            print(name, ': ', value, '\n')
 
     def predict(
         self, 
