@@ -1,10 +1,14 @@
 from src.features.build_features import FeatureBuilder
 from src.data.constants import Currency, ROOT_DIR
-from src.models.model_utils import evaluate_predictions, save_r2_time_struc
+from src.models.model_utils import evaluate_predictions, generate_search_space, \
+    init_scheduler_and_search_algorithms
+from src.models.training_plot_utils import save_r2_time_struc
+from ray import tune
+from src.models.ray_tuning_models import get_training_ray_method
 
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from dataclasses import dataclass
-from typing import Tuple, Dict, List, Union, Callable
+from typing import Tuple, Dict, List, Union
 
 import pandas as pd
 import yaml
@@ -79,7 +83,9 @@ class ModelTrainer:
         for name, model in models.items():
             log.info(f"Training model {name} for period "
                     f"{' '.join(self.train_period)}.")
-            if 'params' in model.keys():
+            if 'ray_params' in model.keys():
+                self.tune_and_train_model(model, name)
+            elif 'params' in model.keys():
                 self.select_and_train_model(model, name)
             else:
                 self.train_model(model, name)
@@ -94,12 +100,41 @@ class ModelTrainer:
         # Model selection & model training
         mo = model['model']()
         best_mo = self.model_selection(mo, name, model['params'])
-        best_mo.fit(self.X_train, self.y_train)
+        best_mo.fit(self.X_train, self.y_train, validation_split=0)
+        self.save_model_results(best_mo, name)
+
+    def tune_and_train_model(self, model, name: str):        
+        # Model selection & model training
+        params, num_samples = generate_search_space(model['ray_params'])
+        log.info("Initializing ray Trainable")
+        training = get_training_ray_method(
+            model['model'], self.X_train, self.y_train, ROOT_DIR + '/ray_results/'
+        )
+        scheduler, search_alg = init_scheduler_and_search_algorithms(params)
+        log.info("Starting hyperparameter tuning (ray)")
+        results = tune.run(
+            training,
+            name=name,
+            verbose=1,
+            search_alg=search_alg,
+            local_dir=ROOT_DIR + f"/ray_results",
+            scheduler=scheduler,
+            num_samples=num_samples
+        )
+        log.debug(results.results_df)
+        log.info(f"Best trial results are obtained with configuration: "
+                 f"{results.get_best_config(metric='val_loss', mode='min')}")
+        log.info(f"Best trial are: "
+                 f"{results.get_best_trial(metric='val_loss', mode='min').last_result}")
+        best_mo = model['model'](
+            **results.get_best_config(metric="val_loss", mode='min')
+        )
+        best_mo.fit(self.X_train, self.y_train, validation_split=0)
         self.save_model_results(best_mo, name)
 
     def model_selection(self, model, model_name, params):
         clf = GridSearchCV(model, param_grid=params, cv=self.tscv, verbose=4, 
-                           scoring=val_metrics, refit=val_metrics[0], n_jobs=-1)
+                           scoring=val_metrics, refit=val_metrics[0])
         clf.fit(self.X_train, self.y_train)
 
         results = pd.DataFrame(clf.cv_results_)
