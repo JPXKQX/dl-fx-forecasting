@@ -116,6 +116,7 @@ class ModelTrainer:
             training,
             name=name,
             verbose=1,
+            max_failures=2,
             search_alg=search_alg,
             local_dir=ROOT_DIR + f"/ray_results",
             scheduler=scheduler,
