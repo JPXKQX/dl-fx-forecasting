@@ -1,16 +1,23 @@
+from ray import tune
+from ray.tune.schedulers import AsyncHyperBandScheduler
+from ray.tune.suggest import ConcurrencyLimiter
+from ray.tune.suggest.hyperopt import HyperOptSearch
 from sklearn import metrics
 from sklearn.ensemble import RandomForestRegressor
 from src.models.sklearn_models import LinearRegr, ElasticNetRegr
 from src.models.neural_network import MultiLayerPerceptron
 from src.models.inception_time import InceptionTime
-from pathlib import Path
-from typing import Union, Dict, NoReturn
 
-import matplotlib.pyplot as plt
+from pathlib import Path
+from typing import Union, Dict, List
+
 import logging
 import pandas as pd
 import logging
 import yaml
+
+
+log = logging.getLogger("Model utilities")
 
 
 # Dictionary with the conversion from string to object
@@ -22,10 +29,6 @@ str2model = {
     'InceptionTime': InceptionTime
 }
 
-
-log = logging.getLogger("Model utilities")
-
-
 def read_yaml_models(filename: Union[str, Path]) -> Dict:
     log.debug(f"Loading YAML file at {filename}")
     with open(filename, 'r') as stream:
@@ -35,7 +38,7 @@ def read_yaml_models(filename: Union[str, Path]) -> Dict:
         except yaml.YAMLError as e:
             log.error(e)
             raise e
-    
+
     for key, value in json.items():
         if 'model' in value:
             try:
@@ -45,6 +48,24 @@ def read_yaml_models(filename: Union[str, Path]) -> Dict:
                 log.error(e)
                 raise e
     return json
+
+
+def generate_search_space(params: Dict) -> tuple[Dict, int]:
+    num_samples = 10
+    for attr, values in params.items():
+        if attr == 'num_samples':
+            num_samples = int(values)
+        elif isinstance(values, list) and len(values) > 1:
+            if isinstance(values[0], str) and (not isinstance(values[1], str)):
+                params[attr] = getattr(tune, values[0])(*values[1:])
+            else:
+                params[attr] = tune.choice(values)
+        elif isinstance(values, list):
+            params[attr] = tune.choice(values)
+        else:
+            params[attr] = tune.choice([values])
+    params.pop('num_samples', None)
+    return params, num_samples
 
 
 def evaluate_predictions(model, features, labels, type: str = 'regression'):
@@ -85,12 +106,21 @@ def evaluate_predictions_classification(
     return metrics.classification_report(labels, predictions, output_dict=True), None
 
 
-def save_r2_time_struc(r2time, outfile: Union[str, Path]) -> NoReturn:
-    log.info(f"Plotting R2 with time structure to {outfile}")
-    plt.figure(figsize=(12, 9))
-    r2time.plot(legend=False)
-    plt.ylabel("R-Squared with time structure")
-    plt.xlabel("Date")
-    plt.tight_layout()
-    plt.savefig(outfile)
+def init_scheduler_and_search_algorithms(
+    search_space: Dict,
+    init_config: List[Dict] = None
+) -> tuple[AsyncHyperBandScheduler, ConcurrencyLimiter]:
+    # Use HyperBand scheduler to earlystop unpromising runs
+    scheduler = AsyncHyperBandScheduler(
+        time_attr='training_iteration', metric="val_loss", mode="min", grace_period=10
+    )
+
+    # Use bayesian optimisation with TPE implemented by hyperopt
+    search_alg = HyperOptSearch(
+        search_space, metric="val_loss", mode="min", points_to_evaluate=init_config
+    )
+
+    # We limit concurrent trials to 2 since bayesian optimisation doesn't parallelize very well
+    search_alg = ConcurrencyLimiter(search_alg, max_concurrent=2)
     
+    return scheduler, search_alg
