@@ -52,6 +52,7 @@ def evaluate_predictions(model, features, labels, type: str = 'regression'):
     if model.problem == 'regression':
         return evaluate_predictions_regression(preds, labels)
     elif model.problem == 'classification':
+        labels = pd.get_dummies(labels.iloc[:, 0])
         return evaluate_predictions_classification(preds, labels)
     else:
         raise Exception(f"Model type \'{type}\' not valid for evaluation.")
@@ -77,12 +78,11 @@ def evaluate_predictions_regression(
 def evaluate_predictions_classification(
     predictions: pd.DataFrame, 
     labels: pd.DataFrame
-):
-    log.info(metrics.classification_report(labels, predictions, 
-                                           target_names=labels.columns))
-    values = metrics.classification_report(
-        labels, predictions, target_names=labels.columns, output_dict=True)
-    return values
+) -> tuple[Dict, None]:
+    labels = labels.idxmax(axis=1).astype(int)
+    predictions = predictions.idxmax(axis=1).astype(int)
+    log.info(metrics.classification_report(labels, predictions))
+    return metrics.classification_report(labels, predictions, output_dict=True), None
 
 
 def save_r2_time_struc(r2time, outfile: Union[str, Path]) -> NoReturn:
