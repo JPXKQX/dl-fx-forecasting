@@ -1,13 +1,12 @@
 import os
 import logging 
-import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from src.data.constants import ROOT_DIR
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, NoReturn, Union
-from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.layers import Dense, Conv1D, MaxPool1D, Concatenate, Add, \
     Activation, Input, GlobalAveragePooling1D, BatchNormalization
@@ -31,13 +30,15 @@ class InceptionTime:
     loss: str = 'mse'
     problem: str = 'regression'
     metrics: List[str] = field(default_factory=lambda: ['mae'])
+    output_predictions: Path = Path(ROOT_DIR )
 
     def __post_init__(self) -> NoReturn:
         if self.problem not in ['regression', 'classification']:
             raise Exception(f"Problem {self.problem} is not supported yet. Please, "
                 f"select one of the following: regression (default) or classifation.")
-        self.attr_scaler = StandardScaler()
-        self.aq_vars_scaler = StandardScaler()
+        self.output_predictions = self.output_predictions / "data" / "predictions" / \
+            f"InceptionTime{self.problem.capitalize()}"
+        os.makedirs(self.output_predictions, exist_ok=True)
         self._set_callbacks()
 
     def __str__(self):
@@ -130,7 +131,7 @@ class InceptionTime:
         features, labels = self.reshape_data(X, y)
 
         # Update output dim
-        self.output_dims = len(y.columns)
+        self.output_dims = labels.shape[1]
         self.build_model(features.shape[1:])
         history = self.model.fit(
             features, labels, validation_split=0.2, epochs=self.n_epochs, 
@@ -138,14 +139,14 @@ class InceptionTime:
         )
 
         # Save fig with results
-        plt.figure((12, 9))
+        plt.figure(figsize=(12, 9))
         plt.plot(history.history['loss'])
         plt.plot(history.history['val_loss'])
         plt.title('model loss')
         plt.ylabel(self.loss.upper())
         plt.xlabel('Epoch')
         plt.legend(['train', 'valid'], loc='upper left')
-        plt.savefig(self.output_models / f"history_{str(self)}.png")
+        plt.savefig("/tmp/history_{str(self)}.png")
         return history
 
     def predict(
@@ -153,25 +154,35 @@ class InceptionTime:
         X: pd.DataFrame,
         filename: Union[Path, str] = None
     ) -> pd.DataFrame:
-        y_hat = self.model.predict(self.reshape_data(X, test=True)[0])
+        y_hat = self.model.predict(self.reshape_features(X))
         y_hat = pd.DataFrame(
-            y_hat, index=X.index, columns=list(range(1, self.output_dims + 1)))
+            y_hat, index=X.index, columns=list(range(-1, self.output_dims-1)))
         if filename is not None:
-            if isinstance(filename, str): filename = Path(filename)
-            y_hat.to_csv(self.output_predictions / f"{filename}.csv")
+            if isinstance(filename, str):
+                y_hat.to_csv(self.output_predictions / f"{filename}.csv")
+            elif isinstance(filename, bool):
+                y_hat.to_csv(self.output_predictions / f"{str(self)}.csv")
+            else:
+                raise Exception(f"Filename argument {filename} not recognized.")
         return y_hat
 
     def reshape_data(self, X: pd.DataFrame, y:pd.DataFrame) -> tuple[pd.DataFrame]:
-        # Process temporal feaures. Including scaling ignoring timestep.
-        n_time_steps = len(set(map(lambda x: x.split("_")[-1], X.columns)))
-        n_vars = len(X.columns) // n_time_steps
-        temp_values = X.values.reshape((-1, n_vars, n_time_steps))
+        features = self.reshape_features(X)
 
         logger.info("The input data is contains only temporal features (air quality"
                     " variables).")
         if self.problem == 'classification':
             y = pd.get_dummies(y.iloc[:, 0], prefix='increment')
-        return temp_values, y.values
+
+        return features, y.values
+
+    def reshape_features(self, features: pd.DataFrame) -> pd.DataFrame:
+        # Process temporal feaures. Including scaling ignoring timestep.
+        n_time_steps = len(set(map(lambda x: x.split("_")[-1], features.columns)))
+        n_vars = len(features.columns) // n_time_steps
+        features_values = features.values.reshape((-1, n_vars, n_time_steps))
+        
+        return features_values
 
     def get_params(self, deep=True):
         return {
