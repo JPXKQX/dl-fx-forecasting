@@ -155,24 +155,27 @@ class FeatureBuilder:
         df['filter'] = df.index.where(df.index.hour.isin(list(range(7, 19))))
         df = df.dropna().drop('filter', axis=1)
 
-        if isinstance(freqs, list):
-            df = get_features(df, freqs)
-        else:
-            df = get_x_blocks(df, freqs)
-        
         # Filtering by spread values. Drop values over a quantile specified
-        if quantile:
+        if quantile and ('spread' in df.columns):
             quantiles = df['spread'].quantile(quantile)
             spreads = df['spread'].where(df['spread'] <= quantiles).dropna()
             indices = spreads.index
             df = df.loc[indices]
 
-        num_prev = max(freqs) if isinstance(freqs, list) else freqs
-        first_obs = df.reset_index().time.diff(num_prev) < timedelta(hours=2)
-        last_obs = df.reset_index().time.diff(-obs_ahead) > timedelta(hours=-2)
-        mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
-        indices = mask.where(mask).dropna().index 
-        X = df[mask[0]]
+        if isinstance(freqs, list):
+            df = get_features(df, freqs)
+            num_prev = max(freqs) if isinstance(freqs, list) else freqs
+            first_obs = df.reset_index().time.diff(num_prev) < timedelta(hours=2)
+            last_obs = df.reset_index().time.diff(-obs_ahead) > timedelta(hours=-2)
+            mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
+            indices = mask.where(mask).dropna().index
+        else:
+            # Iterar para cada dia
+            df = df.groupby(df.index.date).apply(get_x_blocks, past_obs=freqs)
+            df = df.droplevel(0)
+            indices = df.index
+
+        X = df.loc[indices]
         vol = vol[indices]
         if label in ['increment', 'spread']:
             fut_inc = incs[[label]].rolling(obs_ahead).sum().shift(-obs_ahead)
@@ -183,6 +186,14 @@ class FeatureBuilder:
             y = y.where((y.increment > vol) | (y.increment < -vol), 0)
             y = y.where(y.increment >= -vol, -1)
             y = y.where(y.increment <= vol, 1)
+        elif label == 'is-increment':
+            fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices]
+            y = y.where((y.increment > vol) | (y.increment < -vol), 0)
+            y = y.where((y.increment >= -vol) & (y.increment <= vol), 1)
+        elif label == 'size-increment':
+            fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices].abs()
         return X, y
 
 
