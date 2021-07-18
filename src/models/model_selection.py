@@ -87,7 +87,7 @@ class ModelTrainer:
     def train_model(self, model, name: str):
         # Train models
         mo = model['model'](**model['attrs'] if 'attrs' in model.keys() else None)
-        mo = mo.fit(self.X_train, self.y_train)
+        mo.fit(self.X_train, self.y_train)
         self.save_model_results(mo, name)
 
     def select_and_train_model(self, model, name: str):        
@@ -150,9 +150,10 @@ class ModelTrainer:
             yaml.dump(data, outfile, default_flow_style=False)
 
         # Save R-Squared with time structure
-        plots_path = path.replace("models", "reports/models") 
-        os.makedirs(plots_path, exist_ok=True)
-        save_r2_time_struc(r2time, f"{plots_path}plot_r2time_{filename}.png")
+        if r2time is not None:
+            plots_path = path.replace("models", "reports/models") 
+            os.makedirs(plots_path, exist_ok=True)
+            save_r2_time_struc(r2time, f"{plots_path}plot_r2time_{filename}.png")
 
         attr = getattr(model, "save", None)
         if callable(attr):            
