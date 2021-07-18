@@ -1,4 +1,4 @@
-from src.data.constants import Currency, ROOT_DIR
+from src.data.constants import Currency, ROOT_DIR, log_fmt
 from src.models.model_selection import ModelTrainer
 from src.models import model_utils
 from typing import Tuple, List, NoReturn, Union
@@ -44,6 +44,7 @@ if __name__ == '__main__':
     test_period = '2020-04-12', '2020-04-18'
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
     future_obs = [5, 10, 20]
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
     train(
         Currency.EUR, Currency.GBP, 'fixed-time-increment',  "inceptiontime_classification", 
         200, future_obs, train_period, test_period, (Currency.USD, ), 
