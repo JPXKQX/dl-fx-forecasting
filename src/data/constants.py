@@ -53,3 +53,5 @@ class Currency(Enum):
 col_names = ["time", "low", "high"]
 
 timezone = pytz.timezone('Etc/Greenwich')
+
+log_fmt = '%(asctime)s | %(name)s | %(levelname)s | %(message)s'
