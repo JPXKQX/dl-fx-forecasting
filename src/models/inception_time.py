@@ -55,7 +55,7 @@ class InceptionTime:
         logger.info("Two callbacks have been added to the model fitting: "
                     "ModelCheckpoint and ReduceLROnPlateau.")
         reduce_lr = ReduceLROnPlateau(
-            monitor='loss', factor=0.5, patience=patience_reduce_lr, min_lr=1e-3
+            monitor='loss', factor=0.5, patience=patience_reduce_lr, min_lr=1e-5
         )
         early_stopping = EarlyStopping(
             monitor='val_loss' if include_validation else 'loss', patience=patience_fit
@@ -173,6 +173,7 @@ class InceptionTime:
             classes = np.sort(y.iloc[:, 0].unique())
             weights = compute_class_weight('balanced', classes, y.values.ravel())
             class_weights = dict(enumerate(weights))
+            logger.info(f"Weights for each class have been used: {class_weights}")
         else:
             class_weights = None
 
@@ -199,8 +200,14 @@ class InceptionTime:
         filename: Union[Path, str] = None
     ) -> pd.DataFrame:
         y_hat = self.model.predict(self.reshape_features(X))
-        y_hat = pd.DataFrame(
-            y_hat, index=X.index, columns=list(range(-1, self.output_dims-1)))
+        if self.problem == 'classification':
+            y_hat = pd.DataFrame(
+                y_hat, 
+                index=X.index, 
+                columns=[-1., 0., 1.] if self.output_dims == 3 else [0, 1]
+            )
+        else:
+            y_hat = pd.DataFrame(y_hat, index=X.index)
         if filename is not None:
             if isinstance(filename, str):
                 y_hat.to_csv(self.output_predictions / f"{filename}.csv")
@@ -231,7 +238,7 @@ class InceptionTime:
     def get_params(self, deep=True):
         return {
             "n_filters": self.n_filters, "bottleneck_size": self.bottleneck_size,
-            "optimizer": self.optimizer, "loss": self.loss, 
+            "optimizer": self.optimizer, "loss": self.loss, "depth": self.depth,
             "batch_size": self.batch_size, "n_epochs": self.n_epochs}
 
     def set_params(self, **parameters):
