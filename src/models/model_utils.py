@@ -90,7 +90,7 @@ def evaluate_predictions_regression(
     vals['mae'] = float(metrics.mean_absolute_error(labels, predictions))
     vals['mse'] = float(metrics.mean_squared_error(labels, predictions))
     vals['r2'] = float(metrics.r2_score(labels, predictions))
-    ssd = ((labels - predictions.reshape(-1, 1)) ** 2).cumsum()
+    ssd = ((labels - predictions.values.reshape(-1, 1)) ** 2).cumsum()
     sst = (labels ** 2).cumsum()
     r2time = (sst - ssd) / sst.iloc[-1]
     return vals, r2time
@@ -100,10 +100,13 @@ def evaluate_predictions_classification(
     predictions: pd.DataFrame, 
     labels: pd.DataFrame
 ) -> tuple[Dict, None]:
+    log_loss = metrics.log_loss(labels, predictions)
     labels = labels.idxmax(axis=1).astype(int)
     predictions = predictions.idxmax(axis=1).astype(int)
     log.info(metrics.classification_report(labels, predictions))
-    return metrics.classification_report(labels, predictions, output_dict=True), None
+    dict_metrics = metrics.classification_report(labels, predictions, output_dict=True)
+    dict_metrics['loss(not weighted)'] = log_loss
+    return dict_metrics, None
 
 
 def init_scheduler_and_search_algorithms(
