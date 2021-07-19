@@ -75,7 +75,6 @@ def plot_metrics(
         raise Exception(f"Problem type \'{problem}\' is not valid. Please select "
                         f"specify one of the following: classification or regression.")
         
-    metrics = ['loss', 'prc', 'precision', 'recall']
     for n, metric in enumerate(metrics):
         name = metric.replace("_", " ").capitalize()
         plt.subplot(2, 2, n + 1)
