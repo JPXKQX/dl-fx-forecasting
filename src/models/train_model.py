@@ -38,6 +38,32 @@ def train(
                           aux_pair=aux_pair)
         mt.train(models)
 
+def test():
+    # Models with features
+    train(
+        Currency.EUR, Currency.GBP, 'spread',  "regressions", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, ), 
+        variables=['increment', 'spread'])
+    train(
+        Currency.EUR, Currency.GBP, 'spread',  "regressions", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
+        variables=['increment', 'spread'])
+    train(
+        Currency.EUR, Currency.GBP, 'size-increment',  "regressions", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, ), 
+        variables=['increment', 'spread'])
+    train(
+        Currency.EUR, Currency.GBP, 'size-increment',  "regressions", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
+        variables=['increment', 'spread'])
+    train(
+        Currency.EUR, Currency.GBP, 'is-increment',  "inceptiontime_classification", 
+        200, future_obs, train_period, test_period, (Currency.USD, ), 
+        variables=['increment', 'difference', 'spread'])
+    train(
+        Currency.EUR, Currency.GBP, 'is-increment',  "inceptiontime_classification", 
+        200, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
+        variables=['increment', 'difference', 'spread'])
 
 if __name__ == '__main__':
     train_period = '2020-04-05', '2020-04-11'
@@ -45,11 +71,13 @@ if __name__ == '__main__':
     freqs = [1, 2, 3, 5, 10, 25, 50, 100, 200]
     future_obs = [5, 10, 20]
     logging.basicConfig(level=logging.INFO, format=log_fmt)
+
     train(
-        Currency.EUR, Currency.GBP, 'fixed-time-increment',  "inceptiontime_classification", 
-        200, future_obs, train_period, test_period, (Currency.USD, ), 
-        variables=['increment', 'difference', 'spread'])
+        Currency.EUR, Currency.GBP, 'size-increment',  "regressions", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, ), 
+        variables=['size-increment', 'spread'])
     train(
-        Currency.EUR, Currency.GBP, 'fixed-time-increment',  "inceptiontime_classification", 
-        200, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
-        variables=['increment', 'difference', 'spread'])
+        Currency.EUR, Currency.GBP, 'size-increment',  "regressions", 
+        freqs, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
+        variables=['size-increment', 'spread'])
+    test()

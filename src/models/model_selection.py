@@ -92,7 +92,10 @@ class ModelTrainer:
 
     def train_model(self, model, name: str):
         # Train models
-        mo = model['model'](**model['attrs'] if 'attrs' in model.keys() else None)
+        if 'attrs' in model.keys():
+            mo = model['model'](**model['attrs'])
+        else:
+            mo = model['model']()
         mo.fit(self.X_train, self.y_train)
         self.save_model_results(mo, name)
 
@@ -100,7 +103,10 @@ class ModelTrainer:
         # Model selection & model training
         mo = model['model']()
         best_mo = self.model_selection(mo, name, model['params'])
-        best_mo.fit(self.X_train, self.y_train, validation_split=0)
+        if name in ['LinearRegression', 'RandomForest', 'ElasticNet']:
+            best_mo.fit(self.X_train, self.y_train)
+        else:
+            best_mo.fit(self.X_train, self.y_train, validation_split=0)
         self.save_model_results(best_mo, name)
 
     def tune_and_train_model(self, model, name: str):        

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Union, Dict, List
 
 import logging
+import numpy as np
 import pandas as pd
 import logging
 import yaml
@@ -80,9 +81,11 @@ def evaluate_predictions(model, features, labels, type: str = 'regression'):
 
 
 def evaluate_predictions_regression(
-    predictions: pd.DataFrame, 
-    labels: pd.DataFrame
+    predictions: Union[pd.DataFrame, np.ndarray],
+    labels: Union[pd.DataFrame, np.ndarray]
 ) -> tuple[Dict, ...]:
+    if isinstance(predictions, pd.DataFrame):
+        predictions = predictions.values
     log.debug(f"Computing test metrics for a total of {len(labels)} instances.")
     vals = {}
     vals['exp_var'] = float(metrics.explained_variance_score(labels, predictions))
@@ -90,7 +93,7 @@ def evaluate_predictions_regression(
     vals['mae'] = float(metrics.mean_absolute_error(labels, predictions))
     vals['mse'] = float(metrics.mean_squared_error(labels, predictions))
     vals['r2'] = float(metrics.r2_score(labels, predictions))
-    ssd = ((labels - predictions.values.reshape(-1, 1)) ** 2).cumsum()
+    ssd = ((labels - predictions.reshape(-1, 1)) ** 2).cumsum()
     sst = (labels ** 2).cumsum()
     r2time = (sst - ssd) / sst.iloc[-1]
     return vals, r2time

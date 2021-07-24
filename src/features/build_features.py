@@ -46,12 +46,17 @@ class FeatureBuilder:
                              "it is used to compute the implicit mid price.")
         return [(self.base, aux), (aux, self.quote)]
 
-    def load_synchronized(self, aux, period):
+    def load_synchronized(
+        self, 
+        aux: Tuple[Currency, ...], 
+        period: Tuple[str, str], 
+        label: str = 'increment'
+    ) -> Tuple[pd.DataFrame,pd.DataFrame]:
         pairs = self.get_aux_currency_pairs(aux)
         
         dl = data_loader.DataLoader(self.base, self.quote, self.path + "raw/")
         df = dl.read(period)
-        increments = df[['increment']]
+        increments = df[[label.split('-')[-1]]]
         
         # Swap order if base/quote order has been inverted during loading
         if df.attrs['base'] != self.base.value:
@@ -136,8 +141,10 @@ class FeatureBuilder:
         vars_dropped: List[str] = None,
         quantile: float = None,
     ):
-        df, incs = self.load_synchronized(aux_currencies, period)
+        df, incs = self.load_synchronized(aux_currencies, period, label)
         df = self.compute_implicit_midprice(df)
+        if label == 'size-increment':
+            df['size-increment'] = df['increment'].abs()
         vol = df.mid.ewm(max(freqs) if isinstance(freqs, list) else freqs).std()
         
         # Select columns
