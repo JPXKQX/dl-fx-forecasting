@@ -1,3 +1,5 @@
+-e .
+
 # external requirements
 setuptools~=57.0.0
 
