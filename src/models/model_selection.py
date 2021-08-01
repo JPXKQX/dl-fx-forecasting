@@ -1,6 +1,10 @@
 from src.features.build_features import FeatureBuilder
 from src.data.constants import Currency, ROOT_DIR
-from src.models.model_utils import evaluate_predictions, save_r2_time_struc
+from src.models.model_utils import evaluate_predictions, generate_search_space, \
+    init_scheduler_and_search_algorithms
+from src.models.training_plot_utils import save_r2_time_struc
+from ray import tune
+from src.models.ray_tuning_models import get_training_ray_method
 
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from dataclasses import dataclass
@@ -31,13 +35,21 @@ class ModelTrainer:
     Attrs:
         base (Currency): base currency to train the model.
         quote (Currency): quote currency to train the model.
-        past_n_obs (int): number of previous observations to consider.
+        target_var (str): variable to predict. Choices
+        freqs_features (int): number of previous observations to consider.
         future_obs (int): horizon length of the prediction.
         train_period (Tuple[str, str]): period of training data.
         test_period (Tuple[str, str]): period of testing data.
+        variables (List[str]): variables containing any of the string passed are
+        considered for the modelling.
+        vars2drop (List[str]): variables selected containing any of these string are 
+        dropped.
+        aux_pair (tuple[Currency]): auxiliary currency to include as model features.
+        label
     """
     base: Currency
-    quote: Currency    
+    quote: Currency
+    target_var: str
     freqs_features: Union[int,List[int]]
     future_obs: int
     train_period: Tuple[str, str]
@@ -52,10 +64,10 @@ class ModelTrainer:
         fb = FeatureBuilder(self.base, self.quote)
         
         self.X_train, self.y_train = fb.build(
-            self.freqs_features, self.future_obs, self.train_period,
+            self.freqs_features, self.future_obs, self.target_var, self.train_period,
             self.aux_pair, self.variables, self.vars2drop)
         self.X_test, self.y_test = fb.build(
-            self.freqs_features, self.future_obs, self.test_period,
+            self.freqs_features, self.future_obs, self.target_var, self.test_period,
             self.aux_pair, self.variables, self.vars2drop)
 
         log.info(f"Train({self.X_train.shape[0]}) and test"
@@ -71,27 +83,65 @@ class ModelTrainer:
         for name, model in models.items():
             log.info(f"Training model {name} for period "
                     f"{' '.join(self.train_period)}.")
-            if 'params' in model.keys():
+            if 'ray_params' in model.keys():
+                self.tune_and_train_model(model, name)
+            elif 'params' in model.keys():
                 self.select_and_train_model(model, name)
             else:
                 self.train_model(model, name)
 
     def train_model(self, model, name: str):
         # Train models
-        mo = model['model']()
-        mo = mo.fit(self.X_train, self.y_train)
+        if 'attrs' in model.keys():
+            mo = model['model'](**model['attrs'])
+        else:
+            mo = model['model']()
+        mo.fit(self.X_train, self.y_train)
         self.save_model_results(mo, name)
 
     def select_and_train_model(self, model, name: str):        
         # Model selection & model training
         mo = model['model']()
         best_mo = self.model_selection(mo, name, model['params'])
-        best_mo.fit(self.X_train, self.y_train)
+        if name in ['LinearRegression', 'RandomForest', 'ElasticNet']:
+            best_mo.fit(self.X_train, self.y_train)
+        else:
+            best_mo.fit(self.X_train, self.y_train, validation_split=0)
+        self.save_model_results(best_mo, name)
+
+    def tune_and_train_model(self, model, name: str):        
+        # Model selection & model training
+        params, num_samples = generate_search_space(model['ray_params'])
+        log.info("Initializing ray Trainable")
+        training = get_training_ray_method(
+            model['model'], self.X_train, self.y_train, ROOT_DIR + '/ray_results/'
+        )
+        scheduler, search_alg = init_scheduler_and_search_algorithms(params)
+        log.info("Starting hyperparameter tuning (ray)")
+        results = tune.run(
+            training,
+            name=name,
+            verbose=1,
+            max_failures=2,
+            search_alg=search_alg,
+            local_dir=ROOT_DIR + f"/ray_results",
+            scheduler=scheduler,
+            num_samples=num_samples
+        )
+        log.debug(results.results_df)
+        log.info(f"Best trial results are obtained with configuration: "
+                 f"{results.get_best_config(metric='val_loss', mode='min')}")
+        log.info(f"Best trial are: "
+                 f"{results.get_best_trial(metric='val_loss', mode='min').last_result}")
+        best_mo = model['model'](
+            **results.get_best_config(metric="val_loss", mode='min')
+        )
+        best_mo.fit(self.X_train, self.y_train, validation_split=0)
         self.save_model_results(best_mo, name)
 
     def model_selection(self, model, model_name, params):
-        clf = GridSearchCV(model, param_grid=params, cv=self.tscv, verbose=2, 
-                           scoring=val_metrics, refit=val_metrics[0], n_jobs=-1)
+        clf = GridSearchCV(model, param_grid=params, cv=self.tscv, verbose=4, 
+                           scoring=val_metrics, refit=val_metrics[0])
         clf.fit(self.X_train, self.y_train)
 
         results = pd.DataFrame(clf.cv_results_)
@@ -108,10 +158,12 @@ class ModelTrainer:
 
     def save_model_results(self, model, name_model):
         log.debug(f"Obtaining results of {name_model}.")
-        exp_var, maxerr, mae, mse, r2, r2time = evaluate_predictions(
-            model, self.X_test, self.y_test)
+        test_metrics, r2time = evaluate_predictions(model, self.X_test, self.y_test)
         train_date = "-".join(map(lambda x: x.replace("-", ""), self.train_period))
-        test_date = "-".join(map(lambda x: x.replace("-", ""), self.test_period))
+        test_metrics['test_date'] = "-".join(map(
+            lambda x: x.replace("-", ""), 
+            self.test_period
+        ))
         n_prev_obs = self.get_num_prev_obs()
         data = {
             'model': name_model,
@@ -121,14 +173,7 @@ class ModelTrainer:
             'past_ticks': n_prev_obs,
             'ticks_ahead': self.future_obs,
             'train_period': train_date,
-            'test' : {
-                'period': test_date,
-                'explained_variance': exp_var,
-                'max_errors': maxerr,
-                'mean_absolute_error': mae,
-                'mean_squared_error': mse,
-                'r2': r2
-            }
+            'test' : test_metrics
         }
         if isinstance(self.freqs_features, list): 
             data['features'] = self.freqs_features
@@ -147,9 +192,10 @@ class ModelTrainer:
             yaml.dump(data, outfile, default_flow_style=False)
 
         # Save R-Squared with time structure
-        plots_path = path.replace("models", "reports/models") 
-        os.makedirs(plots_path, exist_ok=True)
-        save_r2_time_struc(r2time, f"{plots_path}plot_r2time_{filename}.png")
+        if r2time is not None:
+            plots_path = path.replace("models", "reports/models") 
+            os.makedirs(plots_path, exist_ok=True)
+            save_r2_time_struc(r2time, f"{plots_path}plot_r2time_{filename}.png")
 
         attr = getattr(model, "save", None)
         if callable(attr):            
@@ -162,11 +208,10 @@ class ModelTrainer:
                 pickle.dump(model, f)
 
     def get_output_folder(self, model_name) -> str:
-        which = "features" if isinstance(self.freqs_features, list) else "raw"
         if self.aux_pair:
             aux = "".join(map(lambda x: x.value, self.aux_pair))
         else:
             aux = "no_aux"
-        folder = f"{ROOT_DIR}/models/{which}/{model_name}/{self.base.value}" \
+        folder = f"{ROOT_DIR}/models/{self.target_var}/{model_name}/{self.base.value}" \
                  f"{self.quote.value}/{aux}/{'_'.join(self.variables)}/"
         return folder

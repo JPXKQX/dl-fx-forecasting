@@ -82,6 +82,7 @@ target/
 /logs/
 /data/
 /models/
+/ray_results/
 /notebooks/*.ipynb
 /reports/images
 /reports/models

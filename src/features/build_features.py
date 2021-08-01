@@ -46,12 +46,17 @@ class FeatureBuilder:
                              "it is used to compute the implicit mid price.")
         return [(self.base, aux), (aux, self.quote)]
 
-    def load_synchronized(self, aux, period):
+    def load_synchronized(
+        self, 
+        aux: Tuple[Currency, ...], 
+        period: Tuple[str, str], 
+        label: str = 'increment'
+    ) -> Tuple[pd.DataFrame,pd.DataFrame]:
         pairs = self.get_aux_currency_pairs(aux)
         
         dl = data_loader.DataLoader(self.base, self.quote, self.path + "raw/")
         df = dl.read(period)
-        increments = df[['increment']]
+        increments = df[[label.split('-')[-1]]]
         
         # Swap order if base/quote order has been inverted during loading
         if df.attrs['base'] != self.base.value:
@@ -127,16 +132,20 @@ class FeatureBuilder:
 
     def build(
         self,
-        freqs: List[int],
+        freqs: Union[int, List[int]],
         obs_ahead: int,
+        label: str = 'increment',
         period: Tuple[str, str] = None, 
         aux_currencies: Tuple[Currency, ...] = None, 
         variables: List[str] = None,
         vars_dropped: List[str] = None,
         quantile: float = None,
     ):
-        df, incs = self.load_synchronized(aux_currencies, period)
+        df, incs = self.load_synchronized(aux_currencies, period, label)
         df = self.compute_implicit_midprice(df)
+        if label == 'size-increment':
+            df['size-increment'] = df['increment'].abs()
+        vol = df.mid.ewm(max(freqs) if isinstance(freqs, list) else freqs).std()
         
         # Select columns
         if variables:
@@ -153,26 +162,45 @@ class FeatureBuilder:
         df['filter'] = df.index.where(df.index.hour.isin(list(range(7, 19))))
         df = df.dropna().drop('filter', axis=1)
 
-        if isinstance(freqs, list):
-            df = get_features(df, freqs)
-        else:
-            df = get_x_blocks(df, freqs)
-        
         # Filtering by spread values. Drop values over a quantile specified
-        if quantile:
+        if quantile and ('spread' in df.columns):
             quantiles = df['spread'].quantile(quantile)
             spreads = df['spread'].where(df['spread'] <= quantiles).dropna()
             indices = spreads.index
             df = df.loc[indices]
 
-        num_prev = max(freqs) if isinstance(freqs, list) else freqs
-        first_obs = df.reset_index().time.diff(num_prev) < timedelta(hours=2)
-        last_obs = df.reset_index().time.diff(-obs_ahead) > timedelta(hours=-2)
-        mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
-        indices = mask.where(mask).dropna().index 
-        X = df[mask[0]]
-        fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
-        y = fut_inc.loc[indices]
+        if isinstance(freqs, list):
+            df = get_features(df, freqs)
+            num_prev = max(freqs) if isinstance(freqs, list) else freqs
+            first_obs = df.reset_index().time.diff(num_prev) < timedelta(hours=2)
+            last_obs = df.reset_index().time.diff(-obs_ahead) > timedelta(hours=-2)
+            mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
+            indices = mask.where(mask).dropna().index
+        else:
+            # Iterar para cada dia
+            df = df.groupby(df.index.date).apply(get_x_blocks, past_obs=freqs)
+            df = df.droplevel(0)
+            indices = df.index
+
+        X = df.loc[indices]
+        vol = vol[indices]
+        if label in ['increment', 'spread']:
+            fut_inc = incs[[label]].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices]
+        elif label == 'fixed-time-increment':
+            fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices]
+            y = y.where((y.increment > vol) | (y.increment < -vol), 0)
+            y = y.where(y.increment >= -vol, -1)
+            y = y.where(y.increment <= vol, 1)
+        elif label == 'is-increment':
+            fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices]
+            y = y.where((y.increment > vol) | (y.increment < -vol), 0)
+            y = y.where((y.increment >= -vol) & (y.increment <= vol), 1)
+        elif label == 'size-increment':
+            fut_inc = incs[['increment']].rolling(obs_ahead).sum().shift(-obs_ahead)
+            y = fut_inc.loc[indices].abs()
         return X, y
 
 
@@ -206,6 +234,17 @@ def get_features(
     return df
 
 
+def get_daily_volatility(price: pd.Series, span: int = 100):
+    # daily vol, reindexed to close
+    df0 = price.index.searchsorted(price.index - pd.Timedelta(days=1))
+    df0 = df0[df0 > 0]
+    df0 = pd.Series(price.index[df0 - 1], 
+                    index=price.index[price.shape[0]-df0.shape[0]:])
+    df0 = price.loc[df0.index] / price.loc[df0.values].values - 1 # daily returns
+    df0 = df0.ewm(span=span).std()
+    return df0
+
+
 def get_x_blocks(df: pd.DataFrame, past_obs: int) -> pd.DataFrame:
     n_variables = len(df.columns)
     data = df.iloc[:-(df.shape[0] % past_obs)].values
@@ -218,7 +257,3 @@ def get_x_blocks(df: pd.DataFrame, past_obs: int) -> pd.DataFrame:
                        product(df.columns.values, list(range(1, past_obs+1)))))
 
     return pd.DataFrame(data, columns=columns, index=indices)
-
-
-if __name__ == '__main__':
-    FeatureBuilder(Currency.GBP, Currency.EUR).run([1, 2, 3, 50], 5, ('2020-04-01', '2020-04-10'), (Currency.USD))
