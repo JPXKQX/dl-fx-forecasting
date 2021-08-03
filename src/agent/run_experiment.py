@@ -116,10 +116,30 @@ def frictionless_rl_agent_5():
                 f"{market_pnl_ma10:>6.2}) | Wins: {num_sessions_positive_alpha:>5.1%}" \
                 f"| eps: {agent.epsilon:>6.3f}"
             )
-    agent.online_network.save(ROOT_DIR / "models" / "agent" / "q_network_frictionless.h5")
+
+        if episode % 100 == 0:
+            # Cache results
+            agent.online_network.save(
+                Path(ROOT_DIR) / "models" / "agent" / f"q_network_frictionless_{episode}.h5"
+            )
+            results = pd.DataFrame({
+                'Episode': list(range(1, episode+1)),
+                'Agent': agent_pnl,
+                'Market': market_pnl,
+                'Difference': alpha_pnl
+            }).set_index('Episode')
+            results['Strategy Wins (%)'] = (results.Difference > 0).rolling(100).sum()
+            results.info()
+            results.to_csv(
+                Path(ROOT_DIR) / "models" / "agent" / f"results_frictionless_{episode}.csv", 
+                index=False
+            )
     env.close()
 
     # Save results
+    agent.online_network.save(
+        ROOT_DIR / "models" / "agent" / "q_network_frictionless.h5"
+    )
     results = pd.DataFrame({
         'Episode': list(range(1, episode+1)),
         'Agent': agent_pnl,
@@ -128,10 +148,11 @@ def frictionless_rl_agent_5():
     }).set_index('Episode')
     results['Strategy Wins (%)'] = (results.Difference > 0).rolling(100).sum()
     results.info()
-    results.to_csv(ROOT_DIR / "models" / "agent" / "results_frictionless.csv", 
-                   index=False)
+    results.to_csv(
+        Path(ROOT_DIR) / "models" / "agent" / "results_frictionless.csv", 
+        index=False)
 
-    agent_results.plot_results_agent(results, ROOT_DIR / "models" / "agent" )
+    agent_results.plot_results_agent(results, Path(ROOT_DIR) / "models" / "agent" )
 
 
 if __name__ == '__main__':

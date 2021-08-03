@@ -44,7 +44,7 @@ class TradingEnv(gym.Env):
             Currency.EUR, Currency.GBP, 
             ('2020-04-12', '2020-04-18'), 
             200, 5, 
-            scaling_difficulty=0,
+            scaling_difficulty=0.0,
             aux=(Currency.USD,)
         )
         self.ss = StrategySimulator(

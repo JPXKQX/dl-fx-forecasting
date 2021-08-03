@@ -1,5 +1,6 @@
 import logging
 import pickle
+import os
 import pandas as pd
 import numpy as np
 
@@ -7,6 +8,7 @@ from pydantic.dataclasses import dataclass
 from src.features.build_features import FeatureBuilder
 from src.models.neural_network import MultiLayerPerceptron
 from src.data.constants import Currency, ROOT_DIR
+from pathlib import Path
 from gym import spaces
 from typing import List, Tuple, Union
 
@@ -72,6 +74,10 @@ class TradingDataLoader:
 
     def load_data(self) -> pd.DataFrame:
         logger.info(f"Loading data for {self.base}/{self.quote}...")
+        filename = Path(ROOT_DIR) / "data" / "processed" / \
+            "state_space_20200405-20200411.csv"
+        if os.path.exists(filename):
+            return pd.read_csv(filename, index_col=0, parse_dates=True)
         fb = FeatureBuilder(self.base, self.quote)
         X, y = fb.build(
             [1, 2, 3, 5, 10, 25, 50, 100, 200], self.horizon, 'increment', self.period,
@@ -108,6 +114,9 @@ class TradingDataLoader:
 
         # Include spread prediction from InceptionTime
 
+        # Cache data in /processed
+        data.to_csv(filename)
+
         logger.info(f"Data processed for {self.base}/{self.quote}.")        
         return data
 
@@ -128,13 +137,3 @@ class TradingDataLoader:
 
     def get_observation_space(self):
         return spaces.Box(self.data.min(), self.data.max())
-
-
-if __name__ == '__main__':
-    period = ('2020-04-12', '2020-04-18')
-    varnames = ['increment', 'difference', 'spread']
-    ds = TradingDataLoader(
-        Currency.EUR, Currency.GBP, period, 200, 5, varnames, aux=(Currency.USD,)
-    )
-    ds.reset()
-    print(ds.take_step())
