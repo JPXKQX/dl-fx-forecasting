@@ -8,7 +8,7 @@ from src.data.constants import ROOT_DIR
 from sklearn.utils.class_weight import compute_class_weight
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, NoReturn, Union
+from typing import List, NoReturn, Union, Tuple
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.layers import Dense, Conv1D, MaxPool1D, Concatenate, Add, \
     Activation, Input, GlobalAveragePooling1D, BatchNormalization
@@ -120,7 +120,7 @@ class InceptionTime:
         x = Activation('relu')(x)
         return x
 
-    def build_model(self, input_shape: tuple) -> Model:
+    def build_model(self, input_shape: Tuple) -> Model:
         logger.debug(f'Input data has shaper {input_shape}')
         input_layer = Input(input_shape)
 
@@ -217,7 +217,7 @@ class InceptionTime:
                 raise Exception(f"Filename argument {filename} not recognized.")
         return y_hat
 
-    def reshape_data(self, X: pd.DataFrame, y:pd.DataFrame) -> tuple[pd.DataFrame]:
+    def reshape_data(self, X: pd.DataFrame, y:pd.DataFrame) -> Tuple[pd.DataFrame]:
         features = self.reshape_features(X)
 
         logger.info("The input data is contains only temporal features (air quality"
@@ -248,7 +248,7 @@ class InceptionTime:
         return self
 
     def save(self, filename: str, path: str):
-        self.model.save(f"{path}/{filename}.h5")
+        self.model.save(f"{path}/{filename}")
         
     def load(self, filename: str):
         self.model = load_model(filename)

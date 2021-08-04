@@ -7,6 +7,7 @@ import numpy as np
 from pydantic.dataclasses import dataclass
 from src.features.build_features import FeatureBuilder
 from src.models.neural_network import MultiLayerPerceptron
+from src.models.inception_time import InceptionTime
 from src.data.constants import Currency, ROOT_DIR
 from pathlib import Path
 from gym import spaces
@@ -72,6 +73,12 @@ class TradingDataLoader:
         self.mlp = MultiLayerPerceptron()
         self.mlp.load(mlp_path)      
 
+        inception_path = f"{ROOT_DIR}/models/spread/InceptionTimeRegression/EURGBP/" \
+                   f"USD/increment_difference_spread/InceptionTimeRegression" \
+                   f"_EURGBP_200-{self.horizon}_20200405-20200411.h5"
+        self.inception = InceptionTime()
+        #self.inception.load(inception_path)
+
     def load_data(self) -> pd.DataFrame:
         logger.info(f"Loading data for {self.base}/{self.quote}...")
         filename = Path(ROOT_DIR) / "data" / "processed" / \
@@ -113,6 +120,7 @@ class TradingDataLoader:
         data['Rf_5'] = self.rf.predict(X.loc[:, mask2])
 
         # Include spread prediction from InceptionTime
+
 
         # Cache data in /processed
         data.to_csv(filename)

@@ -18,7 +18,7 @@ logger = logging.getLogger("RL Agent")
 
 @dataclass
 class TradingEnv(gym.Env):
-    trading_sessions: int = 5000
+    trading_sessions: int = 40000
     trading_cost_bps: float = 0
     time_cost_bps: float = 1e-4
     scaling_difficulty: float = 1.0
