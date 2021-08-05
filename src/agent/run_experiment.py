@@ -111,7 +111,7 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
                 break
             this_state = next_state
 
-        # get DataFrame with seqence of actions, returns and nav values
+        # get DataFrame of a seqence of actions, returns and pnl
         result = env.ss.result()
 
         # Store episode results
