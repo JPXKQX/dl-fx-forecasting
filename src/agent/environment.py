@@ -18,7 +18,7 @@ logger = logging.getLogger("RL Agent")
 
 @dataclass
 class TradingEnv(gym.Env):
-    trading_sessions: int = 40000
+    trading_sessions: int = 5000
     trading_cost_bps: float = 0
     time_cost_bps: float = 1e-4
     scaling_difficulty: float = 1.0
@@ -67,7 +67,7 @@ class TradingEnv(gym.Env):
         """
         assert self.action_space.contains(action), f"{action} {type(action)} invalid"
         observation, done = self.tdl.take_step()
-        reward, info = self.ss.take_step(action=action, mid_prices=observation[:2])
+        reward, info = self.ss.take_step(action=action, mid_prices=observation)
         return observation, reward, done, info
 
     def reset(self):

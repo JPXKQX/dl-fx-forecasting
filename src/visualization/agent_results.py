@@ -7,10 +7,10 @@ from pathlib import Path
 from typing import Union
 
 
-def plot_results_agent(df: pd.DataFrame, odir: Union[str, Path] = None):
+def plot_results_agent(df: pd.DataFrame, odir: Union[str, Path] = None, mode: str = ""):
     sns.displot(df.Difference, height=9, aspect=1.33)
     if odir:
-        plt.savefig(f"{str(odir)}/agent_alpha.png")
+        plt.savefig(f"{str(odir)}/{mode}_agent_alpha.png")
     else:
         plt.show()
 
@@ -31,6 +31,6 @@ def plot_results_agent(df: pd.DataFrame, odir: Union[str, Path] = None):
     fig.tight_layout()
 
     if odir:
-        fig.savefig(f"{str(odir)}/performance.png", dpi=300)
+        fig.savefig(f"{str(odir)}/{mode}_performance.png", dpi=300)
     else:
         plt.show()
