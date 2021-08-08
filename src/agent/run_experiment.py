@@ -159,6 +159,9 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
                 'Steps': steps,
                 'Longs': n_buys,
                 'Shorts': n_sells,
+                'Regr(PnL)': regr_pnls,
+                'MLP(PnL)': mlp_pnls,
+                'RF(PnL)': rf_pnls,
                 'Difference': alpha_pnls
             }).set_index('Episode')
             results['Strategy Wins (%)'] = (results.Difference > 0).rolling(100).sum()
@@ -169,20 +172,24 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
                 index=False
             )
             agent_results.plot_results_agent(
-                results, Path(ROOT_DIR) / "models" / "agent" / mode_name)
+                results, Path(ROOT_DIR) / "models" / "agent" / mode_name, mode_name
+            )
     env.close()
 
     # Save results
     agent.online_network.save(
-        ROOT_DIR / "models" / "agent" / mode_name / f"q_network_{mode_name}.h5"
+        Path(ROOT_DIR) / "models" / "agent" / mode_name / f"q_network_{mode_name}.h5"
     )
     results = pd.DataFrame({
         'Episode': list(range(1, episode+1)),
-        'Agent': agent_pnsl,
+        'Agent': agent_pnls,
         'Market': market_pnls,
         'Steps': steps,
         'Longs': n_buys,
         'Shorts': n_sells,
+        'Regr(PnL)': regr_pnls,
+        'MLP(PnL)': mlp_pnls,
+        'RF(PnL)': rf_mlps,
         'Difference': alpha_pnls
     }).set_index('Episode')
     results['Strategy Wins (%)'] = (results.Difference > 0).rolling(100).sum()
