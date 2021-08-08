@@ -22,9 +22,10 @@ def plot_results_agent(df: pd.DataFrame, odir: Union[str, Path] = None, mode: st
     df2 = df['Strategy Wins (%)'].div(100).rolling(50).mean()
     df2.plot(ax=ax2, title='Agent Outperformance (% of episodes, Moving Average)')
 
-    for ax in (ax1, ax2):
-        ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:.0%}'.format(y)))
-        ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: '{:,.0f}'.format(x)))
+    ax1.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.2f}'))
+    ax1.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:,.0f}'))
+    ax2.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
+    ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:,.0f}'))
     ax2.axhline(.5, ls='--', c='k')
 
     sns.despine()
