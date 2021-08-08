@@ -16,11 +16,11 @@ def plot_results_agent(df: pd.DataFrame, odir: Union[str, Path] = None, mode: st
 
     fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(14, 4), sharey=True)
 
-    df1 = df[['Agent', 'Market']].sub(1).rolling(100).mean()
+    df1 = df[['Agent', 'Market']].rolling(100).mean()
     df1.plot(ax=ax1, title='Returns (Moving Average)')
 
     df2 = df['Strategy Wins (%)'].div(100).rolling(50).mean()
-    df2.plot(ax=ax2, title='Agent Outperformance (%, Moving Average)')
+    df2.plot(ax=ax2, title='Agent Outperformance (% of episodes, Moving Average)')
 
     for ax in (ax1, ax2):
         ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:.0%}'.format(y)))
