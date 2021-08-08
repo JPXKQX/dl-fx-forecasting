@@ -81,10 +81,6 @@ class TradingDataLoader:
 
     def load_data(self) -> pd.DataFrame:
         logger.info(f"Loading data for {self.base}/{self.quote}...")
-        filename = Path(ROOT_DIR) / "data" / "processed" / \
-            "state_space_20200405-20200411.csv"
-        if os.path.exists(filename):
-            return pd.read_csv(filename, index_col=0, parse_dates=True)
         fb = FeatureBuilder(self.base, self.quote)
         X, y = fb.build(
             [1, 2, 3, 5, 10, 25, 50, 100, 200], self.horizon, 'increment', self.period,
@@ -120,10 +116,6 @@ class TradingDataLoader:
         data['Rf_5'] = self.rf.predict(X.loc[:, mask2])
 
         # Include spread prediction from InceptionTime
-
-
-        # Cache data in /processed
-        data.to_csv(filename)
 
         logger.info(f"Data processed for {self.base}/{self.quote}.")        
         return data

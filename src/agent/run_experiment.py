@@ -217,3 +217,8 @@ def main(scaling_difficulty: float, gpu: int):
     )
     with tf.device(f'/gpu:{gpu-1}'):
         rl_agent_5(scaling_difficulty)
+
+
+if __name__ == '__main__':
+    rl_agent_5(1.0)
+   
