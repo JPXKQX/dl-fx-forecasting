@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestRegressor
 from src.models.sklearn_models import LinearRegr, ElasticNetRegr
 from src.models.neural_network import MultiLayerPerceptron
 from src.models.inception_time import InceptionTime
+from src.models.rnn import LongShortTermMemory
 
 from pathlib import Path
 from typing import Union, Dict, List
@@ -26,6 +27,7 @@ str2model = {
     'LinearRegression': LinearRegr,
     'ElasticNet': ElasticNetRegr,
     'MultiLayerPerceptron': MultiLayerPerceptron,
+    'LSTM': LongShortTermMemory,
     'RandomForest': RandomForestRegressor,
     'InceptionTime': InceptionTime
 }
