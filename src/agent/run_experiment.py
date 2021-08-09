@@ -189,7 +189,7 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
         'Shorts': n_sells,
         'Regr(PnL)': regr_pnls,
         'MLP(PnL)': mlp_pnls,
-        'RF(PnL)': rf_mlps,
+        'RF(PnL)': rf_pnls,
         'Difference': alpha_pnls
     }).set_index('Episode')
     results['Strategy Wins (%)'] = (results.Difference > 0).rolling(100).sum()
@@ -220,5 +220,5 @@ def main(scaling_difficulty: float, gpu: int):
 
 
 if __name__ == '__main__':
-    rl_agent_5(1.0)
+    rl_agent_5(1)
    
