@@ -80,11 +80,12 @@ class StrategySimulator:
         time_cost = 0 if end_position != 0 else self.time_cost_bps
         self.costs[self.step] = trade_costs + time_cost
         if self.step > 0:
-            inc = (self.market_mid[0, self.step] - self.market_mid[1, self.step - 1])
-            self.pnl[self.step] = start_position * 1e4 * inc              
-            self.regr_returns[self.step] = regr_start * 1e4 * inc
-            self.rf_returns[self.step] = rf_start * 1e4 * inc
-            self.mlp_returns[self.step] = mlp_start * 1e4 * inc
+            inc = self.market_mid[1, self.step] - self.market_mid[0, self.step - 1]
+            dec = self.market_mid[0, self.step] - self.market_mid[1, self.step - 1]
+            self.pnl[self.step] = 1e4 * (inc if position == 1 else dec) * abs(position)
+            self.regr_returns[self.step] = 1e4 * (inc if regr_start == 1 else dec) * abs(regr_start)
+            self.rf_returns[self.step] = 1e4 * (inc if rf_start == 1 else dec) * abs(rf_start)
+            self.mlp_returns[self.step] = 1e4 * (inc if mlp_start == 1 else dec) * abs(mlp_start)
         else:
             self.pnl[self.step] = 0 # It does not matter because start_position is 0.
             self.regr_returns[self.step] = 0
