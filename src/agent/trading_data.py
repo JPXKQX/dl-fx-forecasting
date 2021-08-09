@@ -98,8 +98,8 @@ class TradingDataLoader:
         ]
 
         data = pd.DataFrame(index=X.index)
-        data['ask'] = X['mid_1'] - self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
-        data['bid'] = X['mid_1'] + self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
+        data['ask'] = X['mid_1'] + self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
+        data['bid'] = X['mid_1'] - self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
 
         # Process ElasticNet - with USD aux - 
         # Features: increment & differnce $ !implicit-increment as input
