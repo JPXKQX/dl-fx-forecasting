@@ -82,7 +82,7 @@ class StrategySimulator:
         if self.step > 0:
             inc = self.market_mid[1, self.step] - self.market_mid[0, self.step - 1]
             dec = self.market_mid[0, self.step] - self.market_mid[1, self.step - 1]
-            self.pnl[self.step] = 1e4 * (inc if position == 1 else dec) * abs(position)
+            self.pnl[self.step] = 1e4 * (inc if start_position == 1 else dec) * abs(start_position)
             self.regr_returns[self.step] = 1e4 * (inc if regr_start == 1 else dec) * abs(regr_start)
             self.rf_returns[self.step] = 1e4 * (inc if rf_start == 1 else dec) * abs(rf_start)
             self.mlp_returns[self.step] = 1e4 * (inc if mlp_start == 1 else dec) * abs(mlp_start)
@@ -95,17 +95,19 @@ class StrategySimulator:
         self.strategy_returns[self.step] = reward
 
         # Additional
-        if regr > bid - ask:
+        spread = ask - bid
+        if spread < 0: raise Exception("Ask price must be greater than bid price")
+        if regr > spread:
             self.regr_positions[self.step] = 1
-        elif regr < ask - bid:
+        elif regr < -spread:
             self.regr_positions[self.step] = -1
-        if rf > bid - ask:
+        if rf > spread:
             self.rf_positions[self.step] = 1
-        elif rf < ask - bid:
+        elif rf < -spread:
             self.rf_positions[self.step] = -1
-        if mlp > bid - ask:
+        if mlp > spread:
             self.mlp_positions[self.step] = 1
-        elif mlp < ask - bid:
+        elif mlp < -spread:
             self.mlp_positions[self.step] = -1
 
         info = {
