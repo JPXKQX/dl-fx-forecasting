@@ -1,5 +1,4 @@
 import warnings
-import gym
 import logging
 import os
 import click
@@ -8,12 +7,12 @@ import numpy as np
 import tensorflow as tf
 
 from time import time, gmtime, strftime
+from typing import Tuple
 from pathlib import Path
 from src.data.constants import ROOT_DIR
 from src.agent.ddqn_agent import DDQN
 from src.agent.environment import TradingEnv
 from src.visualization import agent_results
-from gym.envs.registration import register
 
 # TF details
 warnings.filterwarnings('ignore')
@@ -62,6 +61,27 @@ def get_mode(scale: float) -> str:
         return 'frictionless'
 
 
+def get_best_outcomes(result: pd.DataFrame) -> Tuple[int, int, float]:
+    """ Compute the maximum potential benefit in an episode and counts the number of
+    possible beneficial trades.
+
+    Args:
+        result (pd.DataFrame): Results of an episode. It must contain at least two
+            columns for the bid and ask prices.
+
+    Returns:
+        int: number of long positions with benefits
+        int: number of short positons with benefits
+        float: maximum number of pip that could have been won in this episode
+    """
+    buys = result.bid[:-1].values - result.ask[1:].values
+    sells = result.bid[1:].values - result.ask[:-1].values
+    long_options = np.where(buys > 0)[0]
+    short_options = np.where(sells > 0)[0]
+    total_pips = buys[long_options] + sells[short_options]
+    return len(long_options), len(short_options), total_pips
+
+
 def rl_agent_5(scaling_difficulty: float = 0.0):
     env = TradingEnv(scaling_difficulty=scaling_difficulty, trading_sessions=25000)
     env.seed(42)
@@ -94,7 +114,8 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
     total_steps = 0
     max_episodes = 1000
     agent_pnls, market_pnls, alpha_pnls, steps, n_sells, n_buys = [], [], [], [], [], []
-    rf_pnls, regr_pnls, mlp_pnls = [], [], []
+    long_options, short_options,rf_pnls, regr_pnls, mlp_pnls = [], [], [], [], []
+    potential_pips = []
     t0 = time()
     for episode in range(1, max_episodes + 1):
         this_state = env.reset()
@@ -113,12 +134,16 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
 
         # get DataFrame of a seqence of actions, returns and pnl
         result = env.ss.result()
+        n_long_options, n_short_options, n_pips = get_best_outcomes(result)
 
         # Store episode results
         agent_pnls.append(result.pnl.sum())
         market_pnls.append(1e4 * (result.iloc[-1].ask - result.iloc[0].bid))
         alpha_pnls.append(agent_pnls[-1] - market_pnls[-1])
         steps.append(result.shape[0])
+        potential_pips.append(n_pips)
+        long_options.append(n_long_options)
+        short_options.append(n_short_options)
         n_buys.append(int(result.position.where(result.position == 1).sum()))
         n_sells.append(int(-result.position.where(result.position == -1).sum()))
         regr_pnls.append(result.regr_pnl.sum())
@@ -130,6 +155,7 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
             regr_pnl = np.mean(regr_pnls[-100:])
             rf_pnl = np.mean(rf_pnls[-100:])
             mlp_pnl = np.mean(mlp_pnls[-100:])
+            mean_pips = np.mean(potential_pips[-10:]), np.mean(potential_pips[-100:])
             market_pnl = np.mean(market_pnls[-10:]), np.mean(market_pnls[-100:])
             n_steps = int(np.mean(steps[-10:]))
             n_buy = int(np.mean(n_buys[-10:]))
@@ -138,11 +164,14 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
                 min(len(alpha_pnls), 100)
             logger.info(
                 f"{episode:>4d} | {strftime('%H:%M:%S', gmtime(time() - t0))} | "
-                f"PnL Agent: {agent_pnl[1]:>6.2f} ({agent_pnl[0]:>6.2f}) | "
+                f"PnL Agent: {agent_pnl[1]:>6.2f}/{mean_pips[1]:>6.2f} "
+                f"({agent_pnl[0]:>6.2f}/{mean_pips[0]:>6.2f}) | "
                 f"PnL Regr & MLP & Rf: {regr_pnl:6.2f} & {mlp_pnl:6.2f} & {rf_pnl:6.2f}"
                 f" | Market (Buy&Hold): {market_pnl[1]:>6.2f} ({market_pnl[0]:>6.2f})"
                 f" | Wins: {num_sessions_positive_alpha:>5.1%}"
-                f" | Short & Long Positions: -{n_sell}/+{n_buy} | "
+                f" | Short & Long Positions: -{n_sell}/+{n_buy}"
+                f" | Optimal Short & Long: -{np.mean(short_options[-100:])}/+"
+                f"{np.mean(long_options[-100:])} | "
                 f"Steps: {n_steps} | eps: {agent.epsilon:>6.3f}"
             )
 
@@ -159,6 +188,9 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
                 'Steps': steps,
                 'Longs': n_buys,
                 'Shorts': n_sells,
+                'Opt. Longs': long_options,
+                'Opt. Shorts': short_options,
+                'Potential Pips': potential_pips,
                 'Regr(PnL)': regr_pnls,
                 'MLP(PnL)': mlp_pnls,
                 'RF(PnL)': rf_pnls,
@@ -187,6 +219,9 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
         'Steps': steps,
         'Longs': n_buys,
         'Shorts': n_sells,
+        'Opt. Longs': long_options,
+        'Opt. Shorts': short_options,
+        'Potential Pips': potential_pips,
         'Regr(PnL)': regr_pnls,
         'MLP(PnL)': mlp_pnls,
         'RF(PnL)': rf_pnls,
