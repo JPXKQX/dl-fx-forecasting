@@ -14,7 +14,7 @@ def plot_results_agent(df: pd.DataFrame, odir: Union[str, Path] = None, mode: st
     else:
         plt.show()
 
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(14, 4), sharey=True)
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(14, 4), sharex=True)
 
     df1 = df[['Agent', 'Market']].rolling(100).mean()
     df1.plot(ax=ax1, title='Returns (Moving Average)')
@@ -22,9 +22,10 @@ def plot_results_agent(df: pd.DataFrame, odir: Union[str, Path] = None, mode: st
     df2 = df['Strategy Wins (%)'].div(100).rolling(50).mean()
     df2.plot(ax=ax2, title='Agent Outperformance (% of episodes, Moving Average)')
 
+    ax1.set_ylabel("Pips")
     ax1.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.2f}'))
     ax1.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:,.0f}'))
-    ax2.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
+    ax2.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.2f}'))
     ax2.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:,.0f}'))
     ax2.axhline(.5, ls='--', c='k')
 
