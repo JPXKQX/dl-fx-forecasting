@@ -40,6 +40,7 @@ class TradingEnv(gym.Env):
             Currency.EUR, Currency.GBP, 
             ('2020-04-12', '2020-04-18'), 
             200, 5, 
+            trading_sessions=self.trading_sessions,
             scaling_difficulty=self.scaling_difficulty,
             aux=(Currency.USD,)
         )
