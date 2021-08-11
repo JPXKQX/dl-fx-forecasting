@@ -53,7 +53,6 @@ class DDQN:
         self.target_network = self.build_model(trainable=False)
         self.update_target()
 
-
         self.epsilon_decay = (self.epsilon - self.epsilon_end) / \
             self.epsilon_decay_steps
         self.epsilon_history = []
@@ -87,9 +86,9 @@ class DDQN:
             )
         layers.append(Dropout(self.dropout_rate))
         layers.append(
-            Dense(units=self.num_actions, trainable=trainable, name='Q-estimate')
+            Dense(units=self.num_actions, trainable=trainable)
         )
-        model = Sequential(layers, name='Q-network')
+        model = Sequential(layers)
         model.compile(loss='mean_squared_error', optimizer=Adam(lr=self.learning_rate))
         return model
 

@@ -1,12 +1,15 @@
 import logging
 import pickle
+import os
 import pandas as pd
 import numpy as np
 
 from pydantic.dataclasses import dataclass
 from src.features.build_features import FeatureBuilder
 from src.models.neural_network import MultiLayerPerceptron
+from src.models.inception_time import InceptionTime
 from src.data.constants import Currency, ROOT_DIR
+from pathlib import Path
 from gym import spaces
 from typing import List, Tuple, Union
 
@@ -70,6 +73,12 @@ class TradingDataLoader:
         self.mlp = MultiLayerPerceptron()
         self.mlp.load(mlp_path)      
 
+        inception_path = f"{ROOT_DIR}/models/spread/InceptionTimeRegression/EURGBP/" \
+                   f"USD/increment_difference_spread/InceptionTimeRegression" \
+                   f"_EURGBP_200-{self.horizon}_20200405-20200411.h5"
+        self.inception = InceptionTime()
+        #self.inception.load(inception_path)
+
     def load_data(self) -> pd.DataFrame:
         logger.info(f"Loading data for {self.base}/{self.quote}...")
         fb = FeatureBuilder(self.base, self.quote)
@@ -89,8 +98,8 @@ class TradingDataLoader:
         ]
 
         data = pd.DataFrame(index=X.index)
-        data['ask'] = X['mid_1'] - self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
-        data['bid'] = X['mid_1'] + self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
+        data['ask'] = X['mid_1'] + self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
+        data['bid'] = X['mid_1'] - self.scaling_difficulty * (1e-4 * X['spread_1'] / 2)
 
         # Process ElasticNet - with USD aux - 
         # Features: increment & differnce $ !implicit-increment as input
@@ -128,13 +137,3 @@ class TradingDataLoader:
 
     def get_observation_space(self):
         return spaces.Box(self.data.min(), self.data.max())
-
-
-if __name__ == '__main__':
-    period = ('2020-04-12', '2020-04-18')
-    varnames = ['increment', 'difference', 'spread']
-    ds = TradingDataLoader(
-        Currency.EUR, Currency.GBP, period, 200, 5, varnames, aux=(Currency.USD,)
-    )
-    ds.reset()
-    print(ds.take_step())

@@ -21,6 +21,7 @@ class TradingEnv(gym.Env):
     trading_sessions: int = 5000
     trading_cost_bps: float = 0
     time_cost_bps: float = 1e-4
+    scaling_difficulty: float = 1.0
 
     """A simple trading environment for reinforcement learning.
     Provides daily observations for a stock price series
@@ -30,11 +31,6 @@ class TradingEnv(gym.Env):
     - 1: HOLD
     - 2: LONG
     Trading has an optional cost (default: 10bps) of the change in position value.
-    Going from short to long implies two trades.
-    Not trading also incurs a default time cost of 1bps per step.
-    An episode begins with a starting Net Asset Value (NAV) of 1 unit of cash.
-    If the NAV drops to 0, the episode ends with a loss.
-    If the NAV hits 2.0, the agent wins.
     The trading simulator tracks a buy-and-hold strategy as benchmark.
     """
     metadata = {'render.modes': ['human']}
@@ -44,7 +40,8 @@ class TradingEnv(gym.Env):
             Currency.EUR, Currency.GBP, 
             ('2020-04-12', '2020-04-18'), 
             200, 5, 
-            scaling_difficulty=0,
+            trading_sessions=self.trading_sessions,
+            scaling_difficulty=self.scaling_difficulty,
             aux=(Currency.USD,)
         )
         self.ss = StrategySimulator(
@@ -71,7 +68,7 @@ class TradingEnv(gym.Env):
         """
         assert self.action_space.contains(action), f"{action} {type(action)} invalid"
         observation, done = self.tdl.take_step()
-        reward, info = self.ss.take_step(action=action, mid_prices=observation[:2])
+        reward, info = self.ss.take_step(action=action, mid_prices=observation)
         return observation, reward, done, info
 
     def reset(self):

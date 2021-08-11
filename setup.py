@@ -15,7 +15,8 @@ setup(
             'plot_cdf = src.scripts.plot_currency_pair:main_cdf',
             'plot_stats = src.scripts.plot_currency_pair:main_stats',
             'plot_pair_correlations = src.scripts.plot_pair_correlations:main_corrs',
-            'plot_pair_acf = src.scripts.plot_pair_correlations:main_acf'
+            'plot_pair_acf = src.scripts.plot_pair_correlations:main_acf',
+            'train_agent = src.agent.run_experiment:main'
         ]
     }
 )
