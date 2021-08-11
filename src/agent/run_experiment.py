@@ -78,8 +78,8 @@ def get_best_outcomes(result: pd.DataFrame) -> Tuple[int, int, float]:
     sells = result.bid[1:].values - result.ask[:-1].values
     long_options = np.where(buys > 0)[0]
     short_options = np.where(sells > 0)[0]
-    total_pips = buys[long_options] + sells[short_options]
-    return len(long_options), len(short_options), total_pips
+    total_pips = sum(buys[long_options]) + sum(sells[short_options])
+    return len(long_options), len(short_options), 1e4 * total_pips
 
 
 def rl_agent_5(scaling_difficulty: float = 0.0):
@@ -114,7 +114,7 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
     total_steps = 0
     max_episodes = 1000
     agent_pnls, market_pnls, alpha_pnls, steps, n_sells, n_buys = [], [], [], [], [], []
-    long_options, short_options,rf_pnls, regr_pnls, mlp_pnls = [], [], [], [], []
+    long_options, short_options, rf_pnls, regr_pnls, mlp_pnls = [], [], [], [], []
     potential_pips = []
     t0 = time()
     for episode in range(1, max_episodes + 1):
@@ -178,8 +178,8 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
         # Cache results
         if episode % 100 == 0:
             agent.online_network.save(
-                Path(ROOT_DIR) / "models" / "agent" / mode_name \
-                    / f"q_network_{mode_name}_{episode}.h5"
+                Path(ROOT_DIR) / "models" / "agent" / mode_name
+                / f"q_network_{mode_name}_{episode}.h5"
             )
             results = pd.DataFrame({
                 'Episode': list(range(1, episode+1)),
@@ -199,8 +199,8 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
             results['Strategy Wins (%)'] = (results.Difference > 0).rolling(100).sum()
             results.info()
             results.to_csv(
-                Path(ROOT_DIR) / "models" / "agent" / mode_name \
-                    / f"results_{mode_name}_{episode}.csv", 
+                Path(ROOT_DIR) / "models" / "agent" / mode_name
+                / f"results_{mode_name}_{episode}.csv",
                 index=False
             )
             agent_results.plot_results_agent(
