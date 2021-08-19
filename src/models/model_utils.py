@@ -10,7 +10,7 @@ from src.models.inception_time import InceptionTime
 from src.models.rnn import LongShortTermMemory
 
 from pathlib import Path
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Tuple
 
 import logging
 import numpy as np
@@ -53,7 +53,7 @@ def read_yaml_models(filename: Union[str, Path]) -> Dict:
     return json
 
 
-def generate_search_space(params: Dict) -> tuple[Dict, int]:
+def generate_search_space(params: Dict) -> Tuple[Dict, int]:
     num_samples = 10
     for attr, values in params.items():
         if attr == 'num_samples':
@@ -85,7 +85,7 @@ def evaluate_predictions(model, features, labels, model_type: str = 'regression'
 def evaluate_predictions_regression(
     predictions: Union[pd.DataFrame, np.ndarray],
     labels: Union[pd.DataFrame, np.ndarray]
-) -> tuple[Dict, ...]:
+) -> Tuple[Dict, ...]:
     if isinstance(predictions, pd.DataFrame):
         predictions = predictions.values
     log.debug(f"Computing test metrics for a total of {len(labels)} instances.")
@@ -104,7 +104,7 @@ def evaluate_predictions_regression(
 def evaluate_predictions_classification(
     predictions: pd.DataFrame, 
     labels: pd.DataFrame
-) -> tuple[Dict, None]:
+) -> Tuple[Dict, None]:
     log_loss = metrics.log_loss(labels, predictions)
     labels = labels.idxmax(axis=1).astype(int)
     predictions = predictions.idxmax(axis=1).astype(int)
@@ -117,7 +117,7 @@ def evaluate_predictions_classification(
 def init_scheduler_and_search_algorithms(
     search_space: Dict,
     init_config: List[Dict] = None
-) -> tuple[AsyncHyperBandScheduler, ConcurrencyLimiter]:
+) -> Tuple[AsyncHyperBandScheduler, ConcurrencyLimiter]:
     # Use HyperBand scheduler to earlystop unpromising runs
     scheduler = AsyncHyperBandScheduler(
         time_attr='training_iteration', metric="val_loss", mode="min", grace_period=10
