@@ -71,11 +71,11 @@ def generate_search_space(params: Dict) -> tuple[Dict, int]:
     return params, num_samples
 
 
-def evaluate_predictions(model, features, labels, type: str = 'regression'):
+def evaluate_predictions(model, features, labels, model_type: str = 'regression'):
     preds = model.predict(features)
-    if model.problem == 'regression':
+    if model_type == 'regression':
         return evaluate_predictions_regression(preds, labels)
-    elif model.problem == 'classification':
+    elif model_type == 'classification':
         labels = pd.get_dummies(labels.iloc[:, 0])
         return evaluate_predictions_classification(preds, labels)
     else:

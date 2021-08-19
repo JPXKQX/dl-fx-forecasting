@@ -79,10 +79,9 @@ class ModelTrainer:
         else:
             return self.freqs_features
 
-    def train(self, models: Dict[str, object]):
+    def train(self, models: Dict[str, Dict]):
         for name, model in models.items():
-            log.info(f"Training model {name} for period "
-                    f"{' '.join(self.train_period)}.")
+            log.info(f"Training model {name} for period {' '.join(self.train_period)}.")
             if 'ray_params' in model.keys():
                 self.tune_and_train_model(model, name)
             elif 'params' in model.keys():
@@ -173,7 +172,7 @@ class ModelTrainer:
             'past_ticks': n_prev_obs,
             'ticks_ahead': self.future_obs,
             'train_period': train_date,
-            'test' : test_metrics
+            'test': test_metrics
         }
         if isinstance(self.freqs_features, list): 
             data['features'] = self.freqs_features
