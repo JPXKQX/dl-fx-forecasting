@@ -177,7 +177,7 @@ class FeatureBuilder:
             mask = pd.DataFrame((first_obs & last_obs).values, index=df.index)
             indices = mask.where(mask).dropna().index
         else:
-            # Iterar para cada dia
+            # Iterate for each day
             df = df.groupby(df.index.date).apply(get_x_blocks, past_obs=freqs)
             df = df.droplevel(0)
             indices = df.index
