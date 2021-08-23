@@ -32,38 +32,12 @@ def train(
         log.info(f"Modeling increments in price using last "
                  f"{max(freqs) if isinstance(freqs, list) else freqs} "
                  f"observations to forecast the increment in {n_fut} "
-                 f"observations ahead.")
+                 f"observations ahead using {', '.join(variables)}.")
         mt = ModelTrainer(base, quote, target, freqs, n_fut, train_period, test_period, 
                           variables=variables, vars2drop=variables_to_drop,
                           aux_pair=aux_pair)
         mt.train(models)
 
-def test():
-    # Models with features
-    train(
-        Currency.EUR, Currency.GBP, 'spread',  "regressions", 
-        freqs, future_obs, train_period, test_period, (Currency.USD, ), 
-        variables=['increment', 'spread'])
-    train(
-        Currency.EUR, Currency.GBP, 'spread',  "regressions", 
-        freqs, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
-        variables=['increment', 'spread'])
-    train(
-        Currency.EUR, Currency.GBP, 'size-increment',  "regressions", 
-        freqs, future_obs, train_period, test_period, (Currency.USD, ), 
-        variables=['increment', 'spread'])
-    train(
-        Currency.EUR, Currency.GBP, 'size-increment',  "regressions", 
-        freqs, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
-        variables=['increment', 'spread'])
-    train(
-        Currency.EUR, Currency.GBP, 'is-increment',  "inceptiontime_classification", 
-        200, future_obs, train_period, test_period, (Currency.USD, ), 
-        variables=['increment', 'difference', 'spread'])
-    train(
-        Currency.EUR, Currency.GBP, 'is-increment',  "inceptiontime_classification", 
-        200, future_obs, train_period, test_period, (Currency.USD, Currency.GBP), 
-        variables=['increment', 'difference', 'spread'])
 
 if __name__ == '__main__':
     train_period = '2020-04-05', '2020-04-11'
