@@ -1,4 +1,6 @@
 import tensorflow as tf
+import logging
+
 from dataclasses import dataclass, field
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense
@@ -7,6 +9,8 @@ from typing import List, Union, NoReturn
 
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
+logger = logging.getLogger("MLP")
 
 
 @dataclass
@@ -49,13 +53,14 @@ class MultiLayerPerceptron:
         self.compile(n_features, n_labels)
         
         # Create callbacks
-        if validation_split is None: validation_split = self.validation_split
+        if validation_split is None: 
+            validation_split = self.validation_split
+        monitor = 'val_loss' if validation_split > 0 else 'loss'
+        logger.debug(f"MLP trained using \'{monitor}\' as monitor metric.")
         reduce_lr = ReduceLROnPlateau(
-            monitor='loss', factor=0.5, patience=int(patience // 5), min_lr=1e-5
+            monitor=monitor, factor=0.5, patience=int(patience // 5), min_lr=1e-5
         )
-        early_stopping = EarlyStopping(
-            monitor='val_loss' if validation_split > 0 else 'loss', patience=patience
-        )        
+        early_stopping = EarlyStopping(monitor=monitor, patience=patience)
         return self.model.fit(
             X, y, epochs=epochs, verbose=2, validation_split=validation_split, 
             callbacks=[reduce_lr, early_stopping]
