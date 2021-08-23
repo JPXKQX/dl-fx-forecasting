@@ -32,6 +32,7 @@ str2model = {
     'InceptionTime': InceptionTime
 }
 
+
 def read_yaml_models(filename: Union[str, Path]) -> Dict:
     log.debug(f"Loading YAML file at {filename}")
     with open(filename, 'r') as stream:
@@ -89,12 +90,13 @@ def evaluate_predictions_regression(
     if isinstance(predictions, pd.DataFrame):
         predictions = predictions.values
     log.debug(f"Computing test metrics for a total of {len(labels)} instances.")
-    vals = {}
-    vals['exp_var'] = float(metrics.explained_variance_score(labels, predictions))
-    vals['maxerr'] = float(metrics.max_error(labels, predictions))
-    vals['mae'] = float(metrics.mean_absolute_error(labels, predictions))
-    vals['mse'] = float(metrics.mean_squared_error(labels, predictions))
-    vals['r2'] = float(metrics.r2_score(labels, predictions))
+    vals = {
+        'exp_var': float(metrics.explained_variance_score(labels, predictions)),
+        'maxerr': float(metrics.max_error(labels, predictions)),
+        'mae': float(metrics.mean_absolute_error(labels, predictions)),
+        'mse': float(metrics.mean_squared_error(labels, predictions)),
+        'r2': float(metrics.r2_score(labels, predictions))
+    }
     ssd = ((labels - predictions.reshape(-1, 1)) ** 2).cumsum()
     sst = (labels ** 2).cumsum()
     r2time = (sst - ssd) / sst.iloc[-1]

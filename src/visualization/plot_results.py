@@ -2,6 +2,7 @@ from src.data.constants import ROOT_DIR
 from pydantic.dataclasses import dataclass
 from typing import List
 
+import os
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,6 +23,7 @@ metric2label = {
     'mse': 'Mean Squared Error', 
     'r2': 'R-squared'
 }
+
 
 @dataclass
 class PlotCoefsModel:
@@ -141,12 +143,53 @@ def get_test_results(path):
     with open(path) as results_file:
         results = yaml.load(results_file)
     test_results = results['test']
-    explained_var = test_results['explained_variance']
-    maxe = test_results['max_errors']
-    mae = test_results['mean_absolute_error']
-    mse = test_results['mean_squared_error']
+    if 'explained_variance' in test_results.keys():
+        explained_var = test_results['explained_variance']
+        maxe = test_results['max_errors']
+        mae = test_results['mean_absolute_error']
+        mse = test_results['mean_squared_error']
+    else:
+        explained_var = test_results['exp_var']
+        maxe = test_results['maxerr']
+        mae = test_results['mae']
+        mse = test_results['mse']
     r2 = test_results['r2']
     return explained_var, maxe, mae, mse, r2
+
+
+def get_table(model: str, target_pair: str):
+    path_target = f"{ROOT_DIR}/models/increment/{model}/{target_pair}"
+
+    metrics = ['R2', 'MAE', 'MSE', 'MAXE']
+    horizons = [5, 10, 20]
+    columns = pd.MultiIndex.from_product(
+        [metrics, horizons], names=["metric", "horizon"]
+    )
+
+    tuples_multiindex = []
+    df = pd.DataFrame(columns=columns)
+    for aux in os.listdir(path_target):
+        path_aux = path_target + "/" + aux
+        for varnames in os.listdir(path_aux):
+            _, maxe5, mae5, mse5, r2_5 = get_test_results(
+                f"{path_aux}/{varnames}/test_{model}_{target_pair}_200-{5}_20200405-20200411.yml"
+            )
+            _, maxe10, mae10, mse10, r2_10 = get_test_results(
+                f"{path_aux}/{varnames}/test_{model}_{target_pair}_200-{10}_20200405-20200411.yml"
+            )
+            _, maxe20, mae20, mse20, r2_20 = get_test_results(
+                f"{path_aux}/{varnames}/test_{model}_{target_pair}_200-{20}_20200405-20200411.yml"
+            )
+            df.loc[df.shape[0]] = [r2_5, r2_10, r2_20,
+                                   mae5, mae10, mae20,
+                                   mse5, mse10, mse20,
+                                   maxe5, maxe10, maxe20]
+            tuples_multiindex.append((aux, varnames))
+
+    df.index = pd.MultiIndex.from_tuples(
+        tuples_multiindex, names=['Aux Currency', 'Variables']
+    )
+    return print(df.to_latex(float_format="%.4f", escape=False))
 
 
 if __name__ == '__main__':

@@ -1,4 +1,3 @@
-from timeit import main
 from src.data import utils, constants
 from src.data.constants import Currency
 from src.data.data_loader import DataLoader
@@ -9,7 +8,7 @@ from scipy.signal import correlate
 from statsmodels.tsa.stattools import acf
 
 import plotly.graph_objects as go
-import plotly.figure_factory as ff
+import matplotlib.pyplot as plt
 import numpy as np
 import logging
 
@@ -168,5 +167,5 @@ class PlotACFCurreny:
             font_size=24,
             template='simple_white',
             plot_bgcolor='rgba(0, 0, 0, 0)',
-            paper_bgcolor= 'rgba(0, 0, 0, 0)',)
+            paper_bgcolor='rgba(0, 0, 0, 0)',)
         fig.show()
