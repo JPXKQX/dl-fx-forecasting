@@ -31,6 +31,12 @@ logger = logging.getLogger("RL Agent")
 ################################################################
 
 
+NUM_EPISODES = 2000
+EPISODE_LENGTH = 1000
+NUM_EPISODES_LOGGING = 10
+NUM_EPISODES_CACHING = 100
+
+
 gamma = .99
 tau = 100
 
@@ -119,14 +125,15 @@ def get_models_results(
 
 
 def rl_agent_5(scaling_difficulty: float = 0.0):
-    env = TradingEnv(scaling_difficulty=scaling_difficulty, trading_sessions=25000)
+    env = TradingEnv(
+        scaling_difficulty=scaling_difficulty, trading_sessions=5*EPISODE_LENGTH
+    )
     env.seed(42)
 
     mode_name = get_mode(scaling_difficulty)
 
     state_dim = env.observation_space.shape[0]
     num_actions = env.action_space.n
-    max_episode_steps = 20000
 
     agent = DDQN(
         state_dim=state_dim,
@@ -147,8 +154,6 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
     agent.online_network.summary()
 
     # Train Agent
-    max_episodes = 1000
-    t0 = time()
     rl_agent_results = pd.DataFrame(
         columns=['Agent', 'Market', 'Steps', 'Longs', 'Shorts', 'Optimal Longs',
                  'Optimal Shorts', 'Optimal Pips', 'Difference']
@@ -176,9 +181,10 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
         ]
     )
 
-    for episode in range(1, max_episodes + 1):
+    t0 = time()
+    for episode in range(1, NUM_EPISODES + 1):
         this_state = env.reset()
-        for episode_step in range(max_episode_steps):
+        for episode_step in range(EPISODE_LENGTH):
             action = agent.epsilon_greedy_policy(this_state.reshape(-1, state_dim))
             next_state, reward, done, _ = env.step(action)
 
@@ -210,7 +216,7 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
         # Store individual model results
         ind_models_results.loc[episode] = get_models_results(result)
 
-        if episode % 10 == 0:
+        if episode % NUM_EPISODES_LOGGING == 0:
             models_pnl = ind_models_results.iloc[-100:][
                 ['Regr(PnL)', 'MLP(PnL)', 'RF(PnL)']
             ].mean().values
@@ -218,7 +224,7 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
                 ['Agent', 'Market', 'Optimal Pips', 'Steps', 'Optimal Longs',
                  'Optimal Shorts', 'Longs', 'Shorts']
             ].mean().values
-            mean100 = rl_agent_results.iloc[-10:][
+            mean100 = rl_agent_results.iloc[-100:][
                 ['Agent', 'Market', 'Optimal Pips']
             ].mean().values
             num_sessions_positive_alpha = (
@@ -238,7 +244,7 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
             )
 
         # Cache results
-        if episode % 100 == 0:
+        if episode % NUM_EPISODES_CACHING == 0:
             agent.online_network.save(
                 Path(ROOT_DIR) / "models" / "agent" / mode_name
                 / f"q_network_{mode_name}_{episode}.h5"
