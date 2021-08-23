@@ -124,9 +124,11 @@ def get_models_results(
     return results
 
 
-def rl_agent_5(scaling_difficulty: float = 0.0):
+def rl_agent_5(target_pair: str, scaling_difficulty: float = 0.0):
     env = TradingEnv(
-        scaling_difficulty=scaling_difficulty, trading_sessions=5*EPISODE_LENGTH
+        target=target_pair,
+        scaling_difficulty=scaling_difficulty, 
+        trading_sessions=5*EPISODE_LENGTH
     )
     env.seed(42)
 
@@ -282,9 +284,10 @@ def rl_agent_5(scaling_difficulty: float = 0.0):
 
 
 @click.command()
+@click.argument('target', type=click.STRING)
 @click.argument('scaling_difficulty', type=click.FloatRange(min=0, max=1))
 @click.argument('gpu', type=click.IntRange(min=1, max=8))
-def main(scaling_difficulty: float, gpu: int):
+def main(target: str, scaling_difficulty: float, gpu: int):
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
     logging.basicConfig(
@@ -295,8 +298,8 @@ def main(scaling_difficulty: float, gpu: int):
         filemode='a+'
     )
     with tf.device(f'/gpu:{gpu - 1}'):
-        rl_agent_5(scaling_difficulty)
+        rl_agent_5(target, scaling_difficulty)
 
 
 if __name__ == '__main__':
-    rl_agent_5(0.5)
+    rl_agent_5('EURUSD', 0.5)

@@ -50,11 +50,38 @@ class TradingDataLoader:
 
     def __post_init_post_parse__(self):
         self.regr, self.mlp, self.rf = None, None, None
-        self.load_models()
+        if self.quote == Currency.GBP:
+            if self.aux is None: self.aux = (Currency.USD, )
+            self.load_models_eurgbp()
+        elif self.quote == Currency.USD:
+            if self.aux is None: self.aux = (Currency.GBP, )
+            self.load_models_eurusd()
+        else:
+            raise Exception("Currency pair specified is not valid. Please, select EUR "
+                            "as base currency and GBP or USD as quote.")
         self.data = self.load_data()
         self.step, self.offset = 0, None
 
-    def load_models(self):
+    def load_models_eurusd(self):
+        regr_path = f"{ROOT_DIR}/models/increment/ElasticNet/EURUSD/GBP" \
+                    f"/increment_difference/" \
+                    f"ElasticNet_EURUSD_200-{self.horizon}_20200405-20200411.pkl"
+        with open(regr_path, 'rb') as mo_path:
+            self.regr = pickle.load(mo_path)
+
+        rf_path = f"{ROOT_DIR}/models/increment/RandomForest/EURUSD/GBP" \
+                  f"/increment_difference_spread/" \
+                  f"RandomForest_EURUSD_200-{self.horizon}_20200405-20200411.pkl"
+        with open(rf_path, 'rb') as mo_path:
+            self.rf = pickle.load(mo_path)
+
+        mlp_path = f"{ROOT_DIR}/models/increment/MultiLayerPerceptron/EURUSD/GBP" \
+                   f"/increment_difference/" \
+                   f"MultiLayerPerceptron_EURUSD_200-{self.horizon}_20200405-20200411.h5"
+        self.mlp = MultiLayerPerceptron()
+        self.mlp.load(mlp_path)
+
+    def load_models_eurgbp(self):
         regr_path = f"{ROOT_DIR}/models/increment/ElasticNet/EURGBP/USD" \
                     f"/increment_difference/" \
                     f"ElasticNet_EURGBP_200-{self.horizon}_20200405-20200411.pkl"

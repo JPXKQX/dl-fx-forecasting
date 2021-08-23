@@ -18,6 +18,7 @@ logger = logging.getLogger("RL Agent")
 
 @dataclass
 class TradingEnv(gym.Env):
+    target: str
     trading_sessions: int = 5000
     trading_cost_bps: float = 0
     time_cost_bps: float = 1e-4
@@ -37,12 +38,11 @@ class TradingEnv(gym.Env):
 
     def __post_init_post_parse__(self):
         self.tdl = TradingDataLoader(
-            Currency.EUR, Currency.GBP, 
+            Currency.EUR, Currency.GBP if self.target == 'EURGBP' else Currency.USD, 
             ('2020-04-12', '2020-04-18'), 
             200, 5, 
             trading_sessions=self.trading_sessions,
-            scaling_difficulty=self.scaling_difficulty,
-            aux=(Currency.USD,)
+            scaling_difficulty=self.scaling_difficulty
         )
         self.ss = StrategySimulator(
             steps=self.trading_sessions, 
