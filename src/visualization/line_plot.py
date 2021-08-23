@@ -1,3 +1,5 @@
+from numpy.distutils.system_info import dfftw_info
+
 from src.data import constants
 from src.data.constants import Currency
 from src.data.data_loader import DataLoader
@@ -7,6 +9,8 @@ from dataclasses import dataclass, field
 
 import plotly.graph_objects as go
 import numpy as np
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import dask.dataframe as dd
 import logging
 from datetime import datetime
@@ -28,16 +32,16 @@ class PlotCurrencyPair:
     quote: Currency
     var: str
     freqs: List[Union[str, None]] = field(default_factory=lambda: ['D', 'H'])
-    path: str = "data/raw/"
+    path: str = f"{constants.ROOT_DIR}/data/raw/"
 
-    def prepare_dataframes(self, df: dd.DataFrame) -> dd.DataFrame:
+    def prepare_dataframes(self, df: dd.DataFrame) -> List[dd.DataFrame]:
         dfs = []
         for freq in self.freqs:
             if freq in ['D', 'H', 'T', 'S']:
                 log.debug(f"Resampling dataframe averaging each {freq}")
                 df_processed = df.resample(freq).mean()
                 dfs.append(df_processed)
-            elif freq == None:
+            elif freq is None:
                 log.debug("No resampling is also included.")
                 dfs.append(df)
             else:
@@ -85,7 +89,7 @@ class PlotCurrencyPair:
         self,
         period: Tuple[Union[str, datetime], 
                       Union[str, datetime]] = None
-    ) -> Tuple[np.array, List[str]]:
+    ):
         # Get the data
         dl = DataLoader(self.base, self.quote, self.path)
         df_mid = dl.read(period)
@@ -94,3 +98,38 @@ class PlotCurrencyPair:
         
         # Plot images
         self.show_dataframes(dfs)
+
+    def comparison_max_spread(self, period):
+        # Get the data
+        dl = DataLoader(self.base, self.quote, self.path)
+        df_mid = dl.read(period)
+
+        df_mid['ask'] = df_mid.mid + 1e-4 * df_mid.spread / 2
+        df_mid['bid'] = df_mid.mid - 1e-4 * df_mid.spread / 2
+
+        max_spread = int(df_mid.spread.argmax())
+
+        fig, axs = plt.subplots(1, 2, sharey=True, sharex=True)
+        df = df_mid.iloc[max_spread - 100:max_spread + 10]
+        df.mid.plot(ax=axs[0], color='k')
+        df[['ask', 'bid']].plot(ax=axs[1])
+        axs[0].set_ylabel("Rate")
+        axs[0].set_xlabel("Time")
+        axs[1].set_xlabel("Time")
+        axs[1].legend(['Ask price', 'Bid price'], fontsize='x-large', loc='lower right')
+        axs[0].legend(['Mid price'], fontsize='x-large', loc='lower left')
+        for ax in [0, 1]:
+            labs = axs[ax].get_xticklabels()
+            new = []
+            for lab in labs:
+                new.append(":".join(lab._text.split(" ")[-1].split(":")[:2]))
+            axs[ax].set_xticklabels(new, rotation=0, ha='center')
+        axs[0].set_ylabel("EUR/GBP")
+        plt.tight_layout()
+        plt.show()
+
+
+if __name__ == '__main__':
+    plotter = PlotCurrencyPair(Currency.EUR, Currency.GBP, 'mid', ['S'])
+    plotter.comparison_max_spread(('2020-04-05', '2020-04-12'))
+
