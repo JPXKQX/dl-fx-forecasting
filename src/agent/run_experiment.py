@@ -111,8 +111,8 @@ def get_models_results(
         successful_longs = longs.where(longs > 0).dropna()
         unsuccessful_longs = longs.where(longs < 0).dropna()
         shorts = result[f"{model}_pnl"].where(result[f"{model}_positions"] == -1)
-        successful_shorts = longs.where(longs > 0).dropna()
-        unsuccessful_shorts = longs.where(longs < 0).dropna()
+        successful_shorts = shorts.where(shorts > 0).dropna()
+        unsuccessful_shorts = shorts.where(shorts < 0).dropna()
         results.extend([
             pnl, int(longs.count()), longs.sum(),
             int(successful_longs.count()), successful_longs.sum(),
