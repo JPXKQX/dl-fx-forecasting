@@ -120,7 +120,7 @@ class StrategySimulator:
         self.strategy_returns[self.step] = reward
 
         # Additional
-        spread = ask - bid
+        spread = 1e4 * (ask - bid)
         if spread < 0: raise Exception("Ask price must be greater than bid price")
         if regr > spread:
             self.regr_positions[self.step] = 1  # Buy
