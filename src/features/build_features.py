@@ -97,7 +97,7 @@ class FeatureBuilder:
         base, quote = df.attrs['base'], df.attrs['quote']
         implicit_base = df[f'mid_{pairs[0]}']
         implicit_quote = df[f'mid_{pairs[1]}']
-        
+
         if base == pairs[0][:3]:
             logger.debug("Currency pair between base and auxiliary currencies "
                          "is fine.")
@@ -123,12 +123,11 @@ class FeatureBuilder:
         df['implicit_mid'] = implicit_base * implicit_quote
         df['implicit_increment'] = df['implicit_mid'].diff()
         df['difference'] = df['mid'] - df['implicit_mid']
-        
+
         # Drop intermediary data variables
         return df.drop(list(map(
             lambda x: "_".join(x), 
             product(["mid", "increment"], df.attrs['pairs']))), axis=1).dropna()
-
 
     def build(
         self,
@@ -146,7 +145,7 @@ class FeatureBuilder:
         if label == 'size-increment':
             df['size-increment'] = df['increment'].abs()
         vol = df.mid.ewm(max(freqs) if isinstance(freqs, list) else freqs).std()
-        
+
         # Select columns
         if variables:
             is_var_chosen = lambda x: any([(v in x) for v in variables])
