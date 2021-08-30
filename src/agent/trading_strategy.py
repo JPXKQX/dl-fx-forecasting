@@ -145,7 +145,7 @@ class StrategySimulator:
         return reward, info
 
     def result(self) -> pd.DataFrame:
-        """ Get the current result as a daframe.
+        """ Get the current result as a dataframe.
 
         Returns:
             pd.DataFrame: current results
