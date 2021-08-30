@@ -88,7 +88,7 @@ class PlotCoefsModel:
 
         handles = axs[0].get_lines()
         fig.legend(handles, list(df.model.unique()), loc=(0.8, 0.9))
-        axs[0].set_title(self.pair + f" ({period})", fontsize=22)
+        axs[0].set_title(self.pair, fontsize=22)
         plt.xlabel("Observations  ahead", fontsize=18)
         plt.show()
         plt.tight_layout()
@@ -99,40 +99,51 @@ class PlotCoefsModel:
         models: List[str] = ['LinearRegression', 'ElasticNet'],
         obs_aheads: List[str] = [5, 10, 20],
         features: List[str] = [1, 2, 3, 5, 10, 25, 50, 100, 200]
-        ):
+    ):
         coeffs = []
         for i, obs_ahead in enumerate(obs_aheads):
-            for j, model in enumerate(models):
-                path = f"{self.models_path}{model}/{self.pair}/" + \
+            for j, model_name in enumerate(models):
+                path = f"{self.models_path}{model_name}/{self.pair}/" + \
                        f"{self.aux if self.aux else 'raw'}/" + \
                        f"{'_'.join(self.variables)}/*{obs_ahead}*.pkl"
                 path = glob.glob(path)[0]
                 with open(path, 'rb') as outfile:
                     model = pickle.load(outfile)
-                coeffs.append(model.coef_.reshape((-1, len(features))))
+                if model_name == 'RandomForest':
+                    coeffs.append(model.feature_importances_.reshape((-1, len(features))))
+                else:
+                    coeffs.append(model.coef_.reshape((-1, len(features))))
 
-        fig, axs = plt.subplots(3, 2, figsize=(12, 7), sharex=True, sharey=True)
-        c_max, c_min = np.array(coeffs).max(), np.array(coeffs).min()
+        fig, axs = plt.subplots(3, len(models), figsize=(12, 7), sharex=True, sharey=True)
+        c_max = max([abs(np.array(coeffs).max()), abs(np.array(coeffs).min())])
+        c_min = 0 if np.array(coeffs).min() > 0 else -c_max
         cbar_ax = fig.add_axes([.91, .2, .03, .6])
         for i, ax in enumerate(axs.flat):
-            logger.info(f"Plotting heatmao ")
-            sns.heatmap(coeffs[i], ax=ax, cmap='RdBu', cbar= i == 0,
-                        vmin=c_min, vmax=c_max, cbar_ax=None if i else cbar_ax, 
-                        xticklabels=features, yticklabels=[])
+            logger.info(f"Plotting heatmap ")
+            sns.heatmap(coeffs[i], ax=ax, cmap='RdBu' if c_min < 0 else 'OrRd',
+                        vmin=c_min, vmax=c_max, cbar_ax=None if i else cbar_ax,
+                        cbar=i == 0, xticklabels=features, yticklabels=[])
             if len(ax.get_yticks() > 1):
                 labels = ["EURGBP"] + [self.aux.capitalize() + f"({self.aux})"]
-                ax.set_yticklabels(labels, size = 16)
+                ax.set_yticklabels(labels, size=16)
             else:
                 ax.get_yaxis().set_ticks([])
                 ax.get_yaxis().set_ticklabels([])
-            ax.set_xticklabels(features, size = 16, rotation=0)
+            ax.set_xticklabels(features, size=16, rotation=0)
 
         for i, mo in enumerate(models):
-            axs[0, i].set_title(mo, fontsize=28)
-            axs[-1, i].set_xlabel("Span of features", fontsize=22)
+            if len(models) > 1:
+                axs[0, i].set_title(mo, fontsize=28)
+                axs[-1, i].set_xlabel("Span of features", fontsize=22)
+            else:
+                axs[0].set_title(mo, fontsize=28)
+                axs[-1].set_xlabel("Span of features", fontsize=22)
             
         for i, next_o in enumerate(obs_aheads):
-            axs[i, 0].set_ylabel(f"Horizon: {next_o}", fontsize=22, rotation=90)
+            if len(models) > 1:
+                axs[i, 0].set_ylabel(f"Horizon: {next_o}", fontsize=22, rotation=90)
+            else:
+                axs[i].set_ylabel(f"Horizon: {next_o}", fontsize=22, rotation=90)
         
         plt.xticks(rotation=90)
         fig.tight_layout(rect=[0, 0, .9, 1])
@@ -193,4 +204,4 @@ def get_table(model: str, target_pair: str):
 
 
 if __name__ == '__main__':
-    PlotCoefsModel("EURGBP", "features", ['increment', 'difference'], "USD").get_results()
+    PlotCoefsModel("EURGBP", "increment", ['increment', 'difference'], "USD").get_coefs(['RandomForest'])
