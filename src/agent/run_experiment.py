@@ -107,17 +107,24 @@ def get_models_results(
     results = []
     for model in models:
         pnl = result[f"{model}_pnl"].sum()
-        longs = result[f"{model}_pnl"].where(result[f"{model}_positions"] == 1)
-        successful_longs = longs.where(longs > 0).dropna()
-        unsuccessful_longs = longs.where(longs < 0).dropna()
-        shorts = result[f"{model}_pnl"].where(result[f"{model}_positions"] == -1)
-        successful_shorts = shorts.where(shorts > 0).dropna()
-        unsuccessful_shorts = shorts.where(shorts < 0).dropna()
+        longs = result[f"{model}_pnl"].where(
+            result[f"{model}_positions"] == 1
+        ).dropna().index
+        longs_pnl = result.iloc[longs+1, :][f"{model}_pnl"]
+        successful_longs = longs_pnl.where(longs_pnl > 0).dropna()
+        unsuccessful_longs = longs_pnl.where(longs_pnl < 0).dropna()
+
+        shorts = result[f"{model}_pnl"].where(
+            result[f"{model}_positions"] == -1
+        ).dropna().index
+        shorts_pnl = result.iloc[shorts+1, :][f"{model}_pnl"]
+        successful_shorts = shorts_pnl.where(shorts_pnl > 0).dropna()
+        unsuccessful_shorts = shorts_pnl.where(shorts_pnl < 0).dropna()
         results.extend([
-            pnl, int(longs.count()), longs.sum(),
+            pnl, len(longs), longs_pnl.sum(),
             int(successful_longs.count()), successful_longs.sum(),
             int(unsuccessful_longs.count()), unsuccessful_longs.sum(),
-            int(shorts.count()), shorts.sum(),
+            len(shorts), shorts_pnl.sum(),
             int(successful_shorts.count()), successful_shorts.sum(),
             int(unsuccessful_shorts.count()), unsuccessful_shorts.sum()
         ])
@@ -302,4 +309,4 @@ def main(target: str, scaling_difficulty: float, gpu: int):
 
 
 if __name__ == '__main__':
-    rl_agent_5('EURUSD', 0.5)
+    rl_agent_5('EURUSD', 1)
